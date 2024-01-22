@@ -126,7 +126,7 @@ def deploy(c, prepare=True):
         prepare_deploy(c)
 
     c.run(f"{prefix_virtualenv} git pull origin main")
-    c.run(f"{prefix_virtualenv} pip install -r {proj_path}/{reqs_path}")
+    c.run(f"{prefix_virtualenv} python3.10 -m install -r {proj_path}/{reqs_path}")
 
     updatetemplates(c)
     c.run(f"{prefix_manage} collectstatic -v 0 --noinput")
@@ -151,7 +151,8 @@ def create(c, prepare_before_deploying=True):
 
     # Create virtual env
     c.run(f"cd {venv_home} && virtualenv -p python3  {proj_name}")
-    c.run(f"{prefix_virtualenv} pip install gunicorn setproctitle psycopg2 django-compressor python-memcached")
+    c.run(f"{prefix_virtualenv} curl -sS https://bootstrap.pypa.io/get-pip.py | python3.10")
+    c.run(f"{prefix_virtualenv} python3.10 -m pip install gunicorn setproctitle psycopg2-binary django-compressor python-memcached")
 
     # Create DB and DB user
     db_pwd_sanitized = db_pwd.replace("'", "\'")
@@ -265,7 +266,7 @@ def django(c, code):
              f"django.setup();")
     # noinspection PyPep8
     sanitized_code = code.replace("`", "\\\`")
-    return c.run(f'{prefix_virtualenv} python -c "{setup}{sanitized_code}"')
+    return c.run(f'{prefix_virtualenv} python3.10 -c "{setup}{sanitized_code}"')
 
 
 @task(hosts=hosts)
@@ -334,13 +335,13 @@ def upload_file(c, file_object, remote_path):
 def replicatedatabase(c):
     dump_fname = f'db_dump_{datetime.now().strftime("%Y%M%d_%H%M%S")}'
     c.run(
-        f'{prefix_virtualenv} python manage.py dumpdata --format json --indent 4 --natural-foreign -e contenttypes.ContentType -e auth.Permission --output {dump_fname}.json')
+        f'{prefix_virtualenv} python3.10 manage.py dumpdata --format json --indent 4 --natural-foreign -e contenttypes.ContentType -e auth.Permission --output {dump_fname}.json')
     c.local(f'rsync {hosts[0]}:{proj_path}/{dump_fname}.json {dump_fname}.json')
     c.local(f'rsync -a {hosts[0]}:{proj_path}/static/media/* static/media/')
     c.run(f'{prefix_virtualenv} rm {dump_fname}.json')
 
-    c.local(f'python manage.py flush')
-    c.local(f'python manage.py loaddata {dump_fname}.json')
+    c.local(f'python3.10 manage.py flush')
+    c.local(f'python3.10 manage.py loaddata {dump_fname}.json')
 
 
 ################################
