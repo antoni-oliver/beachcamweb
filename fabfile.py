@@ -104,7 +104,7 @@ format_templates = {  # Dict with project-dependant strings to format templates
 }
 
 prefix_virtualenv = f'source {venv_path}/bin/activate && cd {proj_path} && '
-prefix_manage = f'{prefix_virtualenv} python3 manage.py '
+prefix_manage = f'{prefix_virtualenv} python3.10 manage.py '
 
 
 @task(hosts=hosts)
