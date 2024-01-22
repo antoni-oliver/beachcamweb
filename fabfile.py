@@ -125,7 +125,7 @@ def deploy(c, prepare=True):
     if prepare:
         prepare_deploy(c)
 
-    c.run(f"{prefix_virtualenv} git pull origin master")
+    c.run(f"{prefix_virtualenv} git pull origin main")
     c.run(f"{prefix_virtualenv} pip install -r {proj_path}/{reqs_path}")
 
     updatetemplates(c)
