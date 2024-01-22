@@ -126,7 +126,7 @@ def deploy(c, prepare=True):
         prepare_deploy(c)
 
     c.run(f"{prefix_virtualenv} git pull origin main")
-    c.run(f"{prefix_virtualenv} python3.10 -m install -r {proj_path}/{reqs_path}")
+    c.run(f"{prefix_virtualenv} python3.10 -m pip install -r {proj_path}/{reqs_path}")
 
     updatetemplates(c)
     c.run(f"{prefix_manage} collectstatic -v 0 --noinput")
