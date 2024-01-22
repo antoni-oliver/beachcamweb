@@ -165,7 +165,7 @@ def create(c, prepare_before_deploying=True):
     c.run(f"mkdir -p {proj_path}")
     c.run(f"{prefix_virtualenv} git init")
     c.run(
-        f"{prefix_virtualenv} git remote add origin https://@github.com/{github_external_repo}")
+        f"{prefix_virtualenv} git remote add origin https://github.com/{github_external_repo}")
     c.run(f"{prefix_virtualenv} git remote -v")  # Verify
 
     # Deploy
