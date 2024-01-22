@@ -1,0 +1,15 @@
+# Bug fixing
+
+
+# Now
+
+* Add simple AI to predict crowd count in download_and_process.py
+
+
+# Future
+
+* Use generic relations to allow different handlers for urls with specific formats.
+* Add view for historic statistics (processing data.models.Prediction).
+
+* Use statistics to set data.models.BeachCam.max_crowd_count automatically.
+* Add log to script download_and_process.py

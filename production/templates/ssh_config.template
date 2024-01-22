@@ -1,0 +1,4 @@
+Host {name}
+    HostName {ip}
+    User {user}
+    IdentityFile {keyfile}

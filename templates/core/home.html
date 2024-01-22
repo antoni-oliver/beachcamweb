@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <h1>Data available:</h1>
+    {% for cam in cams %}
+        <h2>Beach</h2>
+        <div>{{ cam.beach_name }}</div>
+        <div>{{ cam.beach_latitude }}</div>
+        <div>{{ cam.beach_longitude }}</div>
+            <a href="{{ prediction.image.url }}">Source image link</a>
+        {% if cam.url_aemet %}
+            <a href="{{ cam.url_aemet }}">Aemet link</a>
+        {% endif %}
+        {% if cam.url_platgesbalears %}
+            <a href="{{ cam.url_platgesbalears }}">PlatgesDeBalears link</a>
+        {% endif %}
+        <h2>Last prediction</h2>
+        {% with prediction=cam.last_prediction  %}
+            <div>{{ prediction.ts }}</div>
+            <a href="{{ prediction.image.url }}">Prediction image link</a>
+
+            <br><img src="{{ prediction.image.url }}" alt="Last prediction" style="max-width: 50vw">
+        <div>{{ prediction.crowd_count }} / {{ cam.max_crowd_count }}</div>
+        {% endwith %}
+    {% endfor %}
+
+    <section id="map">
+
+    </section>
+
+    <section id="list">
+
+    </section>
+</body>
+</html>
