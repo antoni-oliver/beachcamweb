@@ -129,3 +129,10 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+
+# Add production_settings if exist
+try:
+    from core.production_settings import *
+except ImportError:
+    pass

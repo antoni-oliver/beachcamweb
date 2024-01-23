@@ -198,11 +198,8 @@ def deploy(c, prepare=True):
 
 # noinspection SqlNoDataSourceInspection,SqlResolve
 @task(hosts=hosts)
-def create(c, remove_before_creating=True, prepare_before_deploying=True):
+def create(c, prepare_before_deploying=True):
     print_task_header('create')
-
-    if remove_before_creating:
-        remove(c)
 
     # Generate project locale
     if locale not in remote_shell(c, "locale -a", hide=True).stdout:
@@ -350,7 +347,7 @@ def addsuperuser(c):
             f"u, _ = User.objects.get_or_create(username='{superuser_name}', email='{superuser_email}');"
             f"u.is_staff = u.is_admin = u.is_superuser = True;"
             f"u.set_password('{superuser_pwd}');"
-            f"u.save();")
+            f"u.save();", echo=False)
 
 
 @task(hosts=hosts)
