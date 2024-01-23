@@ -110,6 +110,9 @@ prefix_manage = f'{prefix_virtualenv} python3.10 manage.py '
 def run_local(connection, cmd):
     connection.local(cmd, echo=True)
 
+def run_remote(connection, cmd):
+    connection.run(cmd, echo=True)
+
 @task(hosts=hosts)
 def prepare_deploy(c):
     path_activate = os.path.join(os.path.split(sys.executable)[0], 'activate')
@@ -128,7 +131,7 @@ def deploy(c, prepare=True):
     if prepare:
         prepare_deploy(c)
 
-    c.run(f"{prefix_virtualenv} git pull origin main")
+    run_remote(c, f"{prefix_virtualenv} git pull origin main")
     c.run(f"{prefix_virtualenv} python3.10 -m pip install -r {proj_path}/{reqs_path}")
 
     updatetemplates(c)
