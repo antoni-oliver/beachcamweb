@@ -114,6 +114,9 @@ django_setup = (
 )
 
 
+def print_task_header(task_name):
+    print(colored(f"{'=' * 80}\n{task_name}\n{'=' * 80}", 'yellow'))
+
 def local_virtualenv(connection, cmd, echo=True, **kwargs):
     if echo:
         print(colored(f"Local VEnv >> {cmd}", 'cyan'))
@@ -157,8 +160,14 @@ def remote_django(connection, cmd, echo=True, **kwargs):
     return remote_python(connection, f"{django_setup} {sanitized_cmd}", echo=False, **kwargs)
 
 
+def upload_file(c, file_object, remote_path):
+    c.put(file_object, 'fabupload.aux')
+    remote_sudo(c, f'mv /home/{ssh_user}/fabupload.aux {remote_path}', warn=True)
+
+
 @task(hosts=hosts)
 def prepare_deploy(c):
+    print_task_header('prepare_deploy')
     local_virtualenv(c, f"python manage.py makemigrations")
     local_virtualenv(c, f"pip freeze > {reqs_path}")
     local_virtualenv(c, f"git add -A", warn=True)
@@ -168,6 +177,7 @@ def prepare_deploy(c):
 
 @task(hosts=hosts)
 def deploy(c, prepare=True):
+    print_task_header('deploy')
     # if not exists(proj_path):
     #     return RuntimeError('Project does not exist, initialize with `fab create`.')
 
@@ -178,8 +188,8 @@ def deploy(c, prepare=True):
     remote_virtualenv(c, f"python3.10 -m pip install -r {proj_path}/{reqs_path}")
 
     updatetemplates(c)
-    remote_python(c, f"manage collectstatic -v 0 --noinput")
-    remote_python(c, f"manage migrate --noinput")
+    remote_python(c, f"manage.py collectstatic -v 0 --noinput")
+    remote_python(c, f"manage.py migrate --noinput")
 
     return restart(c)
 
@@ -187,6 +197,8 @@ def deploy(c, prepare=True):
 # noinspection SqlNoDataSourceInspection,SqlResolve
 @task(hosts=hosts)
 def create(c, remove_before_creating=True, prepare_before_deploying=True):
+    print_task_header('create')
+
     if remove_before_creating:
         remove(c)
 
@@ -241,6 +253,7 @@ def remove(c):
     """
     Blow away the current project.
     """
+    print_task_header('remove')
     remote_shell(c, f"rm -rf {venv_path}", warn=True)
     remote_shell(c, f"rm -rf {proj_path}", warn=True)
     for template in templates.values():
@@ -258,9 +271,9 @@ def remove(c):
 
 @task(hosts=hosts)
 def stop(c):
+    print_task_header('stop')
     """
     Restart gunicorn worker processes for the project.
-    If the processes are not running, they will be started.
     """
     remote_shell(c, f"kill -HUP `cat {proj_path}/gunicorn.pid`", warn=True)
     remote_sudo(c, f"supervisorctl stop gunicorn_{proj_name} celerybeat_{proj_name} celeryworker_{proj_name}", warn=True)
@@ -272,9 +285,10 @@ def restart(c):
     Restart gunicorn worker processes for the project.
     If the processes are not running, they will be started.
     """
+    print_task_header('restart')
     remote_shell(c, f"kill -HUP `cat {proj_path}/gunicorn.pid`", warn=True)
     remote_sudo(c, "supervisorctl reread", warn=True)
-    remote_sudo(c, f"supervisorctl restart gunicorn_{proj_name} celerybeat_{proj_name} celeryworker_{proj_name}", warn=True)
+    remote_sudo(c, f"supervisorctl restart gunicorn_{proj_name}", warn=True)
 
 
 @task(hosts=hosts)
@@ -318,12 +332,14 @@ def logs(c):
 
 @task(hosts=hosts)
 def removelogs(c):
+    print_task_header('removelogs')
     remote_shell(c, f"rm -f {logs_home}/*.log*", hide=True)
     restart(c)
 
 
 @task(hosts=hosts)
 def addsuperuser(c):
+    print_task_header('addsuperuser')
     if superuser_pwd and superuser_name:
         remote_django(
             c,
@@ -337,6 +353,7 @@ def addsuperuser(c):
 
 @task(hosts=hosts)
 def updatetemplates(c):
+    print_task_header('updatetemplates')
     for name, template_info in templates.items():
         if 'remote_path' in template_info:
             with open(template_info['local_path'], 'r') as template_file:
@@ -349,11 +366,6 @@ def updatetemplates(c):
                 if 'reload_commands' in template_info:
                     for cmd in template_info['reload_commands']:
                         remote_sudo(c, cmd, warn=True)
-
-
-def upload_file(c, file_object, remote_path):
-    c.put(file_object, 'fabupload.aux')
-    remote_sudo(c, f'mv /home/{ssh_user}/fabupload.aux {remote_path}', warn=True)
 
 
 @task(hosts=hosts)
