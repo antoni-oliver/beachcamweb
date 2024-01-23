@@ -1,1 +1,3 @@
 deployment/secrets.py
+
+*/__pycache__/
