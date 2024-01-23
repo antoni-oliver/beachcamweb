@@ -1,6 +1,6 @@
 [program:gunicorn_{proj_name}]
 directory={proj_path}
-command=source {venv_path}/bin/activate && gunicorn -c gunicorn.conf.py -p gunicorn.pid {main_app}.wsgi:application
+command={venv_path}/bin/gunicorn -c gunicorn.conf.py -p gunicorn.pid {main_app}.wsgi:application
 user={ssh_user}
 stdout_logfile = {logs_home}/gunicorn_stdout.log
 stderr_logfile = {logs_home}/gunicorn_stderr.log
