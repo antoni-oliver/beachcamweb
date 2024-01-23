@@ -1,0 +1,2 @@
+# Donwload_and_process every 10 minutes
+*/10 * * * * {venv_path}/bin/python /{proj_path}/Download_and_process.sh

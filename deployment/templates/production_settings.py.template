@@ -7,7 +7,7 @@ DEBUG = False
 DATABASES = {{
     'default': {{
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'production_db.sqlite3',
+        'NAME': '{proj_path}/production_db.sqlite3',
     }}
 }}
 
