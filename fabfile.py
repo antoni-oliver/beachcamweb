@@ -101,6 +101,7 @@ format_templates = {  # Dict with project-dependant strings to format templates
     'logs_home': logs_home,
     'ssh_user': ssh_user,
     'db_pwd': db_pwd,
+    'db_port': CONF.DB_PORT,
     'locale': locale,
     'gunicorn_num_workers': gunicorn_num_workers,
     'domains_nginx': " ".join(domains),
@@ -144,7 +145,7 @@ def remote_sudo(connection, cmd, echo=True, **kwargs):
 def remote_sql(connection, cmd, echo=True, user="postgres", **kwargs):
     if echo:
         print(colored(f"Remote PSQL >> {cmd}", 'light_red'))
-    return remote_sudo(connection, f"psql -c \"{cmd}\"", echo=False, user=user, **kwargs)
+    return remote_sudo(connection, f"psql -p {CONF.DB_PORT} -c \"{cmd}\"", echo=False, user=user, **kwargs)
 
 
 def remote_virtualenv(connection, cmd, echo=True, **kwargs):
