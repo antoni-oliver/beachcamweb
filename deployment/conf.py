@@ -1,39 +1,14 @@
-import os
-
 try:
-    from production.secrets import secrets
+    from deployment.secrets import secrets
 except ImportError:
     class DummySecrets:
         def __getattr__(self, name):
             return 'No secrets file found'
     secrets = DummySecrets()    # Use as 'secrets.ANYTHING_HERE'
 
-# Development settings
-SECRET_KEY = 'hola :)'
-DEBUG = True
 
-BASE_DIR_LOCAL = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR_LOCAL, 'db.sqlite3'),
-    }
-}
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#         'NAME': 'autoscrapper',
-#         'USER': 'autoscrapper',
-#         'PASSWORD': 'estrategias',
-#         'HOST': 'localhost',
-#         'PORT': '5432',
-#     }
-# }
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
-# Production settings (generated from this information)
-class FABRIC:
+# Deployment settings
+class DEPLOYMENT_CONF:
     PROJECT_NAME = 'beachcamweb'
     MAIN_APP = 'core'
     SERVERS = [{
@@ -70,3 +45,7 @@ class FABRIC:
 
     class GUNICORN:
         NUM_WORKERS = 9
+
+
+
+

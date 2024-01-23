@@ -18,7 +18,7 @@ from termcolor import colored
 # Config setup #
 ################
 
-from production.settings import FABRIC as CONF
+from deployment.conf import DEPLOYMENT_CONF as CONF
 
 main_app = CONF.MAIN_APP
 
@@ -58,30 +58,30 @@ logs_home = f"/home/{ssh_user}/logs/{proj_name}"
 
 templates = {
     "nginx": {
-        "local_path": "production/templates/nginx.conf.template",
+        "local_path": "deployment/templates/nginx.conf.template",
         "remote_path": f"/etc/nginx/sites-enabled/{proj_name}.conf",
         "reload_commands": ["nginx -t",
                             "service nginx restart"],
     },
     "supervisor": {
-        "local_path": "production/templates/supervisor.conf.template",
+        "local_path": "deployment/templates/supervisor.conf.template",
         "remote_path": f"/etc/supervisor/conf.d/{proj_name}.conf",
         "reload_commands": [f"supervisorctl update gunicorn_{proj_name}"],
     },
     "gunicorn": {
-        "local_path": "production/templates/gunicorn.conf.py.template",
+        "local_path": "deployment/templates/gunicorn.conf.py.template",
         "remote_path": f"{proj_path}/gunicorn.conf.py",
     },
     "settings": {
-        "local_path": "production/templates/local_settings.py.template",
-        "remote_path": f"{proj_path}/{main_app}/local_settings.py",
+        "local_path": "deployment/templates/production_settings.py.template",
+        "remote_path": f"{proj_path}/{main_app}/production_settings.py",
     },
     "ssh_config": {
-        "local_path": "production/templates/ssh_config.template",
+        "local_path": "deployment/templates/ssh_config.template",
     },
     "secrets": {
-        "local_path": "production/secrets.py",
-        "remote_path": f"{proj_path}/production/secrets.py",
+        "local_path": "deployment/secrets.py",
+        "remote_path": f"{proj_path}/deployment/secrets.py",
         "noformat": True,
     },
 }

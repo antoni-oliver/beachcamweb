@@ -1,7 +1,8 @@
-from __future__ import unicode_literals
+# Production settings
 
 SECRET_KEY = "{secret_key}"
 ALLOWED_HOSTS = [{domains_python}]
+DEBUG = False
 
 DATABASES = {{
     "default": {{
