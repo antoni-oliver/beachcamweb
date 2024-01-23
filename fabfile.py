@@ -353,7 +353,7 @@ def addsuperuser(c):
             f"u, _ = User.objects.get_or_create(username='{superuser_name}', email='{superuser_email}');"
             f"u.is_staff = u.is_admin = u.is_superuser = True;"
             f"u.set_password('{superuser_pwd}');"
-            f"u.save();", echo=False)
+            f"u.save();", echo=True)
 
 
 @task(hosts=hosts)
