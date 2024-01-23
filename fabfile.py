@@ -107,10 +107,13 @@ prefix_virtualenv = f'source {venv_path}/bin/activate && cd {proj_path} && '
 prefix_manage = f'{prefix_virtualenv} python3.10 manage.py '
 
 
+def run_local(connection, cmd):
+    connection.local(cmd, echo=True)
+
 @task(hosts=hosts)
 def prepare_deploy(c):
     path_activate = os.path.join(os.path.split(sys.executable)[0], 'activate')
-    c.local(f"source {path_activate} && python manage.py makemigrations")
+    run_local(c, f"source {path_activate} && python manage.py makemigrations")
     c.local(f"source {path_activate} && pip freeze > {reqs_path}")
     c.local(f"source {path_activate} && git add -A", warn=True)
     c.local(f"source {path_activate} && git commit -m 'fabfile'", warn=True)
