@@ -115,7 +115,7 @@ django_setup = (
 
 
 def print_task_header(task_name):
-    print(colored(f"{'=' * 80}\n{task_name}\n{'=' * 80}", 'yellow'))
+    print(colored(f"{'=' * 40}\n    TASK: {task_name}\n{'=' * 40}", 'yellow'))
 
 def local_virtualenv(connection, cmd, echo=True, **kwargs):
     if echo:
@@ -160,9 +160,11 @@ def remote_django(connection, cmd, echo=True, **kwargs):
     return remote_python(connection, f"{django_setup} {sanitized_cmd}", echo=False, **kwargs)
 
 
-def upload_file(c, file_object, remote_path):
+def upload_file(c, file_object, remote_path, echo=True):
+    if echo:
+        print(colored(f"UPLOAD/UPDATE FILE >> {remote_path}", 'cyan'))
     c.put(file_object, 'fabupload.aux')
-    remote_sudo(c, f'mv /home/{ssh_user}/fabupload.aux {remote_path}', warn=True)
+    remote_sudo(c, f'mv /home/{ssh_user}/fabupload.aux {remote_path}', echo=False, warn=True)
 
 
 @task(hosts=hosts)
