@@ -18,33 +18,33 @@ from termcolor import colored
 # Config setup #
 ################
 
-from production.settings import FABRIC as conf
+from production.settings import FABRIC as CONF
 
-main_app = conf.MAIN_APP
+main_app = CONF.MAIN_APP
 
-secret_key = conf.SECRET_KEY
-db_pwd = conf.DB_PWD or getpass("Enter the database password: ")
-github_external_repo = conf.GITHUB.REPO_PATH
-github_auth_token = conf.GITHUB.AUTH_TOKEN
-github_user = conf.GITHUB.USER or getpass("Enter the git user: ")
+secret_key = CONF.SECRET_KEY
+db_pwd = CONF.DB_PWD or getpass("Enter the database password: ")
+github_external_repo = CONF.GITHUB.REPO_PATH
+github_auth_token = CONF.GITHUB.AUTH_TOKEN
+github_user = CONF.GITHUB.USER or getpass("Enter the git user: ")
 
-servers = conf.SERVERS
+servers = CONF.SERVERS
 hosts = [f"{s['USER']}@{s['IP']}" for s in servers]
 
 ssh_user = servers[0]['USER']
 ssh_pwd = servers[0]['PWD']
 
-domains = conf.DOMAINS
-superuser_name = conf.SUPERUSER.NAME
-superuser_email = conf.SUPERUSER.EMAIL
-superuser_pwd = conf.SUPERUSER.PWD
+domains = CONF.DOMAINS
+superuser_name = CONF.SUPERUSER.NAME
+superuser_email = CONF.SUPERUSER.EMAIL
+superuser_pwd = CONF.SUPERUSER.PWD
 
-proj_name = conf.PROJECT_NAME
+proj_name = CONF.PROJECT_NAME
 venv_home = f"/home/{ssh_user}/venvs"
-reqs_path = conf.REQUIREMENTS_PATH
-locale = conf.LOCALE.replace("UTF-8", "utf8")
+reqs_path = CONF.REQUIREMENTS_PATH
+locale = CONF.LOCALE.replace("UTF-8", "utf8")
 
-gunicorn_num_workers = conf.GUNICORN.NUM_WORKERS
+gunicorn_num_workers = CONF.GUNICORN.NUM_WORKERS
 
 venv_path = join(venv_home, proj_name)
 proj_path = f"/home/{ssh_user}/code/{proj_name}"
@@ -101,28 +101,69 @@ format_templates = {  # Dict with project-dependant strings to format templates
     'domains_python': ", ".join([f"'{s}'" for s in domains]),
     'domains_regex': "|".join(domains),
     'django_admins': f"('{superuser_name}', '{superuser_email}')",
-    'FABRIC': conf,
+    'FABRIC': CONF,
 }
 
-prefix_virtualenv = f'source {venv_path}/bin/activate && cd {proj_path} && '
-prefix_manage = f'{prefix_virtualenv} python3.10 manage.py '
+
+path_local_activate = os.path.join(os.path.split(sys.executable)[0], 'activate')
+django_setup = (
+    f"import os;"
+    f"os.environ['DJANGO_SETTINGS_MODULE']='{main_app}.settings';"
+    f"import django;"
+    f"django.setup();"
+)
 
 
-def run_local(connection, cmd, **kwargs):
-    print(colored(f"Local >> {cmd}", 'red'))
-    connection.local(cmd, **kwargs)
+def local_virtualenv(connection, cmd, echo=True, **kwargs):
+    if echo:
+        print(colored(f"Local VEnv >> {cmd}", 'cyan'))
+    return connection.local(f"source {path_local_activate} && {cmd}", **kwargs)
 
-def run_remote(connection, cmd):
-    connection.run(cmd, echo=True)
+
+def remote_shell(connection, cmd, echo=True, **kwargs):
+    if echo:
+        print(colored(f"Remote Shell >> {cmd}", 'blue'))
+    return connection.run(cmd, **kwargs)
+
+
+def remote_sudo(connection, cmd, echo=True, **kwargs):
+    if echo:
+        print(colored(f"Remote Sudo  >> {cmd}", 'red'))
+    return connection.sudo(cmd, **kwargs)
+
+
+def remote_sql(connection, cmd, echo=True, user="postgres", **kwargs):
+    if echo:
+        print(colored(f"Remote PSQL >> {cmd}", 'light_red'))
+    return remote_sudo(connection, f"psql -c \"{cmd}\"", echo=False, user=user, **kwargs)
+
+
+def remote_virtualenv(connection, cmd, echo=True, **kwargs):
+    if echo:
+        print(colored(f"Remote VEnv  >> {cmd}", 'dark_grey'))
+    return remote_shell(connection, f'source {venv_path}/bin/activate && cd {proj_path} && {cmd}', echo=False, **kwargs)
+
+
+def remote_python(connection, cmd, echo=True, **kwargs):
+    if echo:
+        print(colored(f"Remote python >> {cmd}", 'green'))
+    return remote_virtualenv(connection, f"python3.10 {cmd}", echo=False, **kwargs)
+
+
+def remote_django(connection, cmd, echo=True, **kwargs):
+    if echo:
+        print(colored(f"Remote Django >> {cmd}", 'magenta'))
+    sanitized_cmd = cmd.replace("`", r"\`")
+    return remote_python(connection, f"{django_setup} {sanitized_cmd}", echo=False, **kwargs)
+
 
 @task(hosts=hosts)
 def prepare_deploy(c):
-    path_activate = os.path.join(os.path.split(sys.executable)[0], 'activate')
-    run_local(c, f"source {path_activate} && python manage.py makemigrations")
-    c.local(f"source {path_activate} && pip freeze > {reqs_path}")
-    c.local(f"source {path_activate} && git add -A", warn=True)
-    c.local(f"source {path_activate} && git commit -m 'fabfile'", warn=True)
-    c.local(f"source {path_activate} && git push", warn=True)
+    local_virtualenv(c, f"python manage.py makemigrations")
+    local_virtualenv(c, f"pip freeze > {reqs_path}")
+    local_virtualenv(c, f"git add -A", warn=True)
+    local_virtualenv(c, f"git commit -m 'fabfile'", warn=True)
+    local_virtualenv(c, f"git push", warn=True)
 
 
 @task(hosts=hosts)
@@ -133,63 +174,64 @@ def deploy(c, prepare=True):
     if prepare:
         prepare_deploy(c)
 
-    run_remote(c, f"{prefix_virtualenv} git pull origin main")
-    c.run(f"{prefix_virtualenv} python3.10 -m pip install -r {proj_path}/{reqs_path}")
+    remote_virtualenv(c, f"git pull origin main")
+    remote_virtualenv(c, f"python3.10 -m pip install -r {proj_path}/{reqs_path}")
 
     updatetemplates(c)
-    c.run(f"{prefix_manage} collectstatic -v 0 --noinput")
-    c.run(f"{prefix_manage} migrate --noinput")
+    remote_python(c, f"manage collectstatic -v 0 --noinput")
+    remote_python(c, f"manage migrate --noinput")
 
     return restart(c)
 
 
 # noinspection SqlNoDataSourceInspection,SqlResolve
 @task(hosts=hosts)
-def create(c, prepare_before_deploying=True):
-    # Generate project locale
-    if locale not in c.run("locale -a", hide=True).stdout:
-        c.sudo(f"locale-gen {locale}")
-        c.sudo(f"update-locale {locale}")
-        c.sudo("service postgresql restart_gunicorn")
-        c.run("exit")
+def create(c, remove_before_creating=True, prepare_before_deploying=True):
+    if remove_before_creating:
+        remove(c)
 
-    c.run(f"mkdir -p {logs_home}")
-    c.run(f"mkdir -p {venv_home}")
-    c.run(f"mkdir -p {proj_path}")
+    # Generate project locale
+    if locale not in remote_shell(c, "locale -a", hide=True).stdout:
+        remote_sudo(c, f"locale-gen {locale}")
+        remote_sudo(c, f"update-locale {locale}")
+        remote_sudo(c, "service postgresql restart_gunicorn")
+        remote_shell(c, "exit")
+
+    remote_shell(c, f"mkdir -p {logs_home}")
+    remote_shell(c, f"mkdir -p {venv_home}")
+    remote_shell(c, f"mkdir -p {proj_path}")
 
     # Create virtual env
-    c.run(f"cd {venv_home} && virtualenv -p python3  {proj_name}")
-    c.run(f"{prefix_virtualenv} curl -sS https://bootstrap.pypa.io/get-pip.py | python3.10")
-    c.run(f"{prefix_virtualenv} python3.10 -m pip install gunicorn setproctitle psycopg2-binary django-compressor python-memcached")
+    remote_shell(c, f"cd {venv_home} && virtualenv -p python3  {proj_name}")
+    remote_virtualenv(c, f"curl -sS https://bootstrap.pypa.io/get-pip.py | python3.10")     # Update pip
+    remote_virtualenv(c, f"python3.10 -m pip install gunicorn setproctitle psycopg2-binary django-compressor python-memcached")
 
     # Create DB and DB user
     db_pwd_sanitized = db_pwd.replace("'", "\'")
-    run_psql(c,
-             f"CREATE USER {proj_name} WITH ENCRYPTED PASSWORD '{db_pwd_sanitized}';")
-    run_psql(c,
-             f"CREATE DATABASE {proj_name} WITH OWNER {proj_name} ENCODING = 'UTF8' "
-             f"LC_CTYPE = '{locale}' LC_COLLATE = '{locale}' TEMPLATE template0;")
+    remote_sql(c, f"CREATE USER {proj_name} WITH ENCRYPTED PASSWORD '{db_pwd_sanitized}';")
+    remote_sql(c,
+               f"CREATE DATABASE {proj_name} WITH OWNER {proj_name} ENCODING = 'UTF8' "
+               f"LC_CTYPE = '{locale}' LC_COLLATE = '{locale}' TEMPLATE template0;")
 
     # Initialize project git with GitHub authentication token
-    c.run(f"mkdir -p {proj_path}")
-    c.run(f"{prefix_virtualenv} git init")
-    c.run(
-        f"{prefix_virtualenv} git remote add origin https://github.com/{github_external_repo}")
-    c.run(f"{prefix_virtualenv} git remote -v")  # Verify
+    remote_shell(c, f"mkdir -p {proj_path}")
+    remote_virtualenv(c, f"git init")
+    remote_virtualenv(c, f"git remote add origin https://github.com/{github_external_repo}")
+    remote_virtualenv(c, f"git remote -v")  # Verify
 
     # Deploy
     deploy(c, prepare=prepare_before_deploying)
 
     # Start gunicorn service
-    c.sudo(f"supervisorctl start gunicorn_{proj_name}")
+    remote_sudo(c, f"supervisorctl start gunicorn_{proj_name}")
 
     # Bootstrap the DB
     addsuperuser(c)
 
     # Configure rabbitmq vhost and celery
-    c.sudo(f"rabbitmqctl add_vhost vhost-{proj_name}", warn=True)
-    c.sudo(f"rabbitmqctl add_user '{proj_name}' '{proj_name}'", warn=True)  # Pwd = {proj_name}
-    c.sudo(f"rabbitmqctl set_permissions -p 'vhost-{proj_name}' '{proj_name}' '.*' '.*' '.*'", warn=True)
+    remote_sudo(c, f"rabbitmqctl add_vhost vhost-{proj_name}", warn=True)
+    remote_sudo(c, f"rabbitmqctl add_user '{proj_name}' '{proj_name}'", warn=True)  # Pwd = {proj_name}
+    remote_sudo(c, f"rabbitmqctl set_permissions -p 'vhost-{proj_name}' '{proj_name}' '.*' '.*' '.*'", warn=True)
 
     return True
 
@@ -199,15 +241,15 @@ def remove(c):
     """
     Blow away the current project.
     """
-    c.run(f"rm -rf {venv_path}", warn=True)
-    c.run(f"rm -rf {proj_path}", warn=True)
+    remote_shell(c, f"rm -rf {venv_path}", warn=True)
+    remote_shell(c, f"rm -rf {proj_path}", warn=True)
     for template in templates.values():
         if 'remote_path' in template:
-            c.sudo(f"rm {template['remote_path']}", warn=True)
+            remote_sudo(c, f"rm {template['remote_path']}", warn=True)
 
-    c.sudo("supervisorctl update")
-    run_psql(c, f"DROP DATABASE IF EXISTS {proj_name};")
-    run_psql(c, f"DROP USER IF EXISTS {proj_name};")
+    remote_sudo(c, "supervisorctl update")
+    remote_sql(c, f"DROP DATABASE IF EXISTS {proj_name};")
+    remote_sql(c, f"DROP USER IF EXISTS {proj_name};")
 
 
 ##########
@@ -220,8 +262,8 @@ def stop(c):
     Restart gunicorn worker processes for the project.
     If the processes are not running, they will be started.
     """
-    c.run(f"kill -HUP `cat {proj_path}/gunicorn.pid`", warn=True)
-    c.sudo(f"supervisorctl stop gunicorn_{proj_name} celerybeat_{proj_name} celeryworker_{proj_name}", warn=True)
+    remote_shell(c, f"kill -HUP `cat {proj_path}/gunicorn.pid`", warn=True)
+    remote_sudo(c, f"supervisorctl stop gunicorn_{proj_name} celerybeat_{proj_name} celeryworker_{proj_name}", warn=True)
 
 
 @task(hosts=hosts)
@@ -230,9 +272,9 @@ def restart(c):
     Restart gunicorn worker processes for the project.
     If the processes are not running, they will be started.
     """
-    c.run(f"kill -HUP `cat {proj_path}/gunicorn.pid`", warn=True)
-    c.sudo("supervisorctl reread", warn=True)
-    c.sudo(f"supervisorctl restart gunicorn_{proj_name} celerybeat_{proj_name} celeryworker_{proj_name}", warn=True)
+    remote_shell(c, f"kill -HUP `cat {proj_path}/gunicorn.pid`", warn=True)
+    remote_sudo(c, "supervisorctl reread", warn=True)
+    remote_sudo(c, f"supervisorctl restart gunicorn_{proj_name} celerybeat_{proj_name} celeryworker_{proj_name}", warn=True)
 
 
 @task(hosts=hosts)
@@ -248,38 +290,13 @@ def run(c, cmd=None):
             except:
                 print('[Error] (Press enter to end)')
     # noinspection PyPep8
-    sanitized_cmd = cmd.replace("`", "\\\`")
-    c.run(f'{prefix_virtualenv} {sanitized_cmd}')
-
-
-@task(hosts=hosts)
-def run_psql(c, sql, hide=False):
-    """
-    Runs SQL against the project's database.
-    """
-    out = c.sudo(f'psql -c "{sql}"', hide=hide, user="postgres")
-    if hide:
-        print(sql)
-    return out
-
-
-@task(hosts=hosts)
-def django(c, code):
-    """
-    Runs Python code in the project's virtual environment, with Django loaded.
-    """
-    setup = (f"import os;"
-             f"os.environ['DJANGO_SETTINGS_MODULE']='{main_app}.settings';"
-             f"import django;"
-             f"django.setup();")
-    # noinspection PyPep8
-    sanitized_code = code.replace("`", "\\\`")
-    return c.run(f'{prefix_virtualenv} python3.10 -c "{setup}{sanitized_code}"')
+    sanitized_cmd = cmd.replace("`", r"\`")
+    remote_virtualenv(c, f'{sanitized_cmd}')
 
 
 @task(hosts=hosts)
 def logs(c):
-    options = ['Quit'] + c.run(f"ls {logs_home}/", hide=True).stdout.split()
+    options = ['Quit'] + remote_shell(c, f"ls {logs_home}/", hide=True).stdout.split()
     selection = ""
     while True:
         if selection == "":
@@ -294,21 +311,21 @@ def logs(c):
             if idx_s == 0:
                 return
             else:
-                c.run(f"tail -n 3000 {logs_home}/{options[idx_s]}")
+                remote_shell(c, f"tail -n 3000 {logs_home}/{options[idx_s]}")
         except BaseException:
             pass
 
 
 @task(hosts=hosts)
 def removelogs(c):
-    c.run(f"rm -f {logs_home}/*.log*", hide=True)
+    remote_shell(c, f"rm -f {logs_home}/*.log*", hide=True)
     restart(c)
 
 
 @task(hosts=hosts)
 def addsuperuser(c):
     if superuser_pwd and superuser_name:
-        django(
+        remote_django(
             c,
             f"from django.contrib.auth import get_user_model;"
             f"User = get_user_model();"
@@ -331,25 +348,25 @@ def updatetemplates(c):
                 upload_file(c, io.StringIO(template_as_str), template_info['remote_path'])
                 if 'reload_commands' in template_info:
                     for cmd in template_info['reload_commands']:
-                        c.sudo(cmd, warn=True)
+                        remote_sudo(c, cmd, warn=True)
 
 
 def upload_file(c, file_object, remote_path):
     c.put(file_object, 'fabupload.aux')
-    c.sudo(f'mv /home/{ssh_user}/fabupload.aux {remote_path}', warn=True)
+    remote_sudo(c, f'mv /home/{ssh_user}/fabupload.aux {remote_path}', warn=True)
 
 
 @task(hosts=hosts)
 def replicatedatabase(c):
     dump_fname = f'db_dump_{datetime.now().strftime("%Y%M%d_%H%M%S")}'
-    c.run(
-        f'{prefix_virtualenv} python3.10 manage.py dumpdata --format json --indent 4 --natural-foreign -e contenttypes.ContentType -e auth.Permission --output {dump_fname}.json')
-    c.local(f'rsync {hosts[0]}:{proj_path}/{dump_fname}.json {dump_fname}.json')
-    c.local(f'rsync -a {hosts[0]}:{proj_path}/static/media/* static/media/')
-    c.run(f'{prefix_virtualenv} rm {dump_fname}.json')
+    remote_python(c,
+        f'manage.py dumpdata --format json --indent 4 --natural-foreign -e contenttypes.ContentType -e auth.Permission --output {dump_fname}.json')
+    local_virtualenv(c, f'rsync {hosts[0]}:{proj_path}/{dump_fname}.json {dump_fname}.json')
+    local_virtualenv(c, f'rsync -a {hosts[0]}:{proj_path}/static/media/* static/media/')
+    remote_virtualenv(c, f'rm {dump_fname}.json')
 
-    c.local(f'python3.10 manage.py flush')
-    c.local(f'python3.10 manage.py loaddata {dump_fname}.json')
+    local_virtualenv(c, f'python3.10 manage.py flush')
+    local_virtualenv(c, f'python3.10 manage.py loaddata {dump_fname}.json')
 
 
 ################################
@@ -369,8 +386,8 @@ with open(templates['ssh_config']['local_path'], 'r') as file:
     ]
     config = SSHConfig.from_text("\n\n".join(ssh_config_chunks))
 
-ns = Collection(prepare_deploy, deploy, create, run, run_psql,
-                django, remove, updatetemplates, restart, stop,
+ns = Collection(prepare_deploy, deploy, create, run,
+                remove, updatetemplates, restart, stop,
                 logs, removelogs, replicatedatabase, addsuperuser)
 ns.configure({
     'sudo': {
