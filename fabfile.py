@@ -162,8 +162,8 @@ def remote_python(connection, cmd, echo=True, **kwargs):
 def remote_django(connection, cmd, echo=True, **kwargs):
     if echo:
         print(colored(f"Remote Django >> {cmd}", 'magenta'))
-    sanitized_cmd = cmd.replace("`", r"\`")
-    return remote_python(connection, f"{django_setup} {sanitized_cmd}", echo=False, **kwargs)
+    sanitized_cmd = cmd.replace("`", "\\\`")
+    return remote_python(connection, f"-c \"{django_setup} {sanitized_cmd}\"", echo=False, **kwargs)
 
 
 def upload_file(c, file_object, remote_path, echo=True):
