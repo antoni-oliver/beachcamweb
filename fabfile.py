@@ -79,6 +79,12 @@ templates = {
     "ssh_config": {
         "local_path": "deployment/templates/ssh_config.template",
     },
+    "crontab": {
+        "local_path": "deployment/templates/crontab.template",
+        "remote_path": f"/etc/cron.d/{proj_name}",
+        "reload_commands": [f"chown root /etc/cron.d/{proj_name}",
+                            f"chmod 600 /etc/cron.d/{proj_name}"],
+    },
     "secrets": {
         "local_path": "deployment/secrets.py",
         "remote_path": f"{proj_path}/deployment/secrets.py",
