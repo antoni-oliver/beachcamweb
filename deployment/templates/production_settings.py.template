@@ -4,6 +4,13 @@ SECRET_KEY = "{secret_key}"
 ALLOWED_HOSTS = [{domains_python}]
 DEBUG = False
 
+DATABASES = {{
+    'default': {{
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'production_db.sqlite3',
+    }}
+}}
+
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTOCOL", "https")
 
 CACHE_MIDDLEWARE_SECONDS = 60

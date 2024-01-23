@@ -215,7 +215,7 @@ def create(c, prepare_before_deploying=True):
     # Create virtual env
     remote_shell(c, f"cd {venv_home} && python3.10 -m virtualenv {proj_name}")
     remote_virtualenv(c, f"curl -sS https://bootstrap.pypa.io/get-pip.py | python3.10")     # Update pip
-    remote_virtualenv(c, f"python3.10 -m pip install gunicorn setproctitle psycopg2-binary django-compressor python-memcached")
+    remote_virtualenv(c, f"python3.10 -m pip install gunicorn setproctitle psycopg2-binary django-compressor pymemcache")
 
     # Create DB and DB user
     db_pwd_sanitized = db_pwd.replace("'", "\'")

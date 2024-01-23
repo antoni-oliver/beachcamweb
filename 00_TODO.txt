@@ -1,6 +1,12 @@
 # Bug fixing
 
-* Add to prod_settings template:
+* Mostrar imatges prod vs. dev?
+
+* fab task to download?
+
+* cron task
+
+* Replace current database with: (in prod_settings template):
 
 DATABASES = {{
     "default": {{
