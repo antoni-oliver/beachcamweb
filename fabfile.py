@@ -12,6 +12,7 @@ from posixpath import join
 
 from invoke import Collection
 from paramiko import SSHConfig
+from termcolor import colored
 
 ################
 # Config setup #
@@ -107,8 +108,9 @@ prefix_virtualenv = f'source {venv_path}/bin/activate && cd {proj_path} && '
 prefix_manage = f'{prefix_virtualenv} python3.10 manage.py '
 
 
-def run_local(connection, cmd):
-    connection.local(cmd, echo=True)
+def run_local(connection, cmd, **kwargs):
+    print(colored(f"Local >> {cmd}", 'red'))
+    connection.local(cmd, **kwargs)
 
 def run_remote(connection, cmd):
     connection.run(cmd, echo=True)
