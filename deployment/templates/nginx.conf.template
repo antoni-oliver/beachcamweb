@@ -41,6 +41,13 @@ server {{
         expires 30d;
     }}
 
+    location /media/ {{
+        root            {proj_path};
+        access_log      off;
+        log_not_found   off;
+        expires 30d;
+    }}
+
     location /robots.txt {{
         root            {proj_path}/static;
         access_log      off;

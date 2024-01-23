@@ -247,9 +247,9 @@ def create(c, prepare_before_deploying=True):
     addsuperuser(c)
 
     # Configure rabbitmq vhost and celery
-    remote_sudo(c, f"rabbitmqctl add_vhost vhost-{proj_name}", warn=True)
-    remote_sudo(c, f"rabbitmqctl add_user '{proj_name}' '{proj_name}'", warn=True)  # Pwd = {proj_name}
-    remote_sudo(c, f"rabbitmqctl set_permissions -p 'vhost-{proj_name}' '{proj_name}' '.*' '.*' '.*'", warn=True)
+    # remote_sudo(c, f"rabbitmqctl add_vhost vhost-{proj_name}", warn=True)
+    # remote_sudo(c, f"rabbitmqctl add_user '{proj_name}' '{proj_name}'", warn=True)  # Pwd = {proj_name}
+    # remote_sudo(c, f"rabbitmqctl set_permissions -p 'vhost-{proj_name}' '{proj_name}' '.*' '.*' '.*'", warn=True)
 
     return True
 
