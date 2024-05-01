@@ -10,20 +10,28 @@ import django
 django.setup()
 
 import requests
+from PIL import Image
+from io import BytesIO
 from django.conf import settings
-from data.models import BeachCam
-from predictions.PredictionService import PredictionService
-from predictions.prediction_strategies.BayesianPredictor import BayesianPredictor
+from data.models import BeachCam, Prediction
+from predictions.classes.BayesianPredictor import BayesianPredictor
+
+predictors = [BayesianPredictor()]
 
 for beachcam in BeachCam.objects.all():
-    image = requests.get(beachcam.url_image)
-    now = timezone.now()
-    img_path = settings.MEDIA_ROOT / f"{beachcam.beach_name}_{now.strftime('%Y%m%d%H%M%S')}.jpg"
-    # img = Image.open(BytesIO(response.content))
-    # img.save(str(img_path))
-
-    prediction_service = PredictionService()
-    bayesian_predictor = BayesianPredictor()
-    prediction_service.makePrediction(beachcam, bayesian_predictor, image)
+    response = requests.get(beachcam.url_image)
+    img_path = settings.MEDIA_ROOT / beachcam.getNewFileName()
+    
+    image = Image.open(BytesIO(response.content))
+    image.save(str(img_path))
+    
+    for predictor in predictors:
+        predictionDTO = predictor.predict(img_path)
+        Prediction.saveBeachCamPrediction(
+            beachcam,
+            predictionDTO.time_stamp,
+            predictionDTO.crowd_count,
+            predictionDTO.img_predict_content
+        )
 
     print(f"Downloaded and processed {beachcam.beach_name}.")

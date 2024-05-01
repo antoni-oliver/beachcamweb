@@ -1,6 +1,6 @@
 from predictions.DTO.PredictionDTO import PredictionDTO
 
-class PredictorStrategy:
+class PredictorInterface:
 
     def predict(self, img) -> PredictionDTO:
         pass

@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.utils import timezone
 
 class BeachCam(models.Model):
     beach_name = models.CharField(max_length=200, unique=True)
@@ -17,7 +17,9 @@ class BeachCam(models.Model):
 
     def last_prediction(self):
         return self.prediction_set.order_by('-ts').first()
-
+    
+    def getNewFileName(self):
+        return f'{self.beach_name}_{timezone.now().strftime("%Y%m%d%H%M%S")}.jpg',
 
 class Prediction(models.Model):
     beachcam = models.ForeignKey(BeachCam, on_delete=models.CASCADE)
@@ -27,3 +29,17 @@ class Prediction(models.Model):
 
     def __str__(self):
         return f'{self.beachcam.beach_name} - {self.ts}'
+
+    @staticmethod 
+    def saveBeachCamPrediction(beachcam: BeachCam, time_stamp, crowd_count, img_content):
+        prediction = Prediction.objects.create(
+            beachcam=beachcam,
+            ts=time_stamp,
+            crowd_count=crowd_count
+        )
+        prediction.image.save(
+            beachcam.getNewFileName(),
+            img_content
+        )
+        prediction.save()    
+        return prediction
