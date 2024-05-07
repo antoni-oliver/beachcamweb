@@ -19,7 +19,7 @@ class BeachCam(models.Model):
         return self.prediction_set.order_by('-ts').first()
     
     def getNewFileName(self):
-        return f'{self.beach_name}_{timezone.now().strftime("%Y%m%d%H%M%S")}.jpg',
+        return f'{self.beach_name}_{timezone.now().strftime("%Y%m%d%H%M%S")}.jpg'
 
 class Prediction(models.Model):
     beachcam = models.ForeignKey(BeachCam, on_delete=models.CASCADE)
