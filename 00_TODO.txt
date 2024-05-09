@@ -6,16 +6,18 @@
 
 * cron task
 
-
-
 # Now
 * Add simple AI to predict crowd count in download_and_process.py.
 * Make an image gallery with these templates https://jsfiddle.net/bootstrapious/m8pe5qat https://bootsnipp.com/snippets/aMGnk.
 * Add image uploader.
 * Remove tmp images for beachcams predictions.
+*https://docs.djangoproject.com/en/5.0/topics/db/fixtures/
+*Fixtures | Django documentation
+*Prediction.objects.filter(timestamp__lt=...)
 
 #Possibly Now
 * Create Predictor model to type predictions ?
+* Mostrar la ultima prediccion de cada algoritmo
 
 # Future
 

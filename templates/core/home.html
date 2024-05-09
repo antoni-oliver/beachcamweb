@@ -42,7 +42,7 @@
 
           <br />
           <img src="{{ prediction.image.url }}" alt="Last prediction" style="max-width: 50vw" data-bs-toggle="modal" data-bs-target="#imageModal" />
-          <div>{{ prediction.crowd_count }} / {{ cam.max_crowd_count }}</div>
+          <div>S'han trobat: {{ prediction.getCrowdCount }} persones.</div>
         {% endwith %}
       {% endfor %}
 

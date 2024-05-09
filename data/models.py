@@ -26,9 +26,13 @@ class Prediction(models.Model):
     ts = models.DateTimeField()
     image = models.ImageField(null=True, upload_to='count/')
     crowd_count = models.FloatField(default=0)
+    algorithm = models.CharField(max_length=255, default="")
 
     def __str__(self):
         return f'{self.beachcam.beach_name} - {self.ts}'
+    
+    def getCrowdCount(self):
+        return int(self.crowd_count)
 
     @staticmethod 
     def saveBeachCamPrediction(beachcam: BeachCam, time_stamp, crowd_count, img_content):

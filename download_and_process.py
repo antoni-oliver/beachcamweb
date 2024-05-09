@@ -18,6 +18,11 @@ from predictions.classes.BayesianPredictor import BayesianPredictor
 
 predictors = [BayesianPredictor()]
 
+#TODO limpiar todas las imagenes que tengan mas de 1 dia de los ficheros
+#temporales (revisarlo por los modelos predictions)
+
+#filter por el atributo de timestamp
+
 for beachcam in BeachCam.objects.all():
     response = requests.get(beachcam.url_image)
     img_path = settings.MEDIA_ROOT / beachcam.getNewFileName()
