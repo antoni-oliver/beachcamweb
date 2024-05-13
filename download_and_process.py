@@ -38,5 +38,9 @@ for beachcam in BeachCam.objects.all():
             predictionDTO.crowd_count,
             predictionDTO.img_predict_content
         )
+    
+    #delete the tmp image
+    if os.path.exists(img_path):
+        os.remove(img_path)
 
     print(f"Downloaded and processed {beachcam.beach_name}.")
