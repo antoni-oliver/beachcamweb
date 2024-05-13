@@ -13,38 +13,27 @@
   <body>
     <section id="img-prediction-section" class="container">
       <h1 class="mb-5 mt-5 text-center">Prediccions en viu de les platges de les Illes Balears</h1>
-      {% for cam in cams %}
-        <h2>{{ cam.beach_name }}</h2>
-
-        <div class="mb-2">
-          <p class="h5">Coordinades</p>
-          <ul class="mb-0">
-            <li>{{ cam.beach_latitude }}</li>
-            <li>{{ cam.beach_longitude }}</li>
-          </ul>
-        </div>
-
-        <div class="mb-2">
-          <a href="{{ cam.url_image }}">Link imagen {{ cam.beach_name }}</a>
-          {% if cam.url_aemet %}
-            <a href="{{ cam.url_aemet }}">Aemet link {{ cam.beach_name }}</a>
-          {% endif %}
-          {% if cam.url_platgesbalears %}
-            <a href="{{ cam.url_platgesbalears }}">PlatgesDeBalears link {{ cam.beach_name }}</a>
-          {% endif %}
-        </div>
-
-        <p class="h5">Última predicciò</p>
-
-        {% with prediction=cam.last_prediction %}
-          <div>{{ prediction.ts }}</div>
-          <a href="{{ prediction.image.url }}">Prediction image link</a>
-
-          <br />
-          <img src="{{ prediction.image.url }}" alt="Last prediction" style="max-width: 50vw" data-bs-toggle="modal" data-bs-target="#imageModal" />
-          <div>S'han trobat: {{ prediction.getCrowdCount }} persones.</div>
-        {% endwith %}
-      {% endfor %}
+      <div class="row">
+        {% for cam in cams %}
+          <!-- Gallery item -->
+          <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+            <div class="bg-white rounded shadow-sm">
+              <img src="{{ cam.url_image }}" alt="" class="img-fluid card-img-top min-h-150" />
+              <div class="p-4">
+                <h5><a href="#" class="text-dark">{{ cam.beach_name }}</a></h5>
+                <p class="small text-muted mb-0">Lorem ipsum dolor sit amet, consectetur adipisicing elit</p>
+                <div class="d-flex align-items-center justify-content-between rounded-pill bg-light px-3 py-2 mt-4">
+                  <p class="small mb-0">
+                    <i class="fa fa-picture-o mr-2"></i><span class="font-weight-bold">JPG</span>
+                  </p>
+                  <div class="badge badge-danger px-3 rounded-pill font-weight-normal">New</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!--End Gallery Item-->
+        {% endfor %}
+      </div>
 
       <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered m-0 p-5 mw-100">

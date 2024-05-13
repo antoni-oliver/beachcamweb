@@ -21,3 +21,11 @@ figure.zoom img {
 /*
 * full width modal
 */
+
+
+/*
+* CSS Utils
+*/
+.min-h-150 {
+    min-height: 150px;
+}
