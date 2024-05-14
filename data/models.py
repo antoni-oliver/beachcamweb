@@ -51,10 +51,10 @@ class Prediction(models.Model):
         prediction.save()    
         return prediction
     
-    def deleteImgUrl(self):
-        self.image.delete()
+    def deleteImg(self):
+        self.image.delete(save=True)
     
     def getOutDatedPredictions():
-        outdatedPredictions = Prediction.objects.filter(ts__lte=timezone.now() + timedelta(minutes=1))
-        return outdatedPredictions
+        return Prediction.objects.filter(ts__lte=timezone.now() + timedelta(days=1)).exclude(image__exact='')
+
         

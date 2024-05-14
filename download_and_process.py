@@ -21,8 +21,9 @@ predictors = [BayesianPredictor()]
 #delete the outdated images of the file system from outdated predictions
 outdatedPredictions = Prediction.getOutDatedPredictions()
 for outdatePrediction in outdatedPredictions:
-    predictionImg = outdatePrediction.image.url
-    outdatePrediction.deleteImgUrl()
+    if outdatePrediction.image:
+        predictionImg = outdatePrediction.image.url
+        outdatePrediction.deleteImg()
             
 for beachcam in BeachCam.objects.all():
     
