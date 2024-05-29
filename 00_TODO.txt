@@ -6,12 +6,13 @@
 
 * cron task
 
-
-
 # Now
 
-* Add simple AI to predict crowd count in download_and_process.py
+* Make an image gallery with these templates
+* Add image uploader.
 
+#Possibly Now
+* Mostrar la ultima prediccion de cada algoritmo
 
 # Future
 
@@ -20,3 +21,12 @@
 
 * Use statistics to set data.models.BeachCam.max_crowd_count automatically.
 * Add log to script download_and_process.py
+
+#topics
+
+*https://docs.djangoproject.com/en/5.0/topics/db/fixtures/
+https://jsfiddle.net/bootstrapious/m8pe5qat https://bootsnipp.com/snippets/aMGnk.
+
+#DONE
+* Remove tmp images for beachcams predictions.
+* Add simple AI to predict crowd count in download_and_process.py. 
