@@ -22,7 +22,7 @@ class DEPLOYMENT_CONF:
     REQUIREMENTS_PATH = 'requirements.txt'  # Project's pip requirements
     SECRET_KEY = secrets.DJANGO_SECRET_KEY
 
-    LOCALE = 'en_US.UTF-8'  # Should end with ".UTF-8"
+    LOCALE = 'en_US.utf8'  # Should end with ".UTF-8"
     DB_PWD = secrets.PRODUCTION_DB_PWD  # Live database pwd
     DB_PORT = 5433  # Default for postgres: 5432
 
