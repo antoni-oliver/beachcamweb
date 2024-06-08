@@ -18,12 +18,15 @@ from predictions.classes.BayesianPredictor import BayesianPredictor
 
 predictors = [BayesianPredictor()]
 
-#TODO limpiar todas las imagenes que tengan mas de 1 dia de los ficheros
-#temporales (revisarlo por los modelos predictions)
-
-#filter por el atributo de timestamp
-
+#delete the outdated images of the file system from outdated predictions
+outdatedPredictions = Prediction.getOutDatedPredictions()
+for outdatePrediction in outdatedPredictions:
+    if outdatePrediction.image:
+        predictionImg = outdatePrediction.image.url
+        outdatePrediction.deleteImg()
+            
 for beachcam in BeachCam.objects.all():
+    
     response = requests.get(beachcam.url_image)
     img_path = settings.MEDIA_ROOT / beachcam.getNewFileName()
     
@@ -36,7 +39,12 @@ for beachcam in BeachCam.objects.all():
             beachcam,
             predictionDTO.time_stamp,
             predictionDTO.crowd_count,
-            predictionDTO.img_predict_content
+            predictionDTO.img_predict_content,
+            predictor.__class__.__name__
         )
+    
+    #delete the tmp image
+    if os.path.exists(img_path):
+        os.remove(img_path)
 
     print(f"Downloaded and processed {beachcam.beach_name}.")
