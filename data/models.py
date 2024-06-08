@@ -10,6 +10,7 @@ class BeachCam(models.Model):
     url_aemet = models.CharField(max_length=200, null=True, blank=True)
     url_platgesbalears = models.CharField(max_length=200, null=True, blank=True)
     probe_freq_mins = models.IntegerField(default=60)
+    description = models.CharField(max_length=255, null=True)
 
     max_crowd_count = models.IntegerField()
 

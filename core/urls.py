@@ -24,5 +24,5 @@ from core import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home, name='home'),
-    path('see/{beach_name:str}', views.ajax_image, name='ajax-img'),
+    path('show/<str:beach_name>', views.show_image, name='show-img'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
