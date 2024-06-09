@@ -2,3 +2,12 @@
 * Global styles for pages and components
 */
 @import "css/galleryItem.css";
+@import "css/utils.css";
+
+
+/* 
+* Rule body always minimum heigth 100% of the viewport
+*/
+body {
+    min-height: 100vh !important;
+}

@@ -1,9 +1,13 @@
 {% comment %}Beach cam Gallery items default container{% endcomment %}
 
-<div class="galleryItemsContainer row my-5">
-  {% for cam in cams %}
-    <div class="col-xl-3 col-lg-4 col-md-6 mb-5 px-4">
-      {% include 'components/beachCamItem.html' with cam=cam prediction=cam.last_prediction %}
-    </div>
-  {% endfor %}
-</div>
+<section id="{{ id }}" class="container">
+  <h1 class="mb-5 mt-5 text-center">{{ text }}</h1>
+  <div class="separator py-2"></div>
+  <div class="galleryItemsContainer row my-5">
+    {% for cam in cams %}
+      <div class="col-xl-3 col-lg-4 col-md-6 mb-5 px-4">
+        {% include 'components/beachCamItem.html' with cam=cam prediction=cam.last_prediction %}
+      </div>
+    {% endfor %}
+  </div>
+</section>

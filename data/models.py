@@ -36,6 +36,9 @@ class Prediction(models.Model):
     
     def getCrowdCount(self):
         return int(self.crowd_count)
+    
+    def getCrowdCountText(self):
+        return f"Estimat de gent actual: {self.getCrowdCount()}"
 
     @staticmethod 
     def saveBeachCamPrediction(beachcam: BeachCam, time_stamp, crowd_count, img_content, algorithm):

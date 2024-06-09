@@ -16,16 +16,10 @@
         Corre i no et quedis sense lloc!
       </p>
       <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-        <button type="button" class="btn btn-primary btn-lg px-4 gap-3">Analitzar imatge</button>
+        <button type="button" class="btn btn-primary btn-lg px-4 gap-3" onclick="alert('Aún no hago nada pero pronto lo haré')">Analitzar imatge</button>
       </div>
     </div>
   </section>
 
-  <section id="img-prediction-section" class="container">
-    <h1 class="mb-5 mt-5 text-center">Prediccions en viu de les platges de les Illes Balears</h1>
-    <div class="separator py-2"></div>
-
-    {% include 'components/beachCamItemGallery.html' with cams=cams %}
-    
-  </section>
+  {% include 'components/beachCamItemGallery.html' with id='platges' text='Prediccions en viu de les platges de les Illes Balears' cams=cams %}
 {% endblock %}
