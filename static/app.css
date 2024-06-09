@@ -1,24 +1,4 @@
 /* 
-* Gallery item styles
+* Global styles for pages and components
 */
-div.galleryItem{
-    cursor: pointer;
-}
-
-.galleryItem img{
-    min-height: 80px;
-    max-height: 80px;
-    border-top-left-radius: 20px !important;
-    border-top-right-radius: 20px !important;
-}
-
-div.galleryItem > div,
-div.galleryItem .pill
-{
-    border-radius: 20px !important;
-}
-
-div.galleryItem > div:hover{
-    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
-    transition: box-shadow 0.2s ease-in-out;
-}
+@import "css/galleryItem.css";
