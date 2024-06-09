@@ -25,4 +25,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home, name='home'),
     path('show/<str:beach_name>', views.show_image, name='show-img'),
+    path('analyze-image', views.show_analyze_image, name='show-analyze-img'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

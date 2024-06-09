@@ -1,0 +1,31 @@
+<div class="form-group mb-3 col-lg-5 col-md-5 col">
+  <label><strong>Selecciona una imagen:</strong></label>
+  <input type="file" class="form-control" id="i-imagen" name="imageInput" />
+</div>
+<canvas id="c-imagen" class="canvas-img mw-100" src="#" alt="La imagen aparecerá aquí"></canvas>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document
+      .getElementById("i-imagen")
+      .addEventListener("change", function (event) {
+        const file = event.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            const canvas = document.getElementById("c-imagen");
+            const ctx = canvas.getContext("2d");
+            const image = new Image();
+            image.src = e.target.result;
+            image.onload = function () {
+              canvas.width = image.width;
+              canvas.height = image.height;
+              ctx.drawImage(image, 0, 0);
+              canvas.style.display = "block";
+            };
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+  });
+</script>

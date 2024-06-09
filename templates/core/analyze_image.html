@@ -1,0 +1,15 @@
+{% extends 'core/parent.html' %}
+
+{% load static %}
+
+{% block title %}
+  Analitza sa teva foto d'una platja
+{% endblock %}
+
+{% block content %}
+  <section id="image-uploader">
+    <div class="container d-flex flex-column align-items-center">
+      {% include 'components/image_uploader.html' %}
+    </div>
+  </section>
+{% endblock %}
