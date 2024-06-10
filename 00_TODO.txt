@@ -24,10 +24,10 @@
 
 #topics
 
-*https://docs.djangoproject.com/en/5.0/topics/db/fixtures/
 https://jsfiddle.net/bootstrapious/m8pe5qat https://bootsnipp.com/snippets/aMGnk.
 
 #DONE
 * Remove tmp images for beachcams predictions.
 * Add simple AI to predict crowd count in download_and_process.py. 
 * Make an image gallery with these templates
+* Fixtures for beachcams
