@@ -9,7 +9,14 @@
 {% block content %}
   <section id="image-uploader">
     <div class="container d-flex flex-column align-items-center">
-      {% include 'components/image_uploader.html' %}
+      <form id="main-form" class="image-uploader" action="/analyze-image/" method="post">
+        {% csrf_token %}
+        {{ form }}
+        <div class="d-flex">
+          <input type="submit" class="btn btn-primary my-3" value="Analitzar Imatge" style="display: none;" />
+        </div>
+        <canvas id="img-viewer" class="canvas-img mw-100" src="#" alt="La imagen aparecerá aquí" style="display: none;"></canvas>
+      </form>
     </div>
   </section>
 {% endblock %}
