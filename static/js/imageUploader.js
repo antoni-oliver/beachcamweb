@@ -17,9 +17,7 @@ export function initImageUploaderForms() {
  * Hide all submit buttons initially
  */
 function hideAllSubmits() {
-    $(`${formQuery} :submit`).each(function () {
-        $(this).hide();
-    });
+    $(`${formQuery} :submit`).hide();
 }
 
 /** 
@@ -52,7 +50,7 @@ function initCanvasDrawEvent() {
         const form = $(e.target).closest(formQuery);
         const canvas = form.find(canvasQuery).first();
         const submit = form.find(':submit');
-        if (e.target.files.length <= 0 || !canvas.length) {
+        if (!e.target.files.length || !canvas.length) {
             submit.hide();
             return;
         }
