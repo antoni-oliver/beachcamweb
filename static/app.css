@@ -1,23 +1,13 @@
 /* 
-* CSS for figure zoom
+* Global styles for pages and components
 */
-figure.zoom {
-    background-position: 50% 50%;
-    position: relative;
-    overflow: hidden;
-    cursor: zoom-in;
-}
+@import "css/galleryItem.css";
+@import "css/utils.css";
 
-figure.zoom img:hover {
-    opacity: 0;
-}
 
-figure.zoom img {
-    transition: opacity 0.5s;
-    display: block;
-    width: 100%;
-}
-
-/*
-* full width modal
+/* 
+* Rule body always minimum heigth 100% of the viewport
 */
+body {
+    min-height: 100vh !important;
+}

@@ -1,0 +1,20 @@
+{% extends 'core/parent.html' %}
+
+{% load static %}
+
+{% block title %}
+  {{ cam.beach_name }}
+{% endblock %}
+
+{% block content %}
+  <section id="hero-section" class="container px-4 py-5 my-5 text-center">
+    <div class="container d-flex flex-column align-items-center mb-4">
+      <h1 class="display-4 fw-bold mb-3">Ocupació actual {{ cam.beach_name }}</h1>
+      {% include 'components/pill.html' with text=prediction.getCrowdCountText %}
+    </div>
+
+    <img class="d-block mx-auto mb-4 my-5 img-thumbnail" src="{{ prediction.image.url }}" alt="" />
+  </section>
+
+  {% include 'components/beachCamItemGallery.html' with id='img-prediction-section' text='Altres Platges' cams=other_cams %}
+{% endblock %}

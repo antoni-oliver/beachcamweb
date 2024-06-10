@@ -7,9 +7,9 @@
 * cron task
 
 # Now
-
-* Make an image gallery with these templates
 * Add image uploader.
+* Bigger prediction image.
+* Static page so has to be 100 100 100 100 in pagespeed.
 
 #Possibly Now
 * Mostrar la ultima prediccion de cada algoritmo
@@ -30,3 +30,4 @@ https://jsfiddle.net/bootstrapious/m8pe5qat https://bootsnipp.com/snippets/aMGnk
 #DONE
 * Remove tmp images for beachcams predictions.
 * Add simple AI to predict crowd count in download_and_process.py. 
+* Make an image gallery with these templates
