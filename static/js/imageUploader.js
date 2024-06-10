@@ -1,13 +1,11 @@
-/* 
-* Image uploader js
-*/
+// Image uploader js
 
-const image_query = "[name^=image]";
-const canvas_query = ".canvas-img";
-const form_query = "form.image-uploader";
+const imageQuery = "[name^=image]";
+const canvasQuery = ".canvas-img";
+const formQuery = "form.image-uploader";
 
 /**
- * Initializa ImageUploaderForms events
+ * Initialize ImageUploaderForms events
  */
 export function initImageUploaderForms() {
     hideAllSubmits();
@@ -15,59 +13,65 @@ export function initImageUploaderForms() {
     initCanvasDrawEvent();
 }
 
-/* 
-* Assures all submits are hidden at the start
-*/
+/** 
+ * Hide all submit buttons initially
+ */
 function hideAllSubmits() {
-    $(`${form_query} :submit`).each(function () {
+    $(`${formQuery} :submit`).each(function () {
         $(this).hide();
     });
 }
 
-/* 
-* Initialize Submit Event delegation
-*/
+/** 
+ * Initialize Submit Event delegation
+ */
 function initSubmitEvent() {
-    //event delegation for formSubmit
-    $(document).on('click', `${form_query} :submit`, function (e) {
+    // Event delegation for form submit
+    $(document).on('click', `${formQuery} :submit`, function (e) {
         e.preventDefault();
-        let form = $(this).closest(form_query)[0];
+        const form = $(this).closest(formQuery)[0];
         submitForm(form);
     });
 }
 
+/**
+ * Submit the form via AJAX
+ */
 function submitForm(form) {
-    //TODO implement ajax
-    alert("PALLA QUE VOY")
+    // TODO: implement ajax
+    alert("PALLA QUE VOY");
 }
 
 /**
  * Initialize Canvas Image drawing event delegation
  */
 function initCanvasDrawEvent() {
-    //event delegation for canvas viewer
-    $(document).on('change', `${form_query} ${image_query}`, function (e) {
-        //check files and if has canvas
-        let form = $(e.target).closest(form_query)
-        let canvas = form.find(canvas_query).first();
-        let submit = form.find(':submit');
-        if (e.target.files.length <= 0 || !canvas) {
-            submit?.hide();
+    // Event delegation for canvas viewer
+    $(document).on('change', `${formQuery} ${imageQuery}`, function (e) {
+        // Check files and if canvas exists
+        const form = $(e.target).closest(formQuery);
+        const canvas = form.find(canvasQuery).first();
+        const submit = form.find(':submit');
+        if (e.target.files.length <= 0 || !canvas.length) {
+            submit.hide();
             return;
         }
-        submit?.show();
+        submit.show();
         handleCanvasViewer(e.target.files[0], canvas[0]);
     });
 }
 
+/**
+ * Display the selected image on the canvas
+ */
 function handleCanvasViewer(image, canvas) {
     try {
         const reader = new FileReader();
-        reader.onload = function (e) {
+        reader.onload = (e) => {
             const ctx = canvas.getContext("2d");
             const img = new Image();
             img.src = e.target.result;
-            img.onload = function () {
+            img.onload = () => {
                 canvas.width = img.width;
                 canvas.height = img.height;
                 ctx.drawImage(img, 0, 0);
@@ -79,4 +83,3 @@ function handleCanvasViewer(image, canvas) {
         console.error(error);
     }
 }
-
