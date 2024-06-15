@@ -25,10 +25,15 @@ function hideAllSubmits() {
  */
 function initSubmitEvent() {
     // Event delegation for form submit
-    $(document).on('click', `${formQuery} :submit`, function (e) {
+    $(document).on('click', `${formQuery} :submit`, async function (e) {
         e.preventDefault();
-        const form = $(this).closest(formQuery)[0];
-        submitForm(form);
+        $(this).prop('disabled', true);
+        const form = $(this).closest(formQuery);
+        showLoader(form);
+        let response = await submitForm(form);
+        hideLoader(form);
+        showFeedback(response);
+        $(this).prop('disabled', false);
     });
 }
 
@@ -36,8 +41,26 @@ function initSubmitEvent() {
  * Submit the form via AJAX
  */
 function submitForm(form) {
-    // TODO: implement ajax
-    alert("PALLA QUE VOY");
+    return fetch()
+}
+
+/* 
+* Show loader while processing image
+*/
+function showLoader($form) {
+    $form.hide();
+    const loader = $(`
+        <div class="loader my-5 animate__animated animate__fadeInUp animate__faster">
+            <p class="display-6 font-weight-bolder my-5 text-center">Analitzant sa teva imatge...</p>
+            <div class="spinner-border large text-primary" role="status">
+            </div>
+        </div>`);
+    let form_container = $form.parent();
+    form_container.append(loader);
+}
+
+function hideLoader(form) {
+
 }
 
 /**
