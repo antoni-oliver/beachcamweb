@@ -59,6 +59,6 @@ class Prediction(models.Model):
         self.image.delete(save=True)
     
     def getOutDatedPredictions():
-        return Prediction.objects.filter(ts__lte=timezone.now() + timedelta(days=1)).exclude(image__exact='')
+        return Prediction.objects.filter(ts__gte=timezone.now() + timedelta(days=1)).exclude(image__exact='')
 
         

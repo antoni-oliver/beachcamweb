@@ -6,6 +6,9 @@ from django.shortcuts import get_object_or_404, render
 from django.http import JsonResponse
 from .forms import ImageUploaderForm
 
+from predictions.classes.BayesianPredictor import BayesianPredictor
+from predictions.actions.CustomerPredict import CustomerPredict
+
 
 # Create your views here.
 
@@ -25,10 +28,19 @@ def show_image(request, beach_name):
 def show_analyze_image(request):
     # https://docs.djangoproject.com/en/5.0/topics/forms/
     if request.method == "POST":
-        form = ImageUploaderForm(request.POST)
+        form = ImageUploaderForm(request.POST, request.FILES)
         if form.is_valid():
-            return JsonResponse({'message': "Manolo"})
+            cleaned_data = form.cleaned_data
+            image = cleaned_data.get('image')
+            predictor = BayesianPredictor()
+            action = CustomerPredict()
+            predictionDTO = action.handle(image, predictor)
+            if predictionDTO is None:
+                return JsonResponse({'errors': "Internal Server Error"}, status=500)
+            else:
+                return JsonResponse(predictionDTO.to_dict(), status=200)
+        else:
+            return JsonResponse({'errors': form.errors}, status=400)
     else:
         form = ImageUploaderForm()
-
-    return render(request, 'core/analyze_image.html',  context={'form': form})
+        return render(request, 'core/analyze_image.html',  context={'form': form})

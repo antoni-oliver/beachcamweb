@@ -1,8 +1,9 @@
 // Image uploader js
-
 const imageQuery = "[name^=image]";
 const canvasQuery = ".canvas-img";
 const formQuery = "form.image-uploader";
+const loaderQuery = "div.loader";
+const analyze_image_url = "/analyze-image";
 
 /**
  * Initialize ImageUploaderForms events
@@ -30,18 +31,15 @@ function initSubmitEvent() {
         $(this).prop('disabled', true);
         const form = $(this).closest(formQuery);
         showLoader(form);
-        let response = await submitForm(form);
+        let data = await submitForm(form[0]);
+        debugger;
         hideLoader(form);
-        showFeedback(response);
         $(this).prop('disabled', false);
+        if (!data) {
+            return;
+        }
+        showResult(form, data);
     });
-}
-
-/**
- * Submit the form via AJAX
- */
-function submitForm(form) {
-    return fetch()
 }
 
 /* 
@@ -51,7 +49,7 @@ function showLoader($form) {
     $form.hide();
     const loader = $(`
         <div class="loader my-5 animate__animated animate__fadeInUp animate__faster">
-            <p class="display-6 font-weight-bolder my-5 text-center">Analitzant sa teva imatge...</p>
+            <p class="display-6 font-weight-bolder my-5 text-center">Analitzant la teva imatge...</p>
             <div class="spinner-border large text-primary" role="status">
             </div>
         </div>`);
@@ -59,8 +57,65 @@ function showLoader($form) {
     form_container.append(loader);
 }
 
-function hideLoader(form) {
 
+/**
+ * Submit the form via AJAX
+ */
+async function submitForm(form) {
+    const formData = new FormData(form);
+    return fetch(analyze_image_url, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]').val()
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            showSuccessMessage();
+            return data;
+        })
+        .catch(() => {
+            showErrorMessage();
+            return null;
+        });
+
+}
+
+function showSuccessMessage() {
+    Swal.fire({
+        icon: "success",
+        title: "Imatge analitzada!",
+        showConfirmButton: false,
+        timer: 1500
+    });
+}
+
+function showErrorMessage() {
+    Swal.fire({
+        icon: "error",
+        title: "Error en l'anàlisi de l'imatge",
+        showConfirmButton: false,
+        timer: 1500
+    });
+}
+
+/**
+ * Hide loader
+ */
+function hideLoader(form) {
+    $(loaderQuery).remove();
+    form.show();
+}
+
+/* 
+* Shows results from predictionDTO
+*/
+function showResult(form, predictionDTO) {
+    var image = new Image();
+    image.src = `data:image/png;base64,${predictionDTO.img_predict_content}`;
+    const canvas = form.find(canvasQuery).first();
+    drawImageOnCanvas(image, canvas[0]);
 }
 
 /**
@@ -83,24 +138,31 @@ function initCanvasDrawEvent() {
 }
 
 /**
- * Display the selected image on the canvas
+ * Display selected form image in canvas
  */
 function handleCanvasViewer(image, canvas) {
     try {
         const reader = new FileReader();
         reader.onload = (e) => {
-            const ctx = canvas.getContext("2d");
             const img = new Image();
             img.src = e.target.result;
-            img.onload = () => {
-                canvas.width = img.width;
-                canvas.height = img.height;
-                ctx.drawImage(img, 0, 0);
-                canvas.style.display = "block";
-            };
+            drawImageOnCanvas(img, canvas)
         };
         reader.readAsDataURL(image);
     } catch (error) {
         console.error(error);
     }
+}
+
+/**
+ * Display img on canvas
+ */
+function drawImageOnCanvas(img, canvas) {
+    const ctx = canvas.getContext("2d");
+    img.onload = () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+        canvas.style.display = "block";
+    };
 }

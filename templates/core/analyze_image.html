@@ -9,7 +9,7 @@
 {% block content %}
   <section id="image-uploader">
     <div class="container d-flex flex-column align-items-center">
-      <form id="main-form" class="image-uploader" action="/analyze-image/" method="post">
+      <form id="main-form" class="image-uploader text-center" action="/analyze-image/" method="post">
         {% csrf_token %}
         {{ form }}
         <div class="d-flex">
@@ -19,4 +19,9 @@
       </form>
     </div>
   </section>
+{% endblock %}
+
+{% block scripts %}
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="{% static 'app.js' %}" type="module"></script>
 {% endblock %}

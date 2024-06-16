@@ -35,7 +35,7 @@ class BayesianPredictor(PredictorInterface):
         merged_image = self.mergeDensityMapWithImage(image_path, density_map)
         
         return PredictionDTO(
-            crowd_count= torch.sum(outputs),
+            crowd_count= torch.sum(outputs).item(),
             time_stamp= timezone.now(),
             img_predict_content= ContentFile(merged_image)
         )

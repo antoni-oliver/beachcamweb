@@ -21,3 +21,7 @@ div.loader {
 .progress.progress-image-loader {
     width: 80%;
 }
+
+form.image-uploader label {
+    margin-bottom: 15px;
+}
