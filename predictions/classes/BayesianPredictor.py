@@ -42,7 +42,6 @@ class BayesianPredictor(PredictorInterface):
     
     def mergeDensityMapWithImage(self, image_path, density_map):
         background_image = Image.open(image_path).convert('RGB')
-        background_image_resized = background_image.resize((density_map.shape[1], density_map.shape[0]), Image.BILINEAR)
 
         density_map_normalized = density_map / np.max(density_map)
         density_map_colored = plt.cm.jet(density_map_normalized)[:, :, :3]
@@ -51,9 +50,10 @@ class BayesianPredictor(PredictorInterface):
         density_map_rgba[..., 3] = 75 #alpha channel
 
         density_map_image = Image.fromarray(density_map_rgba)
-        background_image_resized_pil = Image.fromarray(np.array(background_image_resized))
+        width, height = background_image.size
+        density_map_image = density_map_image.resize((width, height), Image.BILINEAR)
 
-        combined_image = Image.alpha_composite(background_image_resized_pil.convert('RGBA'), density_map_image)
+        combined_image = Image.alpha_composite(background_image.convert('RGBA'), density_map_image)
         buffer = io.BytesIO()
         combined_image.save(buffer, format='PNG')
         return buffer.getvalue()
