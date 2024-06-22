@@ -4,6 +4,7 @@ const canvasQuery = ".canvas-img";
 const formQuery = "form.image-uploader";
 const loaderQuery = "div.loader";
 const analyze_image_url = "/analyze-image";
+const p_show_result = "p-show-result";
 
 /**
  * Initialize ImageUploaderForms events
@@ -115,6 +116,9 @@ function showResult(form, predictionDTO) {
     var image = new Image();
     image.src = `data:image/png;base64,${predictionDTO.img_predict_content}`;
     const canvas = form.find(canvasQuery).first();
+    let submit = form.find(':submit');
+    $(`#${p_show_result}`).remove();
+    submit.after(`<p id="${p_show_result}" class="h5 ms-3">S'han trobat ${Math.round(predictionDTO.crowd_count)} persones.</p>`);
     drawImageOnCanvas(image, canvas[0]);
 }
 
@@ -133,6 +137,7 @@ function initCanvasDrawEvent() {
             return;
         }
         submit.show();
+        $(`#${p_show_result}`).remove();
         handleCanvasViewer(e.target.files[0], canvas[0]);
     });
 }

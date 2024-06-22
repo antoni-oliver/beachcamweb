@@ -12,7 +12,7 @@
       <form id="main-form" class="image-uploader text-center" action="/analyze-image/" method="post">
         {% csrf_token %}
         {{ form }}
-        <div class="d-flex">
+        <div class="d-flex align-items-center">
           <input type="submit" class="btn btn-primary my-3" value="Analitzar Imatge" style="display: none;" />
         </div>
         <canvas id="img-viewer" class="canvas-img mw-100" src="#" alt="La imagen aparecerá aquí" style="display: none;"></canvas>
