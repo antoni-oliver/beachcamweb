@@ -1,0 +1,32 @@
+[
+    {
+        "model": "data.beachcam",
+        "pk": 1,
+        "fields": {
+            "beach_name": "Port de Sóller",
+            "beach_latitude": "39.793166",
+            "beach_longitude": "2.696305",
+            "url_image": "https://static.seetheworld.com/image_uploader/webcam/original/port_de_soller.jpg",
+            "url_aemet": null,
+            "url_platgesbalears": null,
+            "probe_freq_mins": 60,
+            "description": "Port de Sóller es un pintoresco y pequeño pueblo costero situado en el noroeste de Mallorca.",
+            "max_crowd_count": 100
+        }
+    },
+    {
+        "model": "data.beachcam",
+        "pk": 2,
+        "fields": {
+            "beach_name": "Pollença",
+            "beach_latitude": "39.793166",
+            "beach_longitude": "2.696305",
+            "url_image": "https://static.seetheworld.com/image_uploader/webcam/original/pollenca_panorama.jpg",
+            "url_aemet": "https://www.aemet.es/es/eltiempo/prediccion/playas/pollenca-llenaire-0704210",
+            "url_platgesbalears": "https://www.platgesdebalears.com/ca/playa/port-pollenca",
+            "probe_freq_mins": 60,
+            "description": "La playa de Puerto Pollensa se encuentra en la región norte de Mallorca.",
+            "max_crowd_count": 150
+        }
+    }
+]
