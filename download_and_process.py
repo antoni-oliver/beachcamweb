@@ -3,8 +3,6 @@
 # Before importing django, configure it
 import os
 
-from django.utils import timezone
-
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
 import django
 django.setup()
@@ -17,13 +15,6 @@ from data.models import BeachCam, Prediction
 from predictions.classes.BayesianPredictor import BayesianPredictor
 
 predictors = [BayesianPredictor()]
-
-#delete the outdated images of the file system from outdated predictions
-outdatedPredictions = Prediction.getOutDatedPredictions()
-for outdatePrediction in outdatedPredictions:
-    if outdatePrediction.image:
-        predictionImg = outdatePrediction.image.url
-        outdatePrediction.deleteImg()
             
 for beachcam in BeachCam.objects.all():
     
@@ -34,17 +25,28 @@ for beachcam in BeachCam.objects.all():
     image.save(str(img_path))
     
     for predictor in predictors:
-        predictionDTO = predictor.predict(img_path)
-        Prediction.saveBeachCamPrediction(
-            beachcam,
-            predictionDTO.time_stamp,
-            predictionDTO.crowd_count,
-            predictionDTO.img_predict_content,
-            predictor.__class__.__name__
-        )
+        try:
+            predictionDTO = predictor.predict(img_path)
+            Prediction.saveBeachCamPrediction(
+                beachcam,
+                predictionDTO.time_stamp,
+                predictionDTO.crowd_count,
+                predictionDTO.img_predict_content,
+                predictor.__class__.__name__
+            )
+        except Exception as e:
+            # Handle any exception
+            print(f"download_and_process.py an error ocurred : {e}")
     
     #delete the tmp image
     if os.path.exists(img_path):
         os.remove(img_path)
 
     print(f"Downloaded and processed {beachcam.beach_name}.")
+    
+#delete the outdated images of the file system from outdated predictions
+outdatedPredictions = Prediction.getOutDatedPredictions()
+for outdatePrediction in outdatedPredictions:
+    if outdatePrediction.image:
+        predictionImg = outdatePrediction.image.url
+        outdatePrediction.deleteImg()

@@ -1,0 +1,27 @@
+/* 
+* CSS styles for loader
+*/
+
+div.loader {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.spinner-border.large {
+    width: 75px;
+    height: 75px;
+}
+
+.progress.progress-image-loader {
+    width: 80%;
+}
+
+form.image-uploader label {
+    margin-bottom: 15px;
+}

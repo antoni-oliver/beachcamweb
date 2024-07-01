@@ -10,6 +10,7 @@
 * Add image uploader.
 * Bigger prediction image.
 * Static page so has to be 100 100 100 100 in pagespeed.
+* Better function comments
 
 #Possibly Now
 * Mostrar la ultima prediccion de cada algoritmo
