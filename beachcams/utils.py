@@ -27,16 +27,18 @@ def download_m3u8(stream_url: str, filepath_without_extension: str, seconds: int
     video_file_path = f'{filepath_without_extension}.mp4'
     image_file_path = f'{filepath_without_extension}.jpg'
     subprocess.run(
-        f'ffmpeg -y -i "{stream_url}" -t {seconds} -c copy "{video_file_path}"',
+        f'ffmpeg -y -i "{stream_url}" -t {seconds} -c copy -f mp4 "{video_file_path}"',
         shell=True,
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
     )
     # Create thumbnail
-    subprocess.run(
+    result = subprocess.run(
         f'ffmpeg -y -i "{video_file_path}" -vcodec mjpeg -vframes 1 -an -f rawvideo -ss {seconds/2} "{image_file_path}"',
         shell=True,
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
     )
+    print(str(result))
+    
     return [video_file_path, image_file_path]
