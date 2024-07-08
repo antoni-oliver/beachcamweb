@@ -14,6 +14,7 @@ class BeachCam(models.Model):
     prefered_image_provider = models.CharField(max_length=25, null=False, default="youtube")
     probe_freq_mins = models.IntegerField(default=60)
     description = models.CharField(max_length=255, null=True)
+    available = models.BooleanField(default=True)
 
     max_crowd_count = models.IntegerField()
 
@@ -25,8 +26,13 @@ class BeachCam(models.Model):
     
     def getNewFileName(self):
         return f'{self.beach_name}_{timezone.now().strftime("%Y%m%d%H%M%S")}.jpg'
-
-
+    
+    def getPreferedUrl(self):
+        match self.prefered_image_provider:
+            case 'youtube':
+                return self.url_youtube
+            case 'seemallorca':
+                return self.url_seemallorca
 class Prediction(models.Model):
     beachcam = models.ForeignKey(BeachCam, on_delete=models.CASCADE)
     ts = models.DateTimeField()
@@ -42,7 +48,7 @@ class Prediction(models.Model):
     
     def getCrowdCountText(self):
         return f"Estimat de gent actual: {self.getCrowdCount()}"
-
+    
     @staticmethod 
     def saveBeachCamPrediction(beachcam: BeachCam, time_stamp, crowd_count, img_content, algorithm):
         prediction = Prediction.objects.create(
