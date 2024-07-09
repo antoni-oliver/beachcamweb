@@ -1,1 +1,268 @@
-[{"model": "data.beachcam", "pk": 1, "fields": {"beach_name": "Port de Sóller", "beach_latitude": "39.793166", "beach_longitude": "2.696305", "url_image": "portdesoller.jpeg", "url_seemallorca": "https://static.seetheworld.com/image_uploader/webcam/original/port_de_soller.jpg", "url_aemet": null, "url_platgesbalears": null, "url_youtube": null, "prefered_image_provider": "seemallorca", "probe_freq_mins": 60, "description": "Port de Sóller es un pintoresco y pequeño pueblo costero situado en el noroeste de Mallorca.", "available": false, "max_crowd_count": 100}}, {"model": "data.beachcam", "pk": 2, "fields": {"beach_name": "Pollença", "beach_latitude": "39.793166", "beach_longitude": "2.696305", "url_image": "pollensa.jpeg", "url_seemallorca": "https://static.seetheworld.com/image_uploader/webcam/original/pollenca_panorama.jpg", "url_aemet": "https://www.aemet.es/es/eltiempo/prediccion/playas/pollenca-llenaire-0704210", "url_platgesbalears": "https://www.platgesdebalears.com/ca/playa/port-pollenca", "url_youtube": null, "prefered_image_provider": "seemallorca", "probe_freq_mins": 60, "description": "La playa de Puerto Pollensa se encuentra en la región norte de Mallorca.", "available": false, "max_crowd_count": 150}}, {"model": "data.beachcam", "pk": 3, "fields": {"beach_name": "Font de sa Cala", "beach_latitude": "39.682700", "beach_longitude": "3.452680", "url_image": "fontdesacala.jpeg", "url_seemallorca": null, "url_aemet": null, "url_platgesbalears": null, "url_youtube": "https://www.youtube.com/watch?v=2Shr-KwpCog", "prefered_image_provider": "youtube", "probe_freq_mins": 60, "description": "Esta playa semiurbana se halla ubicada en una zona residencial y turística situada a 2,5 km de Capdepera y a 3 km de Cala Ratjada. Tiene 100m de largo por 60m de ancho. Su arena es fina y sus aguas limpias y cristalinas", "available": true, "max_crowd_count": 0}}, {"model": "data.beachcam", "pk": 4, "fields": {"beach_name": "Son Moll", "beach_latitude": "39.705880", "beach_longitude": "3.456250", "url_image": "sonmoll.jpeg", "url_seemallorca": null, "url_aemet": null, "url_platgesbalears": null, "url_youtube": "https://www.youtube.com/watch?v=T5vnOe142jw", "prefered_image_provider": "youtube", "probe_freq_mins": 60, "description": "La playa de Son Moll está situada en pleno corazón de Cala Ratjada. Tiene unos 140m de largo por 55m de ancho. Es una playa de arena blanca y aguas claras y cristalinas.", "available": true, "max_crowd_count": 0}}, {"model": "data.beachcam", "pk": 5, "fields": {"beach_name": "Can Pastilla", "beach_latitude": "39.534420", "beach_longitude": "2.717600", "url_image": "canpastilla.jpeg", "url_seemallorca": null, "url_aemet": null, "url_platgesbalears": null, "url_youtube": "https://www.youtube.com/watch?v=RNGrqIGytxo", "prefered_image_provider": "youtube", "probe_freq_mins": 60, "description": "Can Pastilla es una localidad turística situada en la Bahía de Palma donde se encuentra una de las mayores concentraciones de hoteles, restaurantes y comercios turísticos de la isla a lo largo de su extensa playa de arena blanca.", "available": true, "max_crowd_count": 0}}, {"model": "data.beachcam", "pk": 6, "fields": {"beach_name": "Cala Aguila", "beach_latitude": "39.722670", "beach_longitude": "3.455430", "url_image": "calaaguila.jpeg", "url_seemallorca": null, "url_aemet": null, "url_platgesbalears": null, "url_youtube": "https://www.youtube.com/watch?v=2uHxa5rQbRA", "prefered_image_provider": "youtube", "probe_freq_mins": 60, "description": "Cala Agulla es una de las playas más famosas y emblemáticas de Mallorca. Tiene 520m de longitud y 60m de anchura. Se distingue por su arena blanca de textura fina. Sus impresionantes aguas cristalinas son una tentación para cualquier persona que visita", "available": true, "max_crowd_count": 0}}, {"model": "data.beachcam", "pk": 7, "fields": {"beach_name": "Cala Mesquida", "beach_latitude": "39.744390", "beach_longitude": "3.433150", "url_image": "calamesquida.jpeg", "url_seemallorca": null, "url_aemet": null, "url_platgesbalears": null, "url_youtube": "https://www.youtube.com/watch?v=4wG0rLruPyk", "prefered_image_provider": "youtube", "probe_freq_mins": 60, "description": "La playa de Cala Mesquida destaca por su arena blanca fina y sus increíbles aguas cristalinas, se halla a 3 km del municipio de Capdepera. Tiene 300m de longitud y 130m de anchura. La playa tiene fácil acceso con amplio parking público a 200m. Posee servi", "available": true, "max_crowd_count": 0}}, {"model": "data.beachcam", "pk": 8, "fields": {"beach_name": "Cala Gat", "beach_latitude": "39.713650", "beach_longitude": "3.470230", "url_image": "calagat.jpeg", "url_seemallorca": null, "url_aemet": null, "url_platgesbalears": null, "url_youtube": "https://www.youtube.com/watch?v=o-PZktSSfbk", "prefered_image_provider": "youtube", "probe_freq_mins": 60, "description": "Cala Gat es un pequeño arenal de 40 metros de longitud y 20 metros de anchura envuelto por aguas calmadas de color turquesa, que se encuentra rodeado por un denso pinar que ofrece su sombra y frescor durante los días más calurosos del verano. A 0,4 millas", "available": true, "max_crowd_count": 0}}, {"model": "data.beachcam", "pk": 9, "fields": {"beach_name": "Canyamel", "beach_latitude": "39.654650", "beach_longitude": "3.439690", "url_image": "canyamel.jpeg", "url_seemallorca": null, "url_aemet": null, "url_platgesbalears": null, "url_youtube": "https://www.youtube.com/watch?v=o-PZktSSfbk", "prefered_image_provider": "youtube", "probe_freq_mins": 60, "description": "La Playa de Canyamel es una playa semiurbana situada a 3,5km al sudeste de Capdepera y a 5,5km de Cala Ratjada. Tiene 290m de largo por 80m de ancho. Destaca por su arena dorada y por su tranquilidad, ya que no suele estar saturada de turistas.", "available": true, "max_crowd_count": 0}}, {"model": "data.beachcam", "pk": 10, "fields": {"beach_name": "Camp de Mar", "beach_latitude": "39.543050", "beach_longitude": "2.423870", "url_image": "campdemar.jpeg", "url_seemallorca": null, "url_aemet": null, "url_platgesbalears": null, "url_youtube": "https://www.youtube.com/watch?v=OAm9PTEye_w", "prefered_image_provider": "youtube", "probe_freq_mins": 60, "description": "La pintoresca bahía de Camp de Mar es, sin duda, una de las joyas de la costa mallorquina. Con su deslumbrante playa de arena blanca, aguas cristalinas y turquesas, y belleza natural circundante, esta bahía es un verdadero paraíso para los amantes de la p", "available": true, "max_crowd_count": 0}}, {"model": "data.beachcam", "pk": 11, "fields": {"beach_name": "Santa Ponsa", "beach_latitude": "39.511655", "beach_longitude": "2.479830", "url_image": "santaponsa.jpeg", "url_seemallorca": null, "url_aemet": null, "url_platgesbalears": null, "url_youtube": "https://www.youtube.com/watch?v=w2Fm5P02ENM", "prefered_image_provider": "youtube", "probe_freq_mins": 60, "description": "El corazón de Santa Ponsa es, sin duda, su impresionante playa. La amplia playa de arena, con una suave pendiente, se extiende a lo largo de una bahía protegida y es el lugar perfecto para tomar el sol, nadar o practicar deportes acuáticos. El paseo marít", "available": true, "max_crowd_count": 0}}, {"model": "data.beachcam", "pk": 12, "fields": {"beach_name": "Palmira", "beach_latitude": "39.537380", "beach_longitude": "2.451240", "url_image": "playapalmira.jpeg", "url_seemallorca": null, "url_aemet": null, "url_platgesbalears": null, "url_youtube": "https://www.youtube.com/watch?v=KV-p-thXpLs", "prefered_image_provider": "youtube", "probe_freq_mins": 60, "description": "La playa de Palmira en Paguera es un verdadero paraíso en la isla española de Mallorca. Esta impresionante playa se extiende a lo largo de la pintoresca costa y atrae mágicamente a los visitantes con su fina arena dorada y sus claras aguas turquesas. Rode", "available": true, "max_crowd_count": 0}}, {"model": "data.beachcam", "pk": 13, "fields": {"beach_name": "Port d'Andratx", "beach_latitude": "39.545100", "beach_longitude": "2.386050", "url_image": "portandratx.jpeg", "url_seemallorca": null, "url_aemet": null, "url_platgesbalears": null, "url_youtube": "https://www.youtube.com/watch?v=rJr3iwty-WM", "prefered_image_provider": "youtube", "probe_freq_mins": 60, "description": "Port d'Andratx es un pintoresco pueblo portuario en la costa oeste de Mallorca, conocido por su impresionante paisaje y su atmósfera relajada. Las impresionantes vistas del mar Mediterráneo de un azul profundo y las montañas circundantes hacen de este lug", "available": true, "max_crowd_count": 0}}, {"model": "data.beachcam", "pk": 14, "fields": {"beach_name": "Cala Llamp", "beach_latitude": "39.534000", "beach_longitude": "2.387580", "url_image": "calallamp.jpeg", "url_seemallorca": null, "url_aemet": null, "url_platgesbalears": null, "url_youtube": "https://www.youtube.com/watch?v=RDvsABAF32E", "prefered_image_provider": "youtube", "probe_freq_mins": 60, "description": "Cala Llamp se caracteriza por sus aguas cristalinas, que brillan en varios tonos de azul. Los acantilados empinados que enmarcan la bahía le dan una atmósfera casi mística. Un paseo por el paseo marítimo ofrece vistas impresionantes del mar Mediterráneo y", "available": true, "max_crowd_count": 0}}]
+[
+    {
+        "model": "data.beachcam",
+        "pk": 1,
+        "fields": {
+            "beach_name": "Port de Sóller",
+            "beach_latitude": "39.793166",
+            "beach_longitude": "2.696305",
+            "url_image": "portdesoller.jpeg",
+            "url_seemallorca": "https://static.seetheworld.com/image_uploader/webcam/original/port_de_soller.jpg",
+            "url_aemet": null,
+            "url_platgesbalears": null,
+            "url_youtube": null,
+            "prefered_image_provider": "seemallorca",
+            "probe_freq_mins": 60,
+            "description": "Port de Sóller es un pintoresco y pequeño pueblo costero situado en el noroeste de Mallorca.",
+            "available": true,
+            "max_crowd_count": 100
+        }
+    },
+    {
+        "model": "data.beachcam",
+        "pk": 2,
+        "fields": {
+            "beach_name": "Pollença",
+            "beach_latitude": "39.793166",
+            "beach_longitude": "2.696305",
+            "url_image": "pollensa.jpeg",
+            "url_seemallorca": "https://static.seetheworld.com/image_uploader/webcam/original/pollenca_panorama.jpg",
+            "url_aemet": "https://www.aemet.es/es/eltiempo/prediccion/playas/pollenca-llenaire-0704210",
+            "url_platgesbalears": "https://www.platgesdebalears.com/ca/playa/port-pollenca",
+            "url_youtube": null,
+            "prefered_image_provider": "seemallorca",
+            "probe_freq_mins": 60,
+            "description": "La playa de Puerto Pollensa se encuentra en la región norte de Mallorca.",
+            "available": true,
+            "max_crowd_count": 150
+        }
+    },
+    {
+        "model": "data.beachcam",
+        "pk": 3,
+        "fields": {
+            "beach_name": "Font de sa Cala",
+            "beach_latitude": "39.682700",
+            "beach_longitude": "3.452680",
+            "url_image": "fontdesacala.jpeg",
+            "url_seemallorca": null,
+            "url_aemet": null,
+            "url_platgesbalears": null,
+            "url_youtube": "https://www.youtube.com/watch?v=2Shr-KwpCog",
+            "prefered_image_provider": "youtube",
+            "probe_freq_mins": 60,
+            "description": "Esta playa semiurbana se halla ubicada en una zona residencial y turística situada a 2,5 km de Capdepera y a 3 km de Cala Ratjada. Tiene 100m de largo por 60m de ancho. Su arena es fina y sus aguas limpias y cristalinas",
+            "available": true,
+            "max_crowd_count": 0
+        }
+    },
+    {
+        "model": "data.beachcam",
+        "pk": 4,
+        "fields": {
+            "beach_name": "Son Moll",
+            "beach_latitude": "39.705880",
+            "beach_longitude": "3.456250",
+            "url_image": "sonmoll.jpeg",
+            "url_seemallorca": null,
+            "url_aemet": null,
+            "url_platgesbalears": null,
+            "url_youtube": "https://www.youtube.com/watch?v=T5vnOe142jw",
+            "prefered_image_provider": "youtube",
+            "probe_freq_mins": 60,
+            "description": "La playa de Son Moll está situada en pleno corazón de Cala Ratjada. Tiene unos 140m de largo por 55m de ancho. Es una playa de arena blanca y aguas claras y cristalinas.",
+            "available": true,
+            "max_crowd_count": 0
+        }
+    },
+    {
+        "model": "data.beachcam",
+        "pk": 5,
+        "fields": {
+            "beach_name": "Can Pastilla",
+            "beach_latitude": "39.534420",
+            "beach_longitude": "2.717600",
+            "url_image": "canpastilla.jpeg",
+            "url_seemallorca": null,
+            "url_aemet": null,
+            "url_platgesbalears": null,
+            "url_youtube": "https://www.youtube.com/watch?v=RNGrqIGytxo",
+            "prefered_image_provider": "youtube",
+            "probe_freq_mins": 60,
+            "description": "Can Pastilla es una localidad turística situada en la Bahía de Palma donde se encuentra una de las mayores concentraciones de hoteles, restaurantes y comercios turísticos de la isla a lo largo de su extensa playa de arena blanca.",
+            "available": true,
+            "max_crowd_count": 0
+        }
+    },
+    {
+        "model": "data.beachcam",
+        "pk": 6,
+        "fields": {
+            "beach_name": "Cala Aguila",
+            "beach_latitude": "39.722670",
+            "beach_longitude": "3.455430",
+            "url_image": "calaaguila.jpeg",
+            "url_seemallorca": null,
+            "url_aemet": null,
+            "url_platgesbalears": null,
+            "url_youtube": "https://www.youtube.com/watch?v=2uHxa5rQbRA",
+            "prefered_image_provider": "youtube",
+            "probe_freq_mins": 60,
+            "description": "Cala Agulla es una de las playas más famosas y emblemáticas de Mallorca. Tiene 520m de longitud y 60m de anchura. Se distingue por su arena blanca de textura fina. Sus impresionantes aguas cristalinas son una tentación para cualquier persona que visita",
+            "available": true,
+            "max_crowd_count": 0
+        }
+    },
+    {
+        "model": "data.beachcam",
+        "pk": 7,
+        "fields": {
+            "beach_name": "Cala Mesquida",
+            "beach_latitude": "39.744390",
+            "beach_longitude": "3.433150",
+            "url_image": "calamesquida.jpeg",
+            "url_seemallorca": null,
+            "url_aemet": null,
+            "url_platgesbalears": null,
+            "url_youtube": "https://www.youtube.com/watch?v=4wG0rLruPyk",
+            "prefered_image_provider": "youtube",
+            "probe_freq_mins": 60,
+            "description": "La playa de Cala Mesquida destaca por su arena blanca fina y sus increíbles aguas cristalinas, se halla a 3 km del municipio de Capdepera. Tiene 300m de longitud y 130m de anchura. La playa tiene fácil acceso con amplio parking público a 200m. Posee servi",
+            "available": true,
+            "max_crowd_count": 0
+        }
+    },
+    {
+        "model": "data.beachcam",
+        "pk": 8,
+        "fields": {
+            "beach_name": "Cala Gat",
+            "beach_latitude": "39.713650",
+            "beach_longitude": "3.470230",
+            "url_image": "calagat.jpeg",
+            "url_seemallorca": null,
+            "url_aemet": null,
+            "url_platgesbalears": null,
+            "url_youtube": "https://www.youtube.com/watch?v=o-PZktSSfbk",
+            "prefered_image_provider": "youtube",
+            "probe_freq_mins": 60,
+            "description": "Cala Gat es un pequeño arenal de 40 metros de longitud y 20 metros de anchura envuelto por aguas calmadas de color turquesa, que se encuentra rodeado por un denso pinar que ofrece su sombra y frescor durante los días más calurosos del verano. A 0,4 millas",
+            "available": true,
+            "max_crowd_count": 0
+        }
+    },
+    {
+        "model": "data.beachcam",
+        "pk": 9,
+        "fields": {
+            "beach_name": "Canyamel",
+            "beach_latitude": "39.654650",
+            "beach_longitude": "3.439690",
+            "url_image": "canyamel.jpeg",
+            "url_seemallorca": null,
+            "url_aemet": null,
+            "url_platgesbalears": null,
+            "url_youtube": "https://www.youtube.com/watch?v=GywWwDq2VD8",
+            "prefered_image_provider": "youtube",
+            "probe_freq_mins": 60,
+            "description": "La Playa de Canyamel es una playa semiurbana situada a 3,5km al sudeste de Capdepera y a 5,5km de Cala Ratjada. Tiene 290m de largo por 80m de ancho. Destaca por su arena dorada y por su tranquilidad, ya que no suele estar saturada de turistas.",
+            "available": true,
+            "max_crowd_count": 0
+        }
+    },
+    {
+        "model": "data.beachcam",
+        "pk": 10,
+        "fields": {
+            "beach_name": "Camp de Mar",
+            "beach_latitude": "39.543050",
+            "beach_longitude": "2.423870",
+            "url_image": "campdemar.jpeg",
+            "url_seemallorca": null,
+            "url_aemet": null,
+            "url_platgesbalears": null,
+            "url_youtube": "https://www.youtube.com/watch?v=OAm9PTEye_w",
+            "prefered_image_provider": "youtube",
+            "probe_freq_mins": 60,
+            "description": "La pintoresca bahía de Camp de Mar es, sin duda, una de las joyas de la costa mallorquina. Con su deslumbrante playa de arena blanca, aguas cristalinas y turquesas, y belleza natural circundante, esta bahía es un verdadero paraíso para los amantes de la p",
+            "available": true,
+            "max_crowd_count": 0
+        }
+    },
+    {
+        "model": "data.beachcam",
+        "pk": 11,
+        "fields": {
+            "beach_name": "Santa Ponsa",
+            "beach_latitude": "39.511655",
+            "beach_longitude": "2.479830",
+            "url_image": "santaponsa.jpeg",
+            "url_seemallorca": null,
+            "url_aemet": null,
+            "url_platgesbalears": null,
+            "url_youtube": "https://www.youtube.com/watch?v=w2Fm5P02ENM",
+            "prefered_image_provider": "youtube",
+            "probe_freq_mins": 60,
+            "description": "El corazón de Santa Ponsa es, sin duda, su impresionante playa. La amplia playa de arena, con una suave pendiente, se extiende a lo largo de una bahía protegida y es el lugar perfecto para tomar el sol, nadar o practicar deportes acuáticos. El paseo marít",
+            "available": true,
+            "max_crowd_count": 0
+        }
+    },
+    {
+        "model": "data.beachcam",
+        "pk": 12,
+        "fields": {
+            "beach_name": "Palmira",
+            "beach_latitude": "39.537380",
+            "beach_longitude": "2.451240",
+            "url_image": "playapalmira.jpeg",
+            "url_seemallorca": null,
+            "url_aemet": null,
+            "url_platgesbalears": null,
+            "url_youtube": "https://www.youtube.com/watch?v=KV-p-thXpLs",
+            "prefered_image_provider": "youtube",
+            "probe_freq_mins": 60,
+            "description": "La playa de Palmira en Paguera es un verdadero paraíso en la isla española de Mallorca. Esta impresionante playa se extiende a lo largo de la pintoresca costa y atrae mágicamente a los visitantes con su fina arena dorada y sus claras aguas turquesas. Rode",
+            "available": true,
+            "max_crowd_count": 0
+        }
+    },
+    {
+        "model": "data.beachcam",
+        "pk": 13,
+        "fields": {
+            "beach_name": "Port Andratx",
+            "beach_latitude": "39.545100",
+            "beach_longitude": "2.386050",
+            "url_image": "portandratx.jpeg",
+            "url_seemallorca": null,
+            "url_aemet": null,
+            "url_platgesbalears": null,
+            "url_youtube": "https://www.youtube.com/watch?v=rJr3iwty-WM",
+            "prefered_image_provider": "youtube",
+            "probe_freq_mins": 60,
+            "description": "Port d'Andratx es un pintoresco pueblo portuario en la costa oeste de Mallorca, conocido por su impresionante paisaje y su atmósfera relajada. Las impresionantes vistas del mar Mediterráneo de un azul profundo y las montañas circundantes hacen de este lug",
+            "available": true,
+            "max_crowd_count": 0
+        }
+    },
+    {
+        "model": "data.beachcam",
+        "pk": 14,
+        "fields": {
+            "beach_name": "Cala Llamp",
+            "beach_latitude": "39.534000",
+            "beach_longitude": "2.387580",
+            "url_image": "calallamp.jpeg",
+            "url_seemallorca": null,
+            "url_aemet": null,
+            "url_platgesbalears": null,
+            "url_youtube": "https://www.youtube.com/watch?v=RDvsABAF32E",
+            "prefered_image_provider": "youtube",
+            "probe_freq_mins": 60,
+            "description": "Cala Llamp se caracteriza por sus aguas cristalinas, que brillan en varios tonos de azul. Los acantilados empinados que enmarcan la bahía le dan una atmósfera casi mística. Un paseo por el paseo marítimo ofrece vistas impresionantes del mar Mediterráneo y",
+            "available": true,
+            "max_crowd_count": 0
+        }
+    }
+]

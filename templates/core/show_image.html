@@ -13,7 +13,9 @@
       {% include 'components/pill.html' with text=prediction.getCrowdCountText %}
     </div>
 
+    <a href="{{ prediction.image.url }}" target="_blank" title="Predicción persones {{cam.beach_name}}">
     <img class="d-block mx-auto mb-4 my-5 img-thumbnail" src="{{ prediction.image.url }}" alt="" />
+    </a>
   </section>
 
   {% include 'components/beachCamItemGallery.html' with id='img-prediction-section' text='Altres Platges' cams=other_cams %}

@@ -8,20 +8,18 @@ class YoutubeImageProvider(ImageProvider):
     
     def run(self, entryPoint: EntryPoint):
         print(entryPoint.url)
-        with YoutubeDL({'format': 'bestaudio/best'}) as ydl:
+        with YoutubeDL({'format': 'bestvideo/best'}) as ydl:
             result = ydl.extract_info(
                 entryPoint.url,
                 download=False  # We just want to extract the info
             )
-        video = result['formats'][2] if 'formats' in result else result     # Can be a playlist or a list of videos
-        print(video)
         file_path = entryPoint.generate_filename()
         [video_file_path, image_file_path] = download_m3u8(
-            stream_url=video["url"],     # Get first m3u8 as valid video
+            stream_url=result["url"],     # Get first m3u8 as valid video
             filepath_without_extension=file_path
         )
         #remove mp4 data
-        """ if os.path.exists(video_file_path):
-            os.remove(video_file_path) """
+        if os.path.exists(video_file_path):
+            os.remove(video_file_path)
         return image_file_path
         
