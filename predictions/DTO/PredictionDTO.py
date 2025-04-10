@@ -11,6 +11,6 @@ class PredictionDTO:
     def to_dict(self):
         return {
             'crowd_count': self.crowd_count,
-            'img_predict_content': base64.b64encode(self.img_predict_content.read()).decode('utf-8'),
+            'img_predict_content': base64.b64encode(self.img_predict_content).decode('utf-8'),
             'time_stamp': self.time_stamp.isoformat() 
         }

@@ -10,7 +10,7 @@ except ImportError:
 # Deployment settings
 class DEPLOYMENT_CONF:
     PROJECT_NAME = 'beachcamweb'
-    MAIN_APP = 'core'
+    MAIN_APP = 'config'
     SERVERS = [{
         'NAME': 'servidor_virtual_uib',
         'USER': 'beachcamweb',

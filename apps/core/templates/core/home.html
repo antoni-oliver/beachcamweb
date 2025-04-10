@@ -1,0 +1,25 @@
+{% extends 'core/parent.html' %}
+
+{% load static %}
+
+{% block title %}
+  BeachGuard ¡Monitoritzación de l'ocupació de platges!
+{% endblock %}
+
+{% block content %}
+  <section id="hero-section" class="container px-4 py-5 my-5 text-center">
+    <img class="d-block mx-auto mb-4" src="{% static 'images/old-couple.png' %}" alt="" width="300" height="300" />
+    <h1 class="display-4 fw-bold mb-3">Benvingut a BeachGuard</h1>
+    <div class="col-lg-6 mx-auto">
+      <p class="lead mb-4">
+        Monitoritza l'ocupació de les platges de les Illes Balears preferides. <br />
+        Corre i no et quedis sense lloc!
+      </p>
+      <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+        <a href="{% url 'analyze-image' %}" class="btn btn-primary btn-lg px-4 gap-3">Analitzar imatge</a>
+      </div>
+    </div>
+  </section>
+
+  {% include 'components/beachCamItemGallery.html' with id='platges' text='Prediccions en viu de les platges de les Illes Balears' cams=cams %}
+{% endblock %}

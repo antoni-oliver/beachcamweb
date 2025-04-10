@@ -1,0 +1,17 @@
+{% comment %}Bootstrap galleryItem parametrized by BeachCam{% endcomment %}
+{% load static %}
+
+<div class="galleryItem rounded shadow-sm" onclick="window.location.href='{% url 'beach' cam.slug %}'">
+  <img src="{{prediction.predicted_image.url}}" alt="{{ prediction }}" class="img-fluid card-img-top min-h-150" />
+  <div class="p-4">
+    <h5><a href="{% url 'beach' cam.slug %}" class="text-dark text-decoration-none">{{ cam.beach_name }}</a></h5>
+    <p class="small text-muted mb-0 galleryItemDescription">
+        {% if cam.description %}
+            {{ cam.description }}
+        {% else %}
+            Càmera web situada a {{ cam.beach_name }}.
+        {% endif %}
+    </p>
+    {% include 'components/pill.html' with prediction=prediction %}
+  </div>
+</div>
