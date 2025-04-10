@@ -22,9 +22,11 @@ class WebCam(models.Model):
     description = models.CharField(max_length=255, blank=True, null=True)
     # Cam/probing info
     available = models.BooleanField(default=True)
+    num_consecutive_failures = models.IntegerField(default=0)
     probe_freq_mins = models.IntegerField(default=60)
     max_crowd_count = models.IntegerField(default=0)
     # Cam provider
+    public_url = models.CharField(max_length=2048, blank=True, null=True, help_text="URL to redirect viewers to original source.")
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     provider = GenericForeignKey("content_type", "object_id")
@@ -53,16 +55,22 @@ class WebCam(models.Model):
     def create_snapshot(self):
         from apps.prediction.models import Snapshot
         ts = timezone.now()
-        video_path, image_path = self.provider.download_video_and_image(timestamp=ts)
-        snapshot = Snapshot.objects.create(
-            webcam=self,
-            ts=ts,
-            predicted_crowd_count=None,
-        )
-        snapshot.webcam_video.name = video_path
-        snapshot.webcam_image.name = image_path
-        snapshot.save()
-        return snapshot
+        try:
+            video_path, image_path = self.provider.download_video_and_image(timestamp=ts)
+            snapshot = Snapshot.objects.create(
+                webcam=self,
+                ts=ts,
+                predicted_crowd_count=None,
+            )
+            snapshot.webcam_video.name = video_path
+            snapshot.webcam_image.name = image_path
+            snapshot.save()
+            return snapshot
+        except Exception as e:
+            print(e)
+            # TODO: log error
+            self.num_consecutive_failures += 1
+            self.save()
 
 
 class ImageProvider(models.Model):
