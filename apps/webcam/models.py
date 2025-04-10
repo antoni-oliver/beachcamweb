@@ -41,6 +41,8 @@ class WebCam(models.Model):
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.beach_name)
+        if not self.public_url:
+            self.public_url = self.provider_image_url or self.provider_stream_url or self.provider_youtube_url
         super(WebCam, self).save(*args, **kwargs)
 
     def last_prediction(self):

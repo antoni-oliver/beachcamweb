@@ -16,6 +16,7 @@
     <a href="{{ prediction.predicted_image.url }}" target="_blank" title="Predicción persones {{cam.beach_name}}">
     <img class="d-block mx-auto mb-4 my-5 img-thumbnail" src="{{ prediction.predicted_image.url }}" alt="" />
     </a>
+    <a href="{{ cam.public_url }}" target="_blank">Font original: {{ cam.public_url }}</a>
   </section>
 
   {% include 'components/beachCamItemGallery.html' with id='img-prediction-section' text='Altres Platges' cams=other_cams %}
