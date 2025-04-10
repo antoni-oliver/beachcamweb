@@ -1,10 +1,11 @@
 {% comment %}Bootstrap galleryItem parametrized by BeachCam{% endcomment %}
+{% load static %}
 
 <div class="galleryItem rounded shadow-sm" onclick="window.location.href='/show/{{ cam.beach_name }}'">
-  <img src="{{ cam.url_image }}" alt="" class="img-fluid card-img-top min-h-150" />
+  <img src="{% static 'images/beachs/' %}{{cam.url_image}}" alt="" class="img-fluid card-img-top min-h-150" />
   <div class="p-4">
     <h5><a href="/show/{{ cam.beach_name }}" class="text-dark text-decoration-none">{{ cam.beach_name }}</a></h5>
-    <p class="small text-muted mb-0">{{ cam.description }}</p>
+    <p class="small text-muted mb-0 galleryItemDescription">{{ cam.description }}</p>
     {% include 'components/pill.html' with text=prediction.getCrowdCountText %}
   </div>
 </div>

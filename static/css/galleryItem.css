@@ -6,10 +6,18 @@ div.galleryItem {
 }
 
 .galleryItem img {
-    min-height: 80px;
-    max-height: 80px;
+    min-height: 160px;
+    max-height: 160px;
     border-top-left-radius: 20px !important;
     border-top-right-radius: 20px !important;
+}
+
+.galleryItem .galleryItemDescription {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-height: 80px;
+    min-height: 80px;
+    position: relative;
 }
 
 div.galleryItem,
