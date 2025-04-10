@@ -40,13 +40,14 @@ class WebCam(models.Model):
         return self.snapshot_set.exclude(predicted_crowd_count__isnull=True).order_by('-ts').first()
 
     def relative_filepath(self, timestamp=None, subfolder=None, extension=None):
+        """ Returns a filepath relative to MEDIA_ROOT. """
         timestamp = timestamp or timezone.now()
         path = f'{self.slug}_{timestamp.strftime("%Y%m%d%H%M%S")}'
         if subfolder:
             path = os.path.join(subfolder, path)
         if extension:
             path = path + ('' if extension.startswith('.') else '.') + extension
-        os.makedirs(os.path.dirname(path), exist_ok=True)
+        os.makedirs(os.path.join(settings.MEDIA_ROOT, os.path.dirname(path)), exist_ok=True)
         return path
 
     def create_snapshot(self):
