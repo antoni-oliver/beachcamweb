@@ -40,6 +40,8 @@ def main():
                     f.write(predictionDTO.img_predict_content)
                 snapshot.predicted_image.name = prediction_image_path
                 snapshot.save()
+                beachcam.max_crowd_count = max(beachcam.max_crowd_count, predictionDTO.crowd_count)
+                beachcam.save()
             except Exception as e:
                 # Handle any exception
                 print(f"download_and_process.py an error ocurred: {e}")
