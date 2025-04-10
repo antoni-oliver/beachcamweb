@@ -21,9 +21,7 @@ class WebCam(models.Model):
     beach_longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
     description = models.CharField(max_length=255, blank=True, null=True)
     # Cam/probing info
-    available = models.BooleanField(default=True)
     num_consecutive_failures = models.IntegerField(default=0)
-    probe_freq_mins = models.IntegerField(default=60)
     max_crowd_count = models.IntegerField(default=0)
     # Webcam info
     public_url = models.CharField(max_length=2048, blank=True, null=True, help_text="URL to redirect viewers to original source.")
@@ -72,6 +70,8 @@ class WebCam(models.Model):
             snapshot.webcam_video.name = video_path
             snapshot.webcam_image.name = image_path
             snapshot.save()
+            self.num_consecutive_failures = 0
+            self.save()
             return snapshot
         except Exception as e:
             print(e)
