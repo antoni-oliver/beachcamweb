@@ -4,5 +4,9 @@ __pycache__/
 **/__pycache__/
 
 /media
+/static
 
 /.idea
+
+config/local_settings.py
+
