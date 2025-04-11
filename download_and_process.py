@@ -25,9 +25,6 @@ predictors = [BayesianPredictor()]
 
 def main():
     for beachcam in WebCam.objects.order_by('-id').all():
-        
-        if not beachcam.available:
-            continue
 
         snapshot = beachcam.create_snapshot()
         
