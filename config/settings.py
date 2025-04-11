@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 
+from config.local_settings import LOCAL_SETTINGS
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -23,9 +25,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-qh044zmw^ea%*t#b%%b820%y__#0z=v#6r5ot_2(^f(x6@ah-g'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = LOCAL_SETTINGS.DEBUG
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = LOCAL_SETTINGS.ALLOWED_HOSTS
 
 
 # Application definition
@@ -136,10 +138,3 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
-
-# Add production_settings if exist
-try:
-    from config.production_settings import *
-except ImportError:
-    pass
