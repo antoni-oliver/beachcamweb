@@ -1,10 +1,8 @@
-import io
 import os
+import re
 
 import requests
 from django.conf import settings
-from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
-from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.template.defaultfilters import slugify
 from django.utils import timezone
@@ -28,9 +26,13 @@ class WebCam(models.Model):
     video_seconds = models.IntegerField(default=10, help_text="Seconds to record for the video", blank=True)
     # Webcam info: if provider is static image
     provider_image_url = models.CharField(max_length=2048, help_text="Can use `%Y`, `%m`, `%d`, etc. as in python's strftime(...)", blank=True, null=True)
-    # Webcam info: if provider is m3u8 stream
-    provider_stream_url = models.CharField(max_length=2048, help_text="Use .m3u8 or .html that generates a .m3u8 after clicking on a html element.", blank=True, null=True)
-    provider_stream_clickable_element_xpath = models.CharField(max_length=2048, help_text="XPath to the clickable element that generates the stream.", blank=True, null=True)
+    # Webcam info: if provider is m3u8 stream obtainable after parsing .html file (selenium not needed)
+    provider_streamfromregex_url = models.CharField(max_length=2048, help_text=".html url that contains a dynamically-generated .m3u8 that can be located with a regex match.", blank=True, null=True)
+    provider_streamfromregex_regex = models.CharField(max_length=2048, help_text="Regex match.", blank=True, null=True)
+    provider_streamfromregex_strformat = models.CharField(max_length=2048, help_text="String to be formatted with regex's match[1].", blank=True, null=True)
+    # Webcam info: if provider is m3u8 stream obtainable after clicking on element (requires selenium)
+    provider_streamfromclick_url = models.CharField(max_length=2048, help_text=".html url that generates a .m3u8 after clicking on a html element.", blank=True, null=True)
+    provider_streamfromclick_clickable_element_xpath = models.CharField(max_length=2048, help_text="XPath to the clickable element that generates the stream.", blank=True, null=True)
     # Webcam info: if provider is static image
     provider_youtube_url = models.CharField(max_length=2048, help_text="Only for https://www.youtube.com/watch?v=(...) links.", blank=True, null=True)
 
@@ -38,9 +40,15 @@ class WebCam(models.Model):
         return self.beach_name
 
     def save(self, *args, **kwargs):
-        self.slug = slugify(self.beach_name)
+        slug_base = slugify(self.beach_name)
+        slug_idx = 0
+        slug_candidate = slug_base
+        while WebCam.objects.filter(slug=slug_candidate).exists():
+            slug_idx += 1
+            slug_candidate = slug_base + f'_{slug_idx}'
+        self.slug = slug_candidate
         if not self.public_url:
-            self.public_url = self.provider_image_url or self.provider_stream_url or self.provider_youtube_url
+            self.public_url = self.provider_image_url or self.provider_streamfromregex_url or self.provider_streamfromclick_url or self.provider_youtube_url
         super(WebCam, self).save(*args, **kwargs)
 
     def last_prediction(self):
@@ -89,8 +97,19 @@ class WebCam(models.Model):
             with open(os.path.join(settings.MEDIA_ROOT, image_path), 'wb') as f:
                 f.write(requests.get(url, verify=False).content)
             return None, image_path
-        elif self.provider_stream_url:
-            stream_urls = utils.m3u8_from_url(self.provider_stream_url, self.provider_stream_clickable_element_xpath)
+        elif self.provider_streamfromregex_url:
+            response = requests.get(self.provider_streamfromregex_url)
+            if response.status_code == 200:
+                content = response.text
+                regex = self.provider_streamfromregex_regex.encode().decode('unicode-escape')   # Avoid escaping
+                match = re.search(regex, content)
+                if match is None:
+                    raise ValueError(f"Regex '{regex}' did not match any content.")
+                m3u8_url = self.provider_streamfromregex_strformat.format(**match.groupdict())
+                utils.video_and_image_from_m3u8(m3u8_url, self.video_seconds, os.path.join(settings.MEDIA_ROOT, video_path), os.path.join(settings.MEDIA_ROOT, image_path))
+            return video_path, image_path
+        elif self.provider_streamfromclick_url:
+            stream_urls = utils.m3u8_from_clickable_element(self.provider_streamfromclick_url, self.provider_streamfromclick_clickable_element_xpath)
             utils.video_and_image_from_m3u8(stream_urls[0], self.video_seconds, os.path.join(settings.MEDIA_ROOT, video_path), os.path.join(settings.MEDIA_ROOT, image_path))
             return video_path, image_path
         elif self.provider_youtube_url:
@@ -103,3 +122,4 @@ class WebCam(models.Model):
             stream_url = video['url']
             utils.video_and_image_from_m3u8(stream_url, self.video_seconds, os.path.join(settings.MEDIA_ROOT, video_path), os.path.join(settings.MEDIA_ROOT, image_path))
             return video_path, image_path
+        raise NotImplementedError()

@@ -26,11 +26,14 @@ predictors = [BayesianPredictor()]
 def main():
     for beachcam in WebCam.objects.order_by('-id').all():
 
+        print(f"Processing webcam {beachcam.beach_name}.")
         snapshot = beachcam.create_snapshot()
+        print('  Snapshot created.')
         
         for predictor in predictors:
             try:
                 predictionDTO = predictor.predict(snapshot.webcam_image.path)
+                print('  Prediction done.')
                 snapshot.predicted_crowd_count = predictionDTO.crowd_count
                 prediction_image_path = beachcam.relative_filepath(timestamp=snapshot.ts, subfolder='img/predictions/', extension='.jpg')
                 with open(os.path.join(settings.MEDIA_ROOT, prediction_image_path), 'wb') as f:
@@ -39,14 +42,13 @@ def main():
                 snapshot.save()
                 beachcam.max_crowd_count = max(beachcam.max_crowd_count, predictionDTO.crowd_count)
                 beachcam.save()
+                print('  Prediction saved.')
             except Exception as e:
                 # Handle any exception
                 print(f"download_and_process.py an error ocurred: {e}")
-                raise e
                 # TODO: make it NOT available.
 
-        print(f"Downloaded and processed {beachcam.beach_name}.")
-        
+    print(f"Deleting old data.")
     # Delete the outdated images of the file system from outdated predictions
     for outdated_pred in Snapshot.objects.filter(ts__lte=timezone.now() - timedelta(days=1)):
         # TODO: Move `webcam_image` into a new storage server, rather than deleting it?

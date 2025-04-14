@@ -8,7 +8,7 @@ from selenium.webdriver.common.by import By
 from seleniumwire import webdriver  # Import from seleniumwire
 
 
-def m3u8_from_url(url, clicable_element_xpath):
+def m3u8_from_clickable_element(url, clickable_element_xpath):
     """ Downloads first m3u8 found, sleeps 20-35 secs for loading purposes"""
     # Create a new instance of the Chrome driver
     options = Options()
@@ -19,11 +19,12 @@ def m3u8_from_url(url, clicable_element_xpath):
         web_driver = webdriver.Chrome(options=options)  # MacOS
     web_driver.get(url)
     sleep(random.randint(5, 10))    # Wait until it is fully loaded
-    element = web_driver.find_element(By.XPATH, clicable_element_xpath)
-    try:
-        element.click()
-    except ElementClickInterceptedException:
-        web_driver.execute_script("arguments[0].click();", element)
+    if clickable_element_xpath is not None:
+        element = web_driver.find_element(By.XPATH, clickable_element_xpath)
+        try:
+            element.click()
+        except ElementClickInterceptedException:
+            web_driver.execute_script("arguments[0].click();", element)
     sleep(random.randint(20, 20))   # Wait until ad is gone
     # Save all api-related requests
     api_requests = [r for r in web_driver.requests
