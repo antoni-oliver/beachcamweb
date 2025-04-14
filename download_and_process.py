@@ -24,7 +24,7 @@ predictors = [BayesianPredictor()]
 
 
 def main():
-    for beachcam in WebCam.objects.order_by('-id').all():
+    for beachcam in WebCam.objects.filter(provider_youtube_url__isnull=False).order_by('-id').all():
 
         print(f"Processing webcam {beachcam.beach_name}.")
         snapshot = beachcam.create_snapshot()

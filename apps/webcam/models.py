@@ -26,6 +26,8 @@ class WebCam(models.Model):
     video_seconds = models.IntegerField(default=10, help_text="Seconds to record for the video", blank=True)
     # Webcam info: if provider is static image
     provider_image_url = models.CharField(max_length=2048, help_text="Can use `%Y`, `%m`, `%d`, etc. as in python's strftime(...)", blank=True, null=True)
+    # Webcam info: if provider is static image
+    provider_stream_m3u8_url = models.CharField(max_length=2048, help_text=".m3u8 static url", blank=True, null=True)
     # Webcam info: if provider is m3u8 stream obtainable after parsing .html file (selenium not needed)
     provider_streamfromregex_url = models.CharField(max_length=2048, help_text=".html url that contains a dynamically-generated .m3u8 that can be located with a regex match.", blank=True, null=True)
     provider_streamfromregex_regex = models.CharField(max_length=2048, help_text="Regex match.", blank=True, null=True)
@@ -48,7 +50,7 @@ class WebCam(models.Model):
             slug_candidate = slug_base + f'_{slug_idx}'
         self.slug = slug_candidate
         if not self.public_url:
-            self.public_url = self.provider_image_url or self.provider_streamfromregex_url or self.provider_streamfromclick_url or self.provider_youtube_url
+            self.public_url = self.provider_image_url or self.provider_stream_m3u8_url or self.provider_streamfromregex_url or self.provider_streamfromclick_url or self.provider_youtube_url
         super(WebCam, self).save(*args, **kwargs)
 
     def last_prediction(self):
@@ -97,6 +99,9 @@ class WebCam(models.Model):
             with open(os.path.join(settings.MEDIA_ROOT, image_path), 'wb') as f:
                 f.write(requests.get(url, verify=False).content)
             return None, image_path
+        elif self.provider_stream_m3u8_url:
+            utils.video_and_image_from_m3u8(self.provider_stream_m3u8_url, self.video_seconds, os.path.join(settings.MEDIA_ROOT, video_path), os.path.join(settings.MEDIA_ROOT, image_path))
+            return video_path, image_path
         elif self.provider_streamfromregex_url:
             response = requests.get(self.provider_streamfromregex_url)
             if response.status_code == 200:
