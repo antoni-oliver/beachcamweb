@@ -16,7 +16,7 @@ from apps.webcam import utils
 class WebCam(models.Model):
     # Beach info
     beach_name = models.CharField(max_length=200, unique=True)
-    slug = models.CharField(max_length=200, unique=True, blank=True)
+    slug = models.CharField(max_length=200, unique=True, blank=True, null=True)
     beach_latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
     beach_longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
     description = models.CharField(max_length=255, blank=True, null=True)
@@ -90,7 +90,6 @@ class WebCam(models.Model):
                 f.write(requests.get(url, verify=False).content)
             return None, image_path
         elif self.provider_stream_url:
-            timestamp = timestamp or timezone.now()
             stream_urls = utils.m3u8_from_url(self.provider_stream_url, self.provider_stream_clickable_element_xpath)
             utils.video_and_image_from_m3u8(stream_urls[0], self.video_seconds, os.path.join(settings.MEDIA_ROOT, video_path), os.path.join(settings.MEDIA_ROOT, image_path))
             return video_path, image_path

@@ -1,0 +1,742 @@
+[{
+  "model": "webcam.webcam",
+  "pk": 1,
+  "fields": {
+    "beach_name": "Playa Tora Restaurant",
+    "slug": null,
+    "beach_latitude": 39.5342450890422,
+    "beach_longitude": 2.45663681687838,
+    "description": null,
+    "num_consecutive_failures": 0,
+    "max_crowd_count": 1,
+    "public_url": null,
+    "video_seconds": 10,
+    "provider_image_url": null,
+    "provider_stream_url": null,
+    "provider_stream_clickable_element_xpath": null,
+    "provider_youtube_url": "https://www.youtube.com/watch?v=NzvPqRbjvFw"
+  }
+},
+{
+  "model": "webcam.webcam",
+  "pk": 2,
+  "fields": {
+    "beach_name": "Playa Palmira 2",
+    "slug": null,
+    "beach_latitude": 39.535166931198,
+    "beach_longitude": 2.45076483101092,
+    "description": null,
+    "num_consecutive_failures": 0,
+    "max_crowd_count": 1,
+    "public_url": null,
+    "video_seconds": 10,
+    "provider_image_url": null,
+    "provider_stream_url": null,
+    "provider_stream_clickable_element_xpath": null,
+    "provider_youtube_url": "https://www.youtube.com/watch?v=63Suep5hNq0"
+  }
+},
+{
+  "model": "webcam.webcam",
+  "pk": 3,
+  "fields": {
+    "beach_name": "Camp de Mar",
+    "slug": null,
+    "beach_latitude": 39.5450187523535,
+    "beach_longitude": 2.3860725334986,
+    "description": null,
+    "num_consecutive_failures": 0,
+    "max_crowd_count": 1,
+    "public_url": null,
+    "video_seconds": 10,
+    "provider_image_url": null,
+    "provider_stream_url": null,
+    "provider_stream_clickable_element_xpath": null,
+    "provider_youtube_url": "https://www.youtube.com/watch?v=GAnM8PwKZSc"
+  }
+},
+{
+  "model": "webcam.webcam",
+  "pk": 4,
+  "fields": {
+    "beach_name": "Camp de Mar / Playa Roca",
+    "slug": null,
+    "beach_latitude": 39.5450187523535,
+    "beach_longitude": 2.3860725334986,
+    "description": null,
+    "num_consecutive_failures": 0,
+    "max_crowd_count": 1,
+    "public_url": null,
+    "video_seconds": 10,
+    "provider_image_url": null,
+    "provider_stream_url": null,
+    "provider_stream_clickable_element_xpath": null,
+    "provider_youtube_url": "https://www.youtube.com/watch?v=3uN9TztSU5k"
+  }
+},
+{
+  "model": "webcam.webcam",
+  "pk": 5,
+  "fields": {
+    "beach_name": "Portals Vells",
+    "slug": null,
+    "beach_latitude": 39.4725935565603,
+    "beach_longitude": 2.52075973324794,
+    "description": null,
+    "num_consecutive_failures": 0,
+    "max_crowd_count": 1,
+    "public_url": null,
+    "video_seconds": 10,
+    "provider_image_url": null,
+    "provider_stream_url": null,
+    "provider_stream_clickable_element_xpath": null,
+    "provider_youtube_url": "https://www.youtube.com/watch?v=v9SN4hIxMzI"
+  }
+},
+{
+  "model": "webcam.webcam",
+  "pk": 6,
+  "fields": {
+    "beach_name": "Port d’Andratx",
+    "slug": null,
+    "beach_latitude": 39.5450187523535,
+    "beach_longitude": 2.3860725334986,
+    "description": null,
+    "num_consecutive_failures": 0,
+    "max_crowd_count": 1,
+    "public_url": null,
+    "video_seconds": 10,
+    "provider_image_url": null,
+    "provider_stream_url": null,
+    "provider_stream_clickable_element_xpath": null,
+    "provider_youtube_url": "https://www.youtube.com/watch?v=vtLXjkZXQ5A"
+  }
+},
+{
+  "model": "webcam.webcam",
+  "pk": 7,
+  "fields": {
+    "beach_name": "Paguera Beach",
+    "slug": null,
+    "beach_latitude": 39.5341082092783,
+    "beach_longitude": 2.44581435687273,
+    "description": null,
+    "num_consecutive_failures": 0,
+    "max_crowd_count": 1,
+    "public_url": null,
+    "video_seconds": 10,
+    "provider_image_url": null,
+    "provider_stream_url": null,
+    "provider_stream_clickable_element_xpath": null,
+    "provider_youtube_url": "https://www.youtube.com/watch?v=Wxl7PLxDuXg"
+  }
+},
+{
+  "model": "webcam.webcam",
+  "pk": 8,
+  "fields": {
+    "beach_name": "Paguera Tora Beach",
+    "slug": null,
+    "beach_latitude": 39.5341082092783,
+    "beach_longitude": 2.44581435687273,
+    "description": null,
+    "num_consecutive_failures": 0,
+    "max_crowd_count": 1,
+    "public_url": null,
+    "video_seconds": 10,
+    "provider_image_url": null,
+    "provider_stream_url": null,
+    "provider_stream_clickable_element_xpath": null,
+    "provider_youtube_url": "https://www.youtube.com/watch?v=Gha7hrQAgr0"
+  }
+},
+{
+  "model": "webcam.webcam",
+  "pk": 9,
+  "fields": {
+    "beach_name": "Playa Palmira",
+    "slug": null,
+    "beach_latitude": 39.535166931198,
+    "beach_longitude": 2.45076483101092,
+    "description": null,
+    "num_consecutive_failures": 0,
+    "max_crowd_count": 1,
+    "public_url": null,
+    "video_seconds": 10,
+    "provider_image_url": null,
+    "provider_stream_url": null,
+    "provider_stream_clickable_element_xpath": null,
+    "provider_youtube_url": "https://www.youtube.com/watch?v=cbhZdDxkU2U"
+  }
+},
+{
+  "model": "webcam.webcam",
+  "pk": 10,
+  "fields": {
+    "beach_name": "Magaluf / Palmanova Playa Son Maties",
+    "slug": null,
+    "beach_latitude": 39.5134836363045,
+    "beach_longitude": 2.53885850476395,
+    "description": null,
+    "num_consecutive_failures": 0,
+    "max_crowd_count": 1,
+    "public_url": null,
+    "video_seconds": 10,
+    "provider_image_url": null,
+    "provider_stream_url": null,
+    "provider_stream_clickable_element_xpath": null,
+    "provider_youtube_url": "https://www.youtube.com/watch?v=1vd6TjAo3TU"
+  }
+},
+{
+  "model": "webcam.webcam",
+  "pk": 11,
+  "fields": {
+    "beach_name": "Paguera Cala Fornells 2",
+    "slug": null,
+    "beach_latitude": 39.5341082092783,
+    "beach_longitude": 2.44581435687273,
+    "description": null,
+    "num_consecutive_failures": 0,
+    "max_crowd_count": 1,
+    "public_url": null,
+    "video_seconds": 10,
+    "provider_image_url": null,
+    "provider_stream_url": null,
+    "provider_stream_clickable_element_xpath": null,
+    "provider_youtube_url": "https://www.youtube.com/watch?v=GvDNSmw3m_M"
+  }
+},
+{
+  "model": "webcam.webcam",
+  "pk": 12,
+  "fields": {
+    "beach_name": "Port d\"Andratx",
+    "slug": null,
+    "beach_latitude": 39.5450187523535,
+    "beach_longitude": 2.3860725334986,
+    "description": null,
+    "num_consecutive_failures": 0,
+    "max_crowd_count": 1,
+    "public_url": null,
+    "video_seconds": 10,
+    "provider_image_url": null,
+    "provider_stream_url": null,
+    "provider_stream_clickable_element_xpath": null,
+    "provider_youtube_url": "https://www.youtube.com/watch?v=DzXoYk1BpME"
+  }
+},
+{
+  "model": "webcam.webcam",
+  "pk": 13,
+  "fields": {
+    "beach_name": "Port Adriano",
+    "slug": null,
+    "beach_latitude": 39.4903744315375,
+    "beach_longitude": 2.47317602726356,
+    "description": null,
+    "num_consecutive_failures": 0,
+    "max_crowd_count": 1,
+    "public_url": null,
+    "video_seconds": 10,
+    "provider_image_url": null,
+    "provider_stream_url": null,
+    "provider_stream_clickable_element_xpath": null,
+    "provider_youtube_url": "https://www.youtube.com/watch?v=DT0W1DvIXcU"
+  }
+},
+{
+  "model": "webcam.webcam",
+  "pk": 14,
+  "fields": {
+    "beach_name": "Santa Ponça",
+    "slug": null,
+    "beach_latitude": 39.5165689363516,
+    "beach_longitude": 2.4774805054248,
+    "description": null,
+    "num_consecutive_failures": 0,
+    "max_crowd_count": 1,
+    "public_url": null,
+    "video_seconds": 10,
+    "provider_image_url": null,
+    "provider_stream_url": null,
+    "provider_stream_clickable_element_xpath": null,
+    "provider_youtube_url": "https://www.youtube.com/watch?v=HGklLsnDmC8"
+  }
+},
+{
+  "model": "webcam.webcam",
+  "pk": 15,
+  "fields": {
+    "beach_name": "Port d\"Andratx Harbor View",
+    "slug": null,
+    "beach_latitude": 39.5450187523535,
+    "beach_longitude": 2.3860725334986,
+    "description": null,
+    "num_consecutive_failures": 0,
+    "max_crowd_count": 1,
+    "public_url": null,
+    "video_seconds": 10,
+    "provider_image_url": null,
+    "provider_stream_url": null,
+    "provider_stream_clickable_element_xpath": null,
+    "provider_youtube_url": "https://www.youtube.com/watch?v=IV4qkPqjNgI"
+  }
+},
+{
+  "model": "webcam.webcam",
+  "pk": 16,
+  "fields": {
+    "beach_name": "Paguera Cala Fornells",
+    "slug": null,
+    "beach_latitude": 39.5341082092783,
+    "beach_longitude": 2.44581435687273,
+    "description": null,
+    "num_consecutive_failures": 0,
+    "max_crowd_count": 1,
+    "public_url": null,
+    "video_seconds": 10,
+    "provider_image_url": null,
+    "provider_stream_url": null,
+    "provider_stream_clickable_element_xpath": null,
+    "provider_youtube_url": "https://www.youtube.com/watch?v=NG7NAbGUTU4"
+  }
+},
+{
+  "model": "webcam.webcam",
+  "pk": 17,
+  "fields": {
+    "beach_name": "Port d\"Andratx / La Mola",
+    "slug": null,
+    "beach_latitude": 39.5333610799325,
+    "beach_longitude": 2.37265461879065,
+    "description": null,
+    "num_consecutive_failures": 0,
+    "max_crowd_count": 1,
+    "public_url": null,
+    "video_seconds": 10,
+    "provider_image_url": null,
+    "provider_stream_url": null,
+    "provider_stream_clickable_element_xpath": null,
+    "provider_youtube_url": "https://www.youtube.com/watch?v=Qp8-nmUmLZc"
+  }
+},
+{
+  "model": "webcam.webcam",
+  "pk": 18,
+  "fields": {
+    "beach_name": "Port d\"Andratx / Cala Llamp",
+    "slug": null,
+    "beach_latitude": 39.5337941464145,
+    "beach_longitude": 2.38851920335634,
+    "description": null,
+    "num_consecutive_failures": 0,
+    "max_crowd_count": 1,
+    "public_url": null,
+    "video_seconds": 10,
+    "provider_image_url": null,
+    "provider_stream_url": null,
+    "provider_stream_clickable_element_xpath": null,
+    "provider_youtube_url": "https://www.youtube.com/watch?v=RDvsABAF32E"
+  }
+},
+{
+  "model": "webcam.webcam",
+  "pk": 19,
+  "fields": {
+    "beach_name": "Camp de Mar / Playa Roca 2",
+    "slug": null,
+    "beach_latitude": 39.5450187523535,
+    "beach_longitude": 2.3860725334986,
+    "description": null,
+    "num_consecutive_failures": 0,
+    "max_crowd_count": 1,
+    "public_url": null,
+    "video_seconds": 10,
+    "provider_image_url": null,
+    "provider_stream_url": null,
+    "provider_stream_clickable_element_xpath": null,
+    "provider_youtube_url": "https://www.youtube.com/watch?v=bPwycMe21_Q"
+  }
+},
+{
+  "model": "webcam.webcam",
+  "pk": 20,
+  "fields": {
+    "beach_name": "Andratx",
+    "slug": null,
+    "beach_latitude": 39.5450187523535,
+    "beach_longitude": 2.3860725334986,
+    "description": null,
+    "num_consecutive_failures": 0,
+    "max_crowd_count": 1,
+    "public_url": null,
+    "video_seconds": 10,
+    "provider_image_url": null,
+    "provider_stream_url": null,
+    "provider_stream_clickable_element_xpath": null,
+    "provider_youtube_url": "https://www.youtube.com/watch?v=cwgQBFfVP3s"
+  }
+},
+{
+  "model": "webcam.webcam",
+  "pk": 21,
+  "fields": {
+    "beach_name": "Cala Fornells & Paguera",
+    "slug": null,
+    "beach_latitude": 39.5341082092783,
+    "beach_longitude": 2.44581435687273,
+    "description": null,
+    "num_consecutive_failures": 0,
+    "max_crowd_count": 1,
+    "public_url": null,
+    "video_seconds": 10,
+    "provider_image_url": null,
+    "provider_stream_url": null,
+    "provider_stream_clickable_element_xpath": null,
+    "provider_youtube_url": "https://www.youtube.com/watch?v=xWD8G7IykwE"
+  }
+},
+{
+  "model": "webcam.webcam",
+  "pk": 22,
+  "fields": {
+    "beach_name": "Cala Fornells & Sunset",
+    "slug": null,
+    "beach_latitude": 39.5317078210369,
+    "beach_longitude": 2.43847991831222,
+    "description": null,
+    "num_consecutive_failures": 0,
+    "max_crowd_count": 1,
+    "public_url": null,
+    "video_seconds": 10,
+    "provider_image_url": null,
+    "provider_stream_url": null,
+    "provider_stream_clickable_element_xpath": null,
+    "provider_youtube_url": "https://www.youtube.com/watch?v=VbEAFY7YqYw"
+  }
+},
+{
+  "model": "webcam.webcam",
+  "pk": 23,
+  "fields": {
+    "beach_name": "Paguera Plaça Torà",
+    "slug": null,
+    "beach_latitude": 39.5341082092783,
+    "beach_longitude": 2.44581435687273,
+    "description": null,
+    "num_consecutive_failures": 0,
+    "max_crowd_count": 1,
+    "public_url": null,
+    "video_seconds": 10,
+    "provider_image_url": null,
+    "provider_stream_url": null,
+    "provider_stream_clickable_element_xpath": null,
+    "provider_youtube_url": "https://www.youtube.com/watch?v=OqgweRa0RZA"
+  }
+},
+{
+  "model": "webcam.webcam",
+  "pk": 24,
+  "fields": {
+    "beach_name": "Santa Ponsa & Sierra de Tramuntana",
+    "slug": null,
+    "beach_latitude": 39.5165689363516,
+    "beach_longitude": 2.4774805054248,
+    "description": null,
+    "num_consecutive_failures": 0,
+    "max_crowd_count": 1,
+    "public_url": null,
+    "video_seconds": 10,
+    "provider_image_url": null,
+    "provider_stream_url": null,
+    "provider_stream_clickable_element_xpath": null,
+    "provider_youtube_url": "https://www.youtube.com/watch?v=o6ShmVMNmR0"
+  }
+},
+{
+  "model": "webcam.webcam",
+  "pk": 25,
+  "fields": {
+    "beach_name": "Golf de Andratx Camp de Mar ",
+    "slug": null,
+    "beach_latitude": 39.5450187523535,
+    "beach_longitude": 2.3860725334986,
+    "description": null,
+    "num_consecutive_failures": 0,
+    "max_crowd_count": 1,
+    "public_url": null,
+    "video_seconds": 10,
+    "provider_image_url": null,
+    "provider_stream_url": null,
+    "provider_stream_clickable_element_xpath": null,
+    "provider_youtube_url": "https://www.youtube.com/watch?v=3OUB3fvWfOk"
+  }
+},
+{
+  "model": "webcam.webcam",
+  "pk": 26,
+  "fields": {
+    "beach_name": "Pollença Bay",
+    "slug": null,
+    "beach_latitude": 39.897665367485,
+    "beach_longitude": 3.08109996196186,
+    "description": null,
+    "num_consecutive_failures": 0,
+    "max_crowd_count": 1,
+    "public_url": null,
+    "video_seconds": 10,
+    "provider_image_url": null,
+    "provider_stream_url": "https://www.skylinewebcams.com/en/webcam/espana/islas-baleares/mallorca/pollenca-bay.html",
+    "provider_stream_clickable_element_xpath": "/html/body/div[2]/div[1]/div[2]/div[1]/div[1]/div/div/div/div[1]/div[3]",
+    "provider_youtube_url": null
+  }
+},
+{
+  "model": "webcam.webcam",
+  "pk": 27,
+  "fields": {
+    "beach_name": "Cala Agulla",
+    "slug": null,
+    "beach_latitude": 3.97096659955243,
+    "beach_longitude": 3.4624846621784,
+    "description": null,
+    "num_consecutive_failures": 0,
+    "max_crowd_count": 1,
+    "public_url": null,
+    "video_seconds": 10,
+    "provider_image_url": null,
+    "provider_stream_url": "https://www.skylinewebcams.com/en/webcam/espana/islas-baleares/mallorca/playa-cala-agulla.html",
+    "provider_stream_clickable_element_xpath": "/html/body/div[2]/div[1]/div[2]/div[1]/div[1]/div/div/div/div[1]/div[3]",
+    "provider_youtube_url": null
+  }
+},
+{
+  "model": "webcam.webcam",
+  "pk": 28,
+  "fields": {
+    "beach_name": "Can Pastilla 2",
+    "slug": null,
+    "beach_latitude": 39.5346855650782,
+    "beach_longitude": 2.71797888248671,
+    "description": null,
+    "num_consecutive_failures": 0,
+    "max_crowd_count": 1,
+    "public_url": null,
+    "video_seconds": 10,
+    "provider_image_url": null,
+    "provider_stream_url": "https://www.skylinewebcams.com/en/webcam/espana/islas-baleares/mallorca/can-pastilla.html",
+    "provider_stream_clickable_element_xpath": "/html/body/div[2]/div[1]/div[2]/div[1]/div[1]/div/div/div/div[1]/div[3]",
+    "provider_youtube_url": null
+  }
+},
+{
+  "model": "webcam.webcam",
+  "pk": 29,
+  "fields": {
+    "beach_name": "Cala Gat",
+    "slug": null,
+    "beach_latitude": 39.7128705699959,
+    "beach_longitude": 3.47044978912914,
+    "description": null,
+    "num_consecutive_failures": 0,
+    "max_crowd_count": 1,
+    "public_url": null,
+    "video_seconds": 10,
+    "provider_image_url": null,
+    "provider_stream_url": "https://www.skylinewebcams.com/en/webcam/espana/islas-baleares/mallorca/capdepera.html",
+    "provider_stream_clickable_element_xpath": "/html/body/div[2]/div[1]/div[2]/div[1]/div[1]/div/div/div/div[1]/div[3]",
+    "provider_youtube_url": null
+  }
+},
+{
+  "model": "webcam.webcam",
+  "pk": 30,
+  "fields": {
+    "beach_name": "Cala Vadella 2",
+    "slug": null,
+    "beach_latitude": 38.9134716774736,
+    "beach_longitude": 1.22371394806364,
+    "description": null,
+    "num_consecutive_failures": 0,
+    "max_crowd_count": 1,
+    "public_url": null,
+    "video_seconds": 10,
+    "provider_image_url": null,
+    "provider_stream_url": "https://www.skylinewebcams.com/en/webcam/espana/islas-baleares/ibiza/cala-vadella.html",
+    "provider_stream_clickable_element_xpath": "/html/body/div[2]/div[1]/div[2]/div[1]/div[1]/div/div/div/div[1]/div[3]",
+    "provider_youtube_url": null
+  }
+},
+{
+  "model": "webcam.webcam",
+  "pk": 31,
+  "fields": {
+    "beach_name": "Cala Vadella",
+    "slug": null,
+    "beach_latitude": 38.9134716774736,
+    "beach_longitude": 1.22371394806364,
+    "description": null,
+    "num_consecutive_failures": 0,
+    "max_crowd_count": 1,
+    "public_url": null,
+    "video_seconds": 10,
+    "provider_image_url": null,
+    "provider_stream_url": "https://www.skylinewebcams.com/en/webcam/espana/islas-baleares/ibiza/cala-vadella-ibiza.html",
+    "provider_stream_clickable_element_xpath": "/html/body/div[2]/div[1]/div[2]/div[1]/div[1]/div/div/div/div[1]/div[3]",
+    "provider_youtube_url": null
+  }
+},
+{
+  "model": "webcam.webcam",
+  "pk": 32,
+  "fields": {
+    "beach_name": "Es Pujols",
+    "slug": null,
+    "beach_latitude": 38.7310215427947,
+    "beach_longitude": 1.45570529155596,
+    "description": null,
+    "num_consecutive_failures": 0,
+    "max_crowd_count": 1,
+    "public_url": null,
+    "video_seconds": 10,
+    "provider_image_url": null,
+    "provider_stream_url": "https://www.skylinewebcams.com/en/webcam/espana/islas-baleares/formentera/playa-es-pujols.html",
+    "provider_stream_clickable_element_xpath": "/html/body/div[2]/div[1]/div[2]/div[1]/div[1]/div/div/div/div[1]/div[3]",
+    "provider_youtube_url": null
+  }
+},
+{
+  "model": "webcam.webcam",
+  "pk": 33,
+  "fields": {
+    "beach_name": "Sant Antoni de Portmany",
+    "slug": null,
+    "beach_latitude": 38.9734807759004,
+    "beach_longitude": 1.30639416523844,
+    "description": null,
+    "num_consecutive_failures": 0,
+    "max_crowd_count": 1,
+    "public_url": null,
+    "video_seconds": 10,
+    "provider_image_url": null,
+    "provider_stream_url": "https://www.skylinewebcams.com/en/webcam/espana/islas-baleares/ibiza/sant-antoni-de-portmany.html",
+    "provider_stream_clickable_element_xpath": "/html/body/div[2]/div[1]/div[2]/div[1]/div[1]/div/div/div/div[1]/div[3]",
+    "provider_youtube_url": null
+  }
+},
+{
+  "model": "webcam.webcam",
+  "pk": 34,
+  "fields": {
+    "beach_name": "Can Pastilla",
+    "slug": null,
+    "beach_latitude": 39.5346855650782,
+    "beach_longitude": 2.71797888248671,
+    "description": null,
+    "num_consecutive_failures": 0,
+    "max_crowd_count": 1,
+    "public_url": null,
+    "video_seconds": 10,
+    "provider_image_url": null,
+    "provider_stream_url": "https://www.mallorcapipeline.com/webcam/",
+    "provider_stream_clickable_element_xpath": null,
+    "provider_youtube_url": null
+  }
+},
+{
+  "model": "webcam.webcam",
+  "pk": 35,
+  "fields": {
+    "beach_name": "Pollença Bay 2",
+    "slug": null,
+    "beach_latitude": 39.897665367485,
+    "beach_longitude": 3.08109996196186,
+    "description": null,
+    "num_consecutive_failures": 0,
+    "max_crowd_count": 1,
+    "public_url": null,
+    "video_seconds": 10,
+    "provider_image_url": null,
+    "provider_stream_url": "https://www.puravidamallorca.com/webcam-wind?srsltid=AfmBOorItGpHEAmMEqbY2SGYmZ5273u6T3HFWMzCgIRRmaBY-topbFV0",
+    "provider_stream_clickable_element_xpath": null,
+    "provider_youtube_url": null
+  }
+},
+{
+  "model": "webcam.webcam",
+  "pk": 36,
+  "fields": {
+    "beach_name": "Canyamel",
+    "slug": null,
+    "beach_latitude": 39.6567798202415,
+    "beach_longitude": 3.44152266520803,
+    "description": null,
+    "num_consecutive_failures": 0,
+    "max_crowd_count": 1,
+    "public_url": null,
+    "video_seconds": 10,
+    "provider_image_url": null,
+    "provider_stream_url": "https://www.ipcamlive.com/canyamel",
+    "provider_stream_clickable_element_xpath": null,
+    "provider_youtube_url": null
+  }
+},
+{
+  "model": "webcam.webcam",
+  "pk": 37,
+  "fields": {
+    "beach_name": "Platja de Muro",
+    "slug": null,
+    "beach_latitude": 39.8043652487088,
+    "beach_longitude": 3.12407733394846,
+    "description": null,
+    "num_consecutive_failures": 0,
+    "max_crowd_count": 1,
+    "public_url": null,
+    "video_seconds": 10,
+    "provider_image_url": null,
+    "provider_stream_url": null,
+    "provider_stream_clickable_element_xpath": null,
+    "provider_youtube_url": "https://www.youtube.com/watch?v=S266zp4wxHQ"
+  }
+},
+{
+  "model": "webcam.webcam",
+  "pk": 38,
+  "fields": {
+    "beach_name": "Son Serra de Marina",
+    "slug": null,
+    "beach_latitude": 39.7323433012712,
+    "beach_longitude": 3.23982754893663,
+    "description": null,
+    "num_consecutive_failures": 0,
+    "max_crowd_count": 1,
+    "public_url": null,
+    "video_seconds": 10,
+    "provider_image_url": null,
+    "provider_stream_url": "https://www.whatsupcams.com/en/webcams/spain/balearic-islands/mallorca/son-serra-de-marina-beach-live-cam-mallorca-balearic-islands-spain/",
+    "provider_stream_clickable_element_xpath": null,
+    "provider_youtube_url": null
+  }
+},
+{
+  "model": "webcam.webcam",
+  "pk": 39,
+  "fields": {
+    "beach_name": "Soller",
+    "slug": null,
+    "beach_latitude": 39.7935402188683,
+    "beach_longitude": 2.69511644725394,
+    "description": null,
+    "num_consecutive_failures": 0,
+    "max_crowd_count": 1,
+    "public_url": null,
+    "video_seconds": 10,
+    "provider_image_url": "http://www.clubnauticsoller.es/imag/webcamHD.jpg",
+    "provider_stream_url": null,
+    "provider_stream_clickable_element_xpath": null,
+    "provider_youtube_url": null
+  }
+}
+]
