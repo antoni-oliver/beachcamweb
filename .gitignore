@@ -4,7 +4,7 @@ __pycache__/
 **/__pycache__/
 
 /media
-/staticfiles
+/static
 
 /.idea
 
