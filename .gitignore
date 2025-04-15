@@ -10,3 +10,8 @@ __pycache__/
 
 config/local_settings.py
 
+/.venv
+/download.log
+/logs/
+
+*.sqlite3
