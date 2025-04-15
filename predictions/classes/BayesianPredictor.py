@@ -1,15 +1,17 @@
-from predictions.DTO.PredictionDTO import PredictionDTO
-from predictions.interfaces.PredictorInterface import PredictorInterface
-import torch
-from predictions.classes.bayesian_stuff.vgg import vgg19
-from torchvision import transforms
-from PIL import Image
-from django.utils import timezone
-import matplotlib.pyplot as plt
-import numpy as np
 import io
 import os
-from django.core.files.base import ContentFile
+
+import matplotlib.pyplot as plt
+import numpy as np
+import torch
+from PIL import Image
+from django.utils import timezone
+from torchvision import transforms
+
+from predictions.DTO.PredictionDTO import PredictionDTO
+from predictions.classes.bayesian_stuff.vgg import vgg19
+from predictions.interfaces.PredictorInterface import PredictorInterface
+
 
 class BayesianPredictor(PredictorInterface):
     
