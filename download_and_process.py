@@ -48,16 +48,16 @@ def main():
                 print(f"download_and_process.py an error ocurred: {e}")
                 # TODO: make it NOT available.
 
-    print(f"Deleting old data.")
-    # Delete the outdated images of the file system from outdated predictions
-    for outdated_pred in Snapshot.objects.filter(ts__lte=timezone.now() - timedelta(days=1)):
-        # TODO: Move `webcam_image` into a new storage server, rather than deleting it?
-        if outdated_pred.webcam_image:
-            outdated_pred.webcam_image.delete(save=True)
-        if outdated_pred.webcam_video:
-            outdated_pred.webcam_image.delete(save=True)
-        if outdated_pred.predicted_image:
-            outdated_pred.predicted_image.delete(save=True)
+    # print(f"Deleting old data.")
+    # # Delete the outdated images of the file system from outdated predictions
+    # for outdated_pred in Snapshot.objects.filter(ts__lte=timezone.now() - timedelta(days=1)):
+    #     # TODO: Move `webcam_image` into a new storage server, rather than deleting it?
+    #     if outdated_pred.webcam_image:
+    #         outdated_pred.webcam_image.delete(save=True)
+    #     if outdated_pred.webcam_video:
+    #         outdated_pred.webcam_image.delete(save=True)
+    #     if outdated_pred.predicted_image:
+    #         outdated_pred.predicted_image.delete(save=True)
 
 
 if __name__ == "__main__":
