@@ -46,10 +46,14 @@ class BayesianPredictor(PredictorInterface):
         background_image = Image.open(image_path).convert('RGB')
 
         density_map_normalized = density_map / np.max(density_map)
+        
         density_map_colored = plt.cm.jet(density_map_normalized)[:, :, :3]
         density_map_rgba = np.zeros((density_map.shape[0], density_map.shape[1], 4), dtype=np.uint8)
         density_map_rgba[..., :3] = density_map_colored * 255
-        density_map_rgba[..., 3] = 75 #alpha channel
+        
+        alpha_channel = density_map_normalized * 250
+        alpha_channel[alpha_channel>75] = 75
+        density_map_rgba[..., 3] = alpha_channel
 
         density_map_image = Image.fromarray(density_map_rgba)
         width, height = background_image.size

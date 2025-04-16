@@ -3,7 +3,7 @@ const imageQuery = "[name^=image]";
 const canvasQuery = ".canvas-img";
 const formQuery = "form.image-uploader";
 const loaderQuery = "div.loader";
-const analyze_image_url = "/analyze-image";
+const analyze_image_url = "/analitza/";
 const p_show_result = "p-show-result";
 
 /**
@@ -33,7 +33,6 @@ function initSubmitEvent() {
         const form = $(this).closest(formQuery);
         showLoader(form);
         let data = await submitForm(form[0]);
-        debugger;
         hideLoader(form);
         $(this).prop('disabled', false);
         if (!data) {
