@@ -26,18 +26,21 @@ class BayesianPredictor(PredictorInterface):
                 transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
             ])    
     
-    def predict(self, image_path) -> PredictionDTO:
+    def predict(self, image_path, mask_path=None) -> PredictionDTO:
         self.prepareModel()
         inputs = self.processImage(image_path)
 
         with torch.set_grad_enabled(False):
             outputs = self.model(inputs)
             density_map = outputs.squeeze().cpu().numpy()
+        
+        if(mask_path):
+            density_map = np.multiply(density_map, np.load(mask_path))
             
         merged_image = self.mergeDensityMapWithImage(image_path, density_map)
         
         return PredictionDTO(
-            crowd_count= torch.sum(outputs).item(),
+            crowd_count= round(np.sum(density_map)),
             time_stamp= timezone.now(),
             img_predict_content=merged_image
         )
@@ -45,7 +48,7 @@ class BayesianPredictor(PredictorInterface):
     def mergeDensityMapWithImage(self, image_path, density_map):
         background_image = Image.open(image_path).convert('RGB')
 
-        density_map_normalized = density_map / np.max(density_map)
+        density_map_normalized = density_map / (np.max(density_map) + 1e-8)
         
         density_map_colored = plt.cm.jet(density_map_normalized)[:, :, :3]
         density_map_rgba = np.zeros((density_map.shape[0], density_map.shape[1], 4), dtype=np.uint8)
