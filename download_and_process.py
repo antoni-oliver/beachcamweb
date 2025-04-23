@@ -32,8 +32,12 @@ def main():
         
         for predictor in predictors:
             try:
-                mask_path = snapshot.webcam.mask_full.path if snapshot.webcam.mask_full else None
-                predictionDTO = predictor.predict(snapshot.webcam_image.path, mask_path)
+                mask_paths = [
+                    mask.path
+                    for mask in (beachcam.mask_beach, beachcam.mask_swimming)
+                    if mask
+                ]
+                predictionDTO = predictor.predict(snapshot.webcam_image.path, mask_paths)
                 print('  Prediction done.')
                 snapshot.predicted_crowd_count = predictionDTO.crowd_count
                 prediction_image_path = beachcam.relative_filepath(timestamp=snapshot.ts, subfolder='img/predictions/', extension='.jpg')

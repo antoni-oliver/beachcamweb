@@ -22,7 +22,6 @@ class WebCam(models.Model):
     num_consecutive_failures = models.IntegerField(default=0)
     max_crowd_count = models.IntegerField(default=0)
     # Image masks
-    mask_full = models.ImageField(upload_to='masks/full/', blank=True, null=True, help_text="Mask of the full webcam (any area can be included). For non-movable webcams only")
     mask_beach = models.ImageField(upload_to='masks/beach/', blank=True, null=True, help_text="Mask of the beach area (sand, areas with people, etc). For non-movable webcams only.")
     mask_swimming = models.ImageField(upload_to='masks/swimming', blank=True, null=True, help_text="Mask of the swimming area (near the beach, shallow waters). For non-movable webcams only.")
     mask_boats = models.ImageField(upload_to='masks/ocean', blank=True, null=True, help_text="Mask of the boat area (further from beach, deep waters). For non-movable webcams only.")
@@ -71,7 +70,7 @@ class WebCam(models.Model):
             path = path + ('' if extension.startswith('.') else '.') + extension
         os.makedirs(os.path.join(settings.MEDIA_ROOT, os.path.dirname(path)), exist_ok=True)
         return path
-
+    
     def create_snapshot(self):
         from apps.prediction.models import Snapshot
         ts = timezone.now()
