@@ -70,7 +70,7 @@ class WebCam(models.Model):
             path = path + ('' if extension.startswith('.') else '.') + extension
         os.makedirs(os.path.join(settings.MEDIA_ROOT, os.path.dirname(path)), exist_ok=True)
         return path
-
+    
     def create_snapshot(self):
         from apps.prediction.models import Snapshot
         ts = timezone.now()
