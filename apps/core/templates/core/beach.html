@@ -7,6 +7,9 @@
 {% endblock %}
 
 {% block content %}
+
+{% include 'components/beachCamMap.html' with id='mapa' current_cam=cam cams=other_cams %}
+
   <section id="hero-section" class="container px-4 py-5 my-5 text-center">
     <div class="container d-flex flex-column align-items-center mb-4">
       <h1 class="display-4 fw-bold mb-3">Ocupació actual {{ cam.beach_name }}</h1>

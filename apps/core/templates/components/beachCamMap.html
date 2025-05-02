@@ -1,0 +1,33 @@
+{% comment %}Beach cam Gallery items default container{% endcomment %}
+
+<section id="{{ id }}" class="container">
+  <!--<div class="separator py-2"></div>-->
+  <div id="map"></div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      {% if current_cam %}
+        map_add_beachcam({
+          name: "{{ current_cam.beach_name }}",
+          current: true,
+          slug: "{{ current_cam.slug }}",
+          latitude: {{ current_cam.beach_latitude }},
+          longitude: {{ current_cam.beach_longitude }},
+          max_crowd_count: {{ current_cam.max_crowd_count }},
+          last_prediction: {% if current_cam.last_prediction %}{{ current_cam.last_prediction.predicted_crowd_count }}{% else %}null{% endif %}
+        });
+      {% endif %}
+      {% for cam in cams %}
+        map_add_beachcam({
+          name: "{{ cam.beach_name }}",
+          current: false,
+          slug: "{{ cam.slug }}",
+          latitude: {{ cam.beach_latitude }},
+          longitude: {{ cam.beach_longitude }},
+          max_crowd_count: {{ cam.max_crowd_count }},
+          last_prediction: {% if cam.last_prediction %}{{ cam.last_prediction.predicted_crowd_count }}{% else %}null{% endif %}
+        });
+      {% endfor %}
+      map_make();
+    });
+  </script>
+</section>
