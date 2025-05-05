@@ -1,5 +1,6 @@
 import os
 import re
+from datetime import timedelta
 
 import requests
 from django.conf import settings
@@ -59,6 +60,11 @@ class WebCam(models.Model):
 
     def last_prediction(self):
         return self.snapshot_set.exclude(predicted_crowd_count__isnull=True).order_by('-ts').first()
+
+    def history(self):
+        from apps.prediction.models import Snapshot
+        dt_since = timezone.now() - timedelta(days=100)
+        return list(Snapshot.objects.filter(webcam=self).filter(ts__gt=dt_since).order_by('ts').all())
 
     def relative_filepath(self, timestamp=None, subfolder=None, extension=None):
         """ Returns a filepath relative to MEDIA_ROOT. """
