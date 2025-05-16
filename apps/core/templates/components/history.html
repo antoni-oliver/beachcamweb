@@ -1,0 +1,77 @@
+<div id="history-chart" style="height: 400px;"></div>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    {% if history_dates %}
+    const data = {{ history }};
+
+    const threshold = new Date() - (7 * 24 * 60 * 60 * 1000);
+    let firstIndex = 0;
+    for (let i = data.length - 2; i >= 0; i--) {
+      if (data[i][0] <= threshold && data[i + 1][0] > threshold) {
+        firstIndex = i;
+      }
+    }
+
+    const chartDom = document.getElementById('history-chart');
+    const chart = echarts.init(chartDom);
+    const option = {
+      tooltip: {
+        trigger: 'axis',
+        position: function (pt) {
+          return [pt[0], '10%'];
+        }
+      },
+      xAxis: {
+        type: 'time',
+      },
+      yAxis: {
+        type: 'value',
+      },
+      dataZoom: [
+        {
+          type: 'inside',
+          startValue: threshold,
+          //end: data.length - 1
+        },
+        {
+          startValue: threshold,
+          //end: data.length - 1
+        }
+      ],
+      series: [
+        {
+          name: "Ocupació",
+          type: "line",
+          //type: "bar",
+          data: data,
+          //large: true,
+          //barCategoryGap: 0,
+          //smooth: true,
+          lineStyle: {
+            //width: 0,
+            color: 'rgb(0, 160, 200)'
+          },
+          itemStyle: {
+            color: 'rgb(0, 140, 180)'
+          },
+          //showSymbol: false,
+          areaStyle: {
+            opacity: 0.8,
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              {
+                offset: 0,
+                color: 'rgb(128, 255, 165)'
+              },
+              {
+                offset: 1,
+                color: 'rgb(1, 191, 236)'
+              }
+            ])
+          },
+        }
+      ],
+    };
+    chart.setOption(option);
+    {% endif %}
+  });
+</script>

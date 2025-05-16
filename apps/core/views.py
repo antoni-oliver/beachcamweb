@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404, render
+from django.utils.safestring import mark_safe
 
 from django.http import JsonResponse
 
@@ -22,7 +23,11 @@ def webcam(request, slug):
     """ Returns ajax_image of latest prediction overimposed on captured image. """
     beachcam = get_object_or_404(WebCam, slug=slug)
     other_beachcams = WebCam.objects.exclude(slug=slug)
-    return render(request, 'core/beach.html', context={'cam': beachcam, 'other_cams': other_beachcams, 'prediction': beachcam.last_prediction})
+    history_dates, history_counts = zip(*[[f"'{h.ts.isoformat()}'", round(h.predicted_crowd_count)] for h in beachcam.history()])
+    history_dates = f'[{",".join([str(a) for a in list(history_dates)])}]'
+    history_counts = f'[{",".join([str(a) for a in list(history_counts)])}]'
+    history = [[h.ts.timestamp() * 1000, h.predicted_crowd_count] for h in beachcam.history()]
+    return render(request, 'core/beach.html', context={'cam': beachcam, 'other_cams': other_beachcams, 'prediction': beachcam.last_prediction, 'history': history, 'history_dates': mark_safe(history_dates), 'history_counts': mark_safe(history_counts)})
 
 def analyze_image(request):
     # https://docs.djangoproject.com/en/5.0/topics/forms/
