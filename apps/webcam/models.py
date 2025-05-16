@@ -63,8 +63,9 @@ class WebCam(models.Model):
 
     def history(self):
         from apps.prediction.models import Snapshot
-        dt_since = timezone.now() - timedelta(days=100)
-        return list(Snapshot.objects.filter(webcam=self).filter(ts__gt=dt_since).order_by('ts').all())
+        #dt_since = timezone.now() - timedelta(days=100)
+        #return list(Snapshot.objects.filter(webcam=self).filter(ts__gt=dt_since).order_by('ts').all())
+        return list(Snapshot.objects.filter(webcam=self).order_by('ts').all())
 
     def relative_filepath(self, timestamp=None, subfolder=None, extension=None):
         """ Returns a filepath relative to MEDIA_ROOT. """
