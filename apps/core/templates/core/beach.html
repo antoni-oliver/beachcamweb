@@ -16,7 +16,7 @@
       {% include 'components/pill.html' with prediction=prediction %}
     </div>
 
-    {% include 'components/history.html' with history=history history_dates=history_dates history_counts=history_counts %}
+    {% include 'components/history.html' with history=history %}
 
     <a href="{{ prediction.predicted_image.url }}" target="_blank" title="Predicción persones {{cam.beach_name}}">
     <img class="d-block mx-auto mb-4 my-5 img-thumbnail" src="{{ prediction.predicted_image.url }}" alt="" />

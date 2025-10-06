@@ -1,7 +1,6 @@
 <div id="history-chart" style="height: 400px;"></div>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    {% if history_dates %}
     const data = {{ history }};
 
     const threshold = new Date() - (7 * 24 * 60 * 60 * 1000);
@@ -72,6 +71,5 @@
       ],
     };
     chart.setOption(option);
-    {% endif %}
   });
 </script>
