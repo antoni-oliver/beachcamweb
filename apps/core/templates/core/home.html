@@ -3,7 +3,7 @@
 {% load static %}
 
 {% block title %}
-  BeachGuard ¡Monitoritzación de l'ocupació de platges!
+  Estimació actual de l'ocupació de les platges de les Illes Balears
 {% endblock %}
 
 {% block content %}
@@ -23,5 +23,5 @@
 
   {% include 'components/beachCamMap.html' with id='mapa' cams=cams %}
 
-  {% include 'components/beachCamItemGallery.html' with id='platges' text='Prediccions en viu de les platges de les Illes Balears' cams=cams %}
+  {% include 'components/beachCamItemGallery.html' with id='platges' text='Estimacions actuals de l\'ocupació de les platges de les Illes Balears' cams=cams %}
 {% endblock %}
