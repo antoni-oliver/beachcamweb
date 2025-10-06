@@ -11,3 +11,14 @@
 body {
     min-height: 100vh !important;
 }
+
+footer .logos {
+    display: flex;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+    row-gap: 10px;
+}
+
+footer .logos img {
+    height: 100px;
+}
