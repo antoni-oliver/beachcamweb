@@ -4,7 +4,7 @@ from apps.webcam.models import WebCam
 
 
 class Snapshot(models.Model):
-    webcam = models.ForeignKey(WebCam, on_delete=models.CASCADE)
+    webcam = models.ForeignKey(WebCam, on_delete=models.CASCADE, related_name='snapshots')
     ts = models.DateTimeField()
     webcam_image = models.ImageField(null=True, blank=True, upload_to='img/originals/')
     webcam_video = models.FileField(null=True, blank=True, upload_to='stream/originals/')
