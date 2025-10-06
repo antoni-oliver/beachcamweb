@@ -135,3 +135,5 @@ STATIC_ROOT = BASE_DIR / "static"
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+CSRF_TRUSTED_ORIGINS = ['https://ocupacioplatges.uib.es', 'https://ocupacioplatges.uib.cat', 'https://ocupacioplatges.uib.eu']
