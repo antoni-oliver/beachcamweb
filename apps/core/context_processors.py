@@ -16,3 +16,5 @@ def parent_context(request):
     translation.activate(lang)
     request.LANGUAGE_CODE = translation.get_language()
     request.session['django_language'] = lang
+
+    return {}
