@@ -25,7 +25,7 @@ def home(request):
 def webcam(request, slug):
     """ Returns ajax_image of latest prediction overimposed on captured image. """
     beachcam = get_object_or_404(WebCam, slug=slug)
-    other_beachcams = WebCam.objects.exclude(slug=slug)
+    other_beachcams = list(WebCam.objects.exclude(slug=slug).filter(num_consecutive_failures__lte=10).all())
     #other_beachcams = WebCam.objects.exclude(slug=slug).filter(snapshots__ts__gte=now() - timedelta(hours=2))
     # history_dates, history_counts = zip(*[[f"'{h.ts.isoformat()}'", round(h.predicted_crowd_count)] 
     #                                       for h in beachcam.history() if h.predicted_crowd_count is not None])
