@@ -1,5 +1,6 @@
+{% load l10n %}
 {% comment %}Beach cam Gallery items default container{% endcomment %}
-
+{% localize off %}
 <section id="{{ id }}" class="container">
   <!--<div class="separator py-2"></div>-->
   <div id="map"></div>
@@ -31,3 +32,4 @@
     });
   </script>
 </section>
+{% endlocalize %}

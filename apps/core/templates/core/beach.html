@@ -1,9 +1,10 @@
 {% extends 'core/parent.html' %}
+{% load i18n %}
 
 {% load static %}
 
 {% block title %}
-  {{ cam.beach_name }}
+  {% translate "current-occupation-estimation" %} {{ cam.beach_name }}
 {% endblock %}
 
 {% block content %}
@@ -12,17 +13,18 @@
 
   <section id="hero-section" class="container px-4 py-5 my-5 text-center">
     <div class="container d-flex flex-column align-items-center mb-4">
-      <h1 class="display-4 fw-bold mb-3">Ocupació actual {{ cam.beach_name }}</h1>
+      <h1 class="display-4 fw-bold mb-3">{% translate "current-occupation-estimation" %} {{ cam.beach_name }}</h1>
       {% include 'components/pill.html' with prediction=prediction %}
     </div>
 
     {% include 'components/history.html' with history=history %}
 
-    <a href="{{ prediction.predicted_image.url }}" target="_blank" title="Predicción persones {{cam.beach_name}}">
+    <a href="{{ prediction.predicted_image.url }}" target="_blank" title="{% translate 'current-occupation-estimation' %} {{cam.beach_name}}">
     <img class="d-block mx-auto mb-4 my-5 img-thumbnail" src="{{ prediction.predicted_image.url }}" alt="" />
     </a>
-    <a href="{{ cam.public_url }}" target="_blank">Font original: {{ cam.public_url }}</a>
+    <a href="{{ cam.public_url }}" target="_blank">{% translate "original source" %}: {{ cam.public_url }}</a>
   </section>
 
-  {% include 'components/beachCamItemGallery.html' with id='img-prediction-section' text='Altres platges' cams=other_cams %}
+  {% translate "other-beaches" as gallery_title %}
+  {% include 'components/beachCamItemGallery.html' with id='img-prediction-section' text=gallery_title cams=other_cams %}
 {% endblock %}

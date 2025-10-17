@@ -1,3 +1,4 @@
+{% load i18n %}
 <div class="pill w-fit rounded d-flex align-items-center justify-content-between bg-primary text-light px-3 py-2 mt-4">
-  <p class="mb-0">Estimació: {{ prediction.predicted_crowd_count|floatformat:"0" }}</p>
+  <p class="mb-0">{% translate "pill-label-estimation" %}: {{ prediction.predicted_crowd_count|floatformat:"0" }}</p>
 </div>

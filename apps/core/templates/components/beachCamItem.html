@@ -1,5 +1,7 @@
 {% comment %}Bootstrap galleryItem parametrized by BeachCam{% endcomment %}
 {% load static %}
+{% load i18n %}
+
 
 <div class="galleryItem rounded shadow-sm" onclick="window.location.href='{% url 'beach' cam.slug %}'">
   <img src="{{prediction.predicted_image.url}}" alt="{{ prediction }}" class="img-fluid card-img-top min-h-150" />
@@ -9,7 +11,7 @@
         {% if cam.description %}
             {{ cam.description }}
         {% else %}
-            Càmera web situada a {{ cam.beach_name }}.
+            {% translate "webcam-situated-in" %} {{ cam.beach_name }}.
         {% endif %}
     </p>
     {% include 'components/pill.html' with prediction=prediction %}

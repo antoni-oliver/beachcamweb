@@ -1,18 +1,17 @@
+{% load i18n %}
 {% load static %}
 <footer class="p-3 my-4 border-top">
   <div class="links">
-    <p>És <a href="https://github.com/antoni-oliver/beachcamweb">codi lliure</a>.</p>
-    <!-- [1] J. F. Sánchez García, P. Bibiloni, i A. Oliver Tomàs, «Automatic Crowd Counting on the Beaches of the Balearic Islands Using Convolutional Neural Networks», Frontiers in Artificial Intelligence and Applications. IOS Press, set. 22, 2025. doi: 10.3233/faia250604. Available: http://dx.doi.org/10.3233/FAIA250604 -->
-    <!-- [1] J. F. Sánchez García, P. Bibiloni, y A. Oliver Tomàs, «Automatic Crowd Counting on the Beaches of the Balearic Islands Using Convolutional Neural Networks», Frontiers in Artificial Intelligence and Applications. IOS Press, sep. 22, 2025. doi: 10.3233/faia250604. Available: http://dx.doi.org/10.3233/FAIA250604 -->
-    <p>J. F. Sánchez García, P. Bibiloni, and A. Oliver Tomàs, “Automatic Crowd Counting on the Beaches of the Balearic Islands Using Convolutional Neural Networks,” Frontiers in Artificial Intelligence and Applications. IOS Press, Sept. 22, 2025. doi: <a href="http://dx.doi.org/10.3233/FAIA250604">10.3233/faia250604</a>.</p>
-    <p>Basat en el Treball de Fi de Grau de Juan Francisco Sánchez García “Monitoreo automático de la ocupación de las playas de las Islas Baleares”, defensat a la Universitat de les Illes Balears el curs 2023-24.</p>
+    <p>{% translate "github-link" %}</p>
+    <p>{% translate "cite-paper-ccia25" %}</p>
+    <p>{% translate "based-in" %}</p>
   </div>
   <div class="acknowledgements">
-    <p>This work is supported by the project PID2020-113870GB-I00 – “Desarrollo de herramientas de Soft Computing para la Ayuda al Diagnóstico Clínico y a la Gestión deEmergencias (HESOCODICE)” funded by MICIU/AEI/10.13039/501100011033/.</p>
+    <p>{% translate "ack-hesocodice" %}</p>
   </div>
   <div class="logos">
-    <a href="https://dmi.uib.cat/"><img src="{% static 'images/logos/Logo_UIB.png'%}"></a>
-    <a href="https://scopia.uib.cat/"><img src="{% static 'images/logos/Logo_Scopia.png'%}"></a>
+    <a href="https://dmi.uib.{% translate 'tld' %}/"><img src="{% static 'images/logos/Logo_UIB.png'%}"></a>
+    <a href="https://scopia.uib.{% translate 'tld' %}/"><img src="{% static 'images/logos/Logo_Scopia.png'%}"></a>
     <a href="https://ltim.uib.es/"><img src="{% static 'images/logos/Logo_LTIM.png'%}"></a>
     <img src="{% static 'images/logos/Logo_MICIU.jpg'%}">
   </div>

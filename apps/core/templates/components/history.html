@@ -1,3 +1,4 @@
+{% load i18n %}
 <div id="history-chart" style="height: 400px;"></div>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
@@ -39,7 +40,7 @@
       ],
       series: [
         {
-          name: "Ocupació",
+          name: "{% translate 'chart-label-estimation' %}",
           type: "line",
           //type: "bar",
           data: data,

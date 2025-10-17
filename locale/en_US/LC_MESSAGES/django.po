@@ -1,0 +1,107 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-17 11:39+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: .\apps\core\templates\components\beachCamItem.html:15
+msgid "webcam-situated-in"
+msgstr "Webcam situated in"
+
+#: .\apps\core\templates\components\footer.html:5
+msgid "github-link"
+msgstr ""
+"This is <a href=\"https://github.com/antoni-oliver/beachcamweb\">open "
+"source</a>."
+
+#: .\apps\core\templates\components\footer.html:6
+msgid "cite-paper-ccia25"
+msgstr ""
+"J. F. Sánchez García, P. Bibiloni, and A. Oliver Tomàs, “Automatic Crowd "
+"Counting on the Beaches of the Balearic Islands Using Convolutional Neural "
+"Networks,” Frontiers in Artificial Intelligence and Applications. IOS Press, "
+"Sept. 22, 2025. doi: <a href=\"http://dx.doi.org/10.3233/FAIA250604"
+"\">10.3233/faia250604</a>."
+
+#: .\apps\core\templates\components\footer.html:7
+msgid "based-in"
+msgstr ""
+"Based on the Final Degree Project of Juan Francisco Sánchez García "
+"“Monitoreo automático de la ocupación de las playas de las Islas Baleares”, "
+"defended at Universitat de les Illes Balears in the 2023-24 academic year."
+
+#: .\apps\core\templates\components\footer.html:10
+msgid "ack-hesocodice"
+msgstr ""
+"This work is supported by the project PID2020-113870GB-I00 – “Desarrollo de "
+"herramientas de Soft Computing para la Ayuda al Diagnóstico Clínico y a la "
+"Gestión deEmergencias (HESOCODICE)” funded by MICIU/"
+"AEI/10.13039/501100011033/."
+
+#: .\apps\core\templates\components\footer.html:13
+#: .\apps\core\templates\components\footer.html:14
+msgid "tld"
+msgstr "eu"
+
+#: .\apps\core\templates\components\header.html:8
+msgid "home"
+msgstr "Home"
+
+#: .\apps\core\templates\components\header.html:11
+msgid "beaches"
+msgstr "Beaches"
+
+#: .\apps\core\templates\components\header.html:14
+#: .\apps\core\templates\core\analyze_image.html:7
+msgid "analyze-image"
+msgstr "Analyze an image"
+
+#: .\apps\core\templates\components\history.html:43
+msgid "chart-label-estimation"
+msgstr "Estimation of the occupation"
+
+#: .\apps\core\templates\components\pill.html:3
+msgid "pill-label-estimation"
+msgstr "Estimation"
+
+#: .\apps\core\templates\core\beach.html:16
+#: .\apps\core\templates\core\beach.html:22
+msgid "current-occupation-estimation"
+msgstr "Estimation of the current occupation in"
+
+#: .\apps\core\templates\core\beach.html:25
+msgid "original source"
+msgstr "Original source"
+
+#: .\apps\core\templates\core\beach.html:28
+msgid "other-beaches"
+msgstr "Estimation of the occupation of other beaches of the Balearic Islands"
+
+#: .\apps\core\templates\core\home.html:27
+msgid ""
+"estimation-of-the-current-occupation-of-the-beaches-of-the-balearic-islands"
+msgstr "Estimation of the current occupation of the beaches of the Balearic Islands"
+
+#: .\config\settings.py:129
+msgid "English"
+msgstr "English"
+
+#: .\config\settings.py:130
+msgid "Catalan"
+msgstr "Catalan"
+
+#: .\config\settings.py:131
+msgid "Spanish"
+msgstr "Spanish"

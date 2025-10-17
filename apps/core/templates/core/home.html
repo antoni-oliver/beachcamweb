@@ -1,9 +1,10 @@
 {% extends 'core/parent.html' %}
+{% load i18n %}
 
 {% load static %}
 
 {% block title %}
-  Estimació actual de l'ocupació de les platges de les Illes Balears
+  {% translate "estimation-of-the-current-occupation-of-the-beaches-of-the-balearic-islands" %}
 {% endblock %}
 
 {% block content %}
@@ -23,5 +24,6 @@
 
   {% include 'components/beachCamMap.html' with id='mapa' cams=cams %}
 
-  {% include 'components/beachCamItemGallery.html' with id='platges' text='Estimacions actuals de l\'ocupació de les platges de les Illes Balears' cams=cams %}
+  {% translate "estimation-of-the-current-occupation-of-the-beaches-of-the-balearic-islands" as gallery_title %}
+  {% include 'components/beachCamItemGallery.html' with id='platges' text=gallery_title cams=cams %}
 {% endblock %}
