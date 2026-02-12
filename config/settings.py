@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'apps.webcam',
     'apps.prediction',
     'apps.core',
+    'apps.beachImage',
 ]
 
 MIDDLEWARE = [
