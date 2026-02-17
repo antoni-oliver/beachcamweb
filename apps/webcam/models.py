@@ -13,12 +13,12 @@ from apps.webcam import utils
 
 
 class WebCam(models.Model):
+    beach = models.ForeignKey('Beach', on_delete=models.CASCADE, related_name='webcams')
     # Beach info
-    beach_name = models.CharField(max_length=200, unique=True)
-    slug = models.CharField(max_length=200, unique=True, blank=True, null=True)
-    beach_latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
-    beach_longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
-    description = models.CharField(max_length=255, blank=True, null=True)
+    camera_slug = models.CharField(max_length=200, unique=True, blank=True, null=True)
+    camera_latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
+    camera_longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
+    camera_description = models.CharField(max_length=255, blank=True, null=True)
     # Cam/probing info
     num_consecutive_failures = models.IntegerField(default=0)
     max_crowd_count = models.IntegerField(default=0)
@@ -44,7 +44,7 @@ class WebCam(models.Model):
     provider_youtube_url = models.CharField(max_length=2048, help_text="Only for https://www.youtube.com/watch?v=(...) links.", blank=True, null=True)
 
     def __str__(self):
-        return self.beach_name
+        return f'WebCam {self.beach.beach_name} - {self.camera_slug}'
 
     def save(self, *args, **kwargs):
         slug_base = slugify(self.beach_name)
@@ -139,3 +139,127 @@ class WebCam(models.Model):
             utils.video_and_image_from_m3u8(stream_url, self.video_seconds, os.path.join(settings.MEDIA_ROOT, video_path), os.path.join(settings.MEDIA_ROOT, image_path))
             return video_path, image_path
         raise NotImplementedError()
+
+
+class Beach(models.Model):
+
+    # Basic info
+    beach_slug = models.CharField(max_length=200, unique=True, help_text="Provided by FundacioBit")
+    beach_name = models.CharField(max_length=200)
+    source_url = models.URLField(max_length=2048, blank=True, null=True)
+    
+    class Occupancy(models.TextChoices):
+        HIGH = "HIGH", "Alto"
+        MEDIUM = "MEDIUM", "Medio"
+        LOW = "LOW", "Bajo"
+
+    class Proximity(models.TextChoices):
+        URBAN = "URBAN", "Urbana"
+        SEMI_URBAN = "SEMI_URBAN", "Semiurbana"
+        REMOTE = "REMOTE", "Alejada"
+
+    class BeachType(models.TextChoices):
+        NATURAL = "NATURAL", "Natural"
+        ARTIFICIAL = "ARTIFICIAL", "Artificial"
+
+    class Composition(models.TextChoices):
+        SAND = "SAND", "Arena"
+        PEBBLES = "PEBBLES", "Bolos"
+        GRAVEL = "GRAVEL", "Graba"
+        ROCKS = "ROCKS", "Rocas"
+
+    class BathingConditions(models.TextChoices):
+        CALM = "CALM", "Aguas tranquilas"
+        MODERATE = "MODERATE", "Oleaje moderado"
+        STRONG = "STRONG", "Oleaje fuerte"
+
+    class DominantWinds(models.TextChoices):
+        LIGHT_BREEZE = "LIGHT_BREEZE", "Brisa ligera"
+        DOMINANT = "DOMINANT", "Dominante"
+        STRONG = "STRONG", "Fuerte"
+
+    class BeachSlope(models.TextChoices):
+        GENTLE = "GENTLE", "Ángulo suave"
+        NORMAL = "NORMAL", "Ángulo normal"
+        STEEP = "STEEP", "Pendiente brusco"
+
+
+    # Basic technical data 
+    longitud = models.CharField(max_length=100, blank=True, null=True)
+    anchura = models.CharField(max_length=100, blank=True, null=True)
+    limites = models.CharField(max_length=255, blank=True, null=True)
+    localizacion = models.CharField(max_length=255, blank=True, null=True)
+    coordenadas_geograficas = models.CharField(max_length=255, blank=True, null=True)
+
+    # Single-choice fields 
+    grado_de_ocupacion = models.CharField(max_length=20, choices=Occupancy.choices, blank=True, null=True)
+    proximidad_al_nucleo_urbano = models.CharField(max_length=20, choices=Proximity.choices, blank=True, null=True)
+    tipos_de_playas = models.CharField(max_length=20, choices=BeachType.choices, blank=True, null=True)
+    composicion_de_la_playa = models.CharField(max_length=20, choices=Composition.choices, blank=True, null=True)
+    condiciones_de_bano = models.CharField(max_length=20, choices=BathingConditions.choices, blank=True, null=True)
+    vientos_dominantes = models.CharField(max_length=30, choices=DominantWinds.choices, blank=True, null=True)
+    pendiente_de_la_playa = models.CharField(max_length=20, choices=BeachSlope.choices, blank=True, null=True)
+
+    # Optional booleans 
+    paseo_maritimo = models.BooleanField(blank=True, null=True)
+    vegetacion = models.BooleanField(blank=True, null=True)
+    proximidad_a_zona_residencial = models.BooleanField(blank=True, null=True)
+    acceso_para_discapacitado = models.BooleanField(blank=True, null=True)
+    localizacion_de_accesos_para_vehiculos_de_emergencias = models.BooleanField(blank=True, null=True)
+    campos_de_dunas = models.BooleanField(blank=True, null=True)
+    marismas = models.BooleanField(blank=True, null=True)
+    vegetacion_protegida = models.BooleanField(blank=True, null=True)
+    espacio_natural_protegido = models.BooleanField(blank=True, null=True)
+    ondulaciones_de_fondo = models.BooleanField(blank=True, null=True)
+    barras_sumergidas = models.BooleanField(blank=True, null=True)
+    fosas = models.BooleanField(blank=True, null=True)
+    obstaculos_semisumergidos_o_sumergidos = models.BooleanField(blank=True, null=True)
+
+    # Numeric field from the source 
+    espigones = models.IntegerField(blank=True, null=True)
+
+    # Ports 
+    puertos_mares = models.BooleanField(blank=True, null=True)
+    puertos_islas = models.BooleanField(blank=True, null=True)
+    puertos_baches = models.BooleanField(blank=True, null=True)
+    canal = models.BooleanField(blank=True, null=True)
+    arenosa = models.BooleanField(blank=True, null=True)
+    rocosa_en_la_montana = models.BooleanField(blank=True, null=True)
+    rocosa_en_costa_de_escalon = models.BooleanField(blank=True, null=True)
+    playa_mixta_de_grava_y_arena = models.BooleanField(blank=True, null=True)
+
+    # Accessibility
+    accesos_a_la_playa_para_peatones = models.BooleanField(default=False)
+    accesos_a_la_playa_para_vehiculos = models.BooleanField(default=False)
+    accesos_a_la_playa_para_barcos = models.BooleanField(default=False)
+
+    # User type booleans
+    tipo_de_usuario_local = models.BooleanField(default=False)
+    tipo_de_usuario_turista = models.BooleanField(default=False)
+
+    # Wave direction booleans
+    oleaje_dir_n = models.BooleanField(default=False)
+    oleaje_dir_ne = models.BooleanField(default=False)
+    oleaje_dir_e = models.BooleanField(default=False)
+    oleaje_dir_se = models.BooleanField(default=False)
+    oleaje_dir_s = models.BooleanField(default=False)
+    oleaje_dir_so = models.BooleanField(default=False)
+    oleaje_dir_o = models.BooleanField(default=False)
+    oleaje_dir_no = models.BooleanField(default=False)
+
+    # Wave type booleans
+    tipos_de_olas_mar_de_fondo = models.BooleanField(default=False)
+    tipos_de_olas_mar_de_viento = models.BooleanField(default=False)
+
+    # Water flow booleans
+    flujo_de_agua_centrales_termicas = models.BooleanField(default=False)
+    flujo_de_agua_corriente_de_marea = models.BooleanField(default=False)
+    flujo_de_agua_corriente_de_oleaje = models.BooleanField(default=False)
+    flujo_de_agua_corrientes_de_resaca = models.BooleanField(default=False)
+    flujo_de_agua_deriva_litoral = models.BooleanField(default=False)
+    flujo_de_agua_desembocaduras = models.BooleanField(default=False)
+    flujo_de_agua_otros = models.BooleanField(default=False)
+    flujo_de_agua_rieras = models.BooleanField(default=False)
+
+    def __str__(self) -> str:
+        return f"{self.beach_name} ({self.beach_slug})"
