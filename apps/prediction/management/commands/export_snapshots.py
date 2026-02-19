@@ -48,8 +48,11 @@ class Command(BaseCommand):
         self.stdout.write(f"Exporting {snapshots.count()} snapshots...")
 
         for snap in snapshots.iterator():
+            # Get image name
+            image_path = snap.webcam_image.name if snap.webcam_image else None
             export["snapshots"].append({
                 "webcam_id": snap.webcam_id,
+                "image_path": image_path,
                 "beach_name": snap.webcam.beach_name,
                 "slug": snap.webcam.slug,
                 "lat": float(snap.webcam.beach_latitude) if snap.webcam.beach_latitude else None,
