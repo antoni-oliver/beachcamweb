@@ -22,6 +22,7 @@ from django.urls import path, include
 from apps.core import views
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path("api/", include("apps.api.urls")),
     path('', include('apps.core.urls')),
     path('api/beach/', include('apps.beachImage.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
