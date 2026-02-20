@@ -154,7 +154,5 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 CSRF_TRUSTED_ORIGINS = ['https://ocupacioplatges.uib.es', 'https://ocupacioplatges.uib.cat', 'https://ocupacioplatges.uib.eu']
 
-try:
-    from .secrets import *  # noqa
-except ImportError:
-    pass
+API_JWT_SECRET = LOCAL_SETTINGS.API_JWT_SECRET
+API_JWT_ALGOS = LOCAL_SETTINGS.API_JWT_ALGOS
