@@ -47,13 +47,18 @@ class WebCam(models.Model):
         return f'WebCam {self.beach.beach_name} - {self.camera_slug}'
 
     def save(self, *args, **kwargs):
-        slug_base = slugify(self.beach_name)
-        slug_idx = 0
-        slug_candidate = slug_base
-        while WebCam.objects.filter(slug=slug_candidate).exists():
-            slug_idx += 1
-            slug_candidate = slug_base + f'_{slug_idx}'
-        self.slug = slug_candidate
+    # Only auto-generate on create (or if camera_slug was left blank)
+        if not self.camera_slug:
+            slug_base = slugify(self.beach.beach_name) if self.beach_id else "webcam"
+            slug_candidate = slug_base
+            slug_idx = 0
+            qs = WebCam.objects.all()
+            if self.pk:
+                qs = qs.exclude(pk=self.pk)
+            while qs.filter(camera_slug=slug_candidate).exists():
+                slug_idx += 1
+                slug_candidate = f"{slug_base}_{slug_idx}"
+            self.camera_slug = slug_candidate
         if not self.public_url:
             self.public_url = self.provider_image_url or self.provider_stream_m3u8_url or self.provider_streamfromregex_url or self.provider_streamfromclick_url or self.provider_youtube_url
         super(WebCam, self).save(*args, **kwargs)
@@ -70,7 +75,7 @@ class WebCam(models.Model):
     def relative_filepath(self, timestamp=None, subfolder=None, extension=None):
         """ Returns a filepath relative to MEDIA_ROOT. """
         timestamp = timestamp or timezone.now()
-        path = f'{self.slug}_{timestamp.strftime("%Y%m%d%H%M%S")}'
+        path = f'{self.camera_slug}_{timestamp.strftime("%Y%m%d%H%M%S")}'
         if subfolder:
             path = os.path.join(subfolder, path)
         if extension:
@@ -83,6 +88,14 @@ class WebCam(models.Model):
         ts = timezone.now()
         try:
             video_path, image_path = self.download_video_and_image(timestamp=ts)
+            img_abs = os.path.join(settings.MEDIA_ROOT, image_path) if image_path else None
+            vid_abs = os.path.join(settings.MEDIA_ROOT, video_path) if video_path else None
+
+            if img_abs and not os.path.exists(img_abs):
+                raise RuntimeError(f"Image not created: {img_abs}")
+            if vid_abs and not os.path.exists(vid_abs):
+                raise RuntimeError(f"Video not created: {vid_abs}")
+            
             snapshot = Snapshot.objects.create(
                 webcam=self,
                 ts=ts,
