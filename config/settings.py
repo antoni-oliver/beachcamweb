@@ -35,6 +35,7 @@ ALLOWED_HOSTS = LOCAL_SETTINGS.ALLOWED_HOSTS
 # Application definition
 
 INSTALLED_APPS = [
+    'adminfilters',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
