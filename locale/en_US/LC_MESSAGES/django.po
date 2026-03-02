@@ -105,3 +105,126 @@ msgstr "Catalan"
 #: .\config\settings.py:131
 msgid "Spanish"
 msgstr "Spanish"
+# =============================================
+# Forecast component
+# =============================================
+
+msgid "forecast-title"
+msgstr "Future Occupancy Forecast"
+
+msgid "forecast-3-day"
+msgstr "3-Day Forecast"
+
+msgid "forecast-10-day"
+msgstr "10-Day Forecast"
+
+msgid "forecast-15-day"
+msgstr "15-Day Forecast"
+
+msgid "loading-forecast"
+msgstr "Loading forecast"
+
+msgid "forecast-unavailable"
+msgstr "Forecast unavailable"
+
+msgid "metrics-title"
+msgstr "Model Performance (Cross-Validation)"
+
+msgid "loading-metrics"
+msgstr "Loading metrics"
+
+msgid "metrics-none"
+msgstr "No metrics available"
+
+msgid "metrics-unavailable"
+msgstr "Metrics unavailable"
+
+msgid "metrics-tbl-model"
+msgstr "Model"
+
+msgid "metrics-tbl-horizon"
+msgstr "Horizon"
+
+msgid "metrics-tbl-overall-relmae"
+msgstr "Overall relMAE"
+
+msgid "metrics-tbl-season-relmae"
+msgstr "Season relMAE"
+
+msgid "chart-occupancy"
+msgstr "Occupancy"
+
+msgid "chart-temperature"
+msgstr "Temperature"
+
+msgid "chart-people"
+msgstr "People"
+
+msgid "chart-prediction"
+msgstr "Prediction"
+
+msgid "chart-actual"
+msgstr "Actual"
+
+msgid "level-high"
+msgstr "HIGH"
+
+msgid "level-medium"
+msgstr "MEDIUM"
+
+msgid "level-low"
+msgstr "LOW"
+
+msgid "level-very-low"
+msgstr "VERY LOW"
+
+msgid "level-weekend"
+msgstr "Weekend"
+
+msgid "summary-tomorrow"
+msgstr "Tomorrow"
+
+msgid "summary-today"
+msgstr "Today"
+
+msgid "summary-this-weekend"
+msgstr "This Weekend"
+
+msgid "summary-next-weekend"
+msgstr "Next Weekend"
+
+msgid "summary-no-data"
+msgstr "No data available"
+
+msgid "hindcast-title"
+msgstr "Hindcast — Prediction vs Actual"
+
+msgid "hindcast-predict-from"
+msgstr "Predict from"
+
+msgid "hindcast-days"
+msgstr "Days"
+
+msgid "hindcast-run"
+msgstr "Run"
+
+msgid "hindcast-pred-vs-actual"
+msgstr "Prediction vs Actual"
+
+msgid "hindcast-hours"
+msgstr "hours"
+
+msgid "hindcast-select-date"
+msgstr "Select a date"
+
+msgid "hindcast-fetching-prediction"
+msgstr "Fetching prediction..."
+
+msgid "hindcast-fetching-actuals"
+msgstr "Fetching actuals..."
+
+msgid "hindcast-model-label"
+msgstr "Model"
+
+msgid "hindcast-last-data"
+msgstr "Last data"

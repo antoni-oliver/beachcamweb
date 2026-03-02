@@ -13,13 +13,15 @@
 
   <section id="hero-section" class="container px-4 py-5 my-5 text-center">
     <div class="container d-flex flex-column align-items-center mb-4">
-      <h1 class="display-4 fw-bold mb-3">{% translate "current-occupation-estimation" %} {{ cam.beach_name }}</h1>
+      <h1 class="display-4 fw-bold mb-3">{% translate "current-occupation-estimation" %} {{ cam.beach.beach_name }}</h1>
       {% include 'components/pill.html' with prediction=prediction %}
     </div>
 
     {% include 'components/history.html' with history=history %}
 
-    <a href="{{ prediction.predicted_image.url }}" target="_blank" title="{% translate 'current-occupation-estimation' %} {{cam.beach_name}}">
+    {% include 'components/forecast.html' with cam=cam %}
+
+    <a href="{{ prediction.predicted_image.url }}" target="_blank" title="{% translate 'current-occupation-estimation' %} {{cam.beach.beach_name}}">
     <img class="d-block mx-auto mb-4 my-5 img-thumbnail" src="{{ prediction.predicted_image.url }}" alt="" />
     </a>
     <a href="{{ cam.public_url }}" target="_blank">{% translate "original source" %}: {{ cam.public_url }}</a>

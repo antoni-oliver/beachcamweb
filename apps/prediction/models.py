@@ -13,4 +13,4 @@ class Snapshot(models.Model):
     predicted_image = models.ImageField(null=True, blank=True, upload_to='img/predictions/')
 
     def __str__(self):
-        return f'Snapshot {self.webcam.beach_name} - {self.ts}'
+        return f'Snapshot {self.webcam.beach.beach_name} - {self.ts}'

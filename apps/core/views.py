@@ -9,10 +9,12 @@ from apps.core.forms import ImageUploaderForm
 from predictions.classes.BayesianPredictor import BayesianPredictor
 from predictions.actions.CustomerPredict import CustomerPredict
 
-from datetime import timedelta
-from django.utils.timezone import now
+from datetime import datetime, timedelta
+from django.utils import timezone as tz
 
-# Create your views here.
+
+import logging
+logger = logging.getLogger(__name__)
 
 
 def home(request):
@@ -22,11 +24,11 @@ def home(request):
     return render(request, 'core/home.html', context={'cams': beachcams})
 
 
-def webcam(request, slug):
+def webcam(request, camera_slug):
     """ Returns ajax_image of latest prediction overimposed on captured image. """
-    beachcam = get_object_or_404(WebCam, slug=slug)
-    other_beachcams = list(WebCam.objects.exclude(slug=slug).filter(num_consecutive_failures__lte=10).all())
-    #other_beachcams = WebCam.objects.exclude(slug=slug).filter(snapshots__ts__gte=now() - timedelta(hours=2))
+    beachcam = get_object_or_404(WebCam, camera_slug=camera_slug)
+    other_beachcams = WebCam.objects.exclude(camera_slug=camera_slug)
+    #other_beachcams = WebCam.objects.exclude(camera_slug=camera_slug).filter(snapshots__ts__gte=now() - timedelta(hours=2))
     # history_dates, history_counts = zip(*[[f"'{h.ts.isoformat()}'", round(h.predicted_crowd_count)] 
     #                                       for h in beachcam.history() if h.predicted_crowd_count is not None])
     # history_dates = f'[{",".join([str(a) for a in list(history_dates)])}]'
@@ -54,3 +56,78 @@ def analyze_image(request):
     else:
         form = ImageUploaderForm()
         return render(request, 'core/analyze_image.html',  context={'form': form})
+
+
+def tft_forecast_json(request, camera_slug):
+    """Serve TFT forecast as JSON. Accepts optional ?since=YYYY-MM-DD for debug."""
+    from apps.prediction.tft_service import tft_service
+
+    days = int(request.GET.get('days', 3))
+    days = max(1, min(days, 15))
+
+    since_str = request.GET.get('since')
+    since = None
+    if since_str:
+        try:
+            since = tz.make_aware(datetime.strptime(since_str, '%Y-%m-%d'))
+        except ValueError:
+            return JsonResponse({'error': 'since must be YYYY-MM-DD'}, status=400)
+
+    try:
+        webcam = WebCam.objects.select_related('beach').get(camera_slug=camera_slug)
+    except WebCam.DoesNotExist:
+        return JsonResponse({'error': 'Not found'}, status=404)
+
+    if not tft_service.models:
+        return JsonResponse({'error': 'Models not loaded'}, status=503)
+
+    try:
+        result = tft_service.predict(webcam, days=days, since=since)
+        return JsonResponse(result)
+    except ValueError as e:
+        return JsonResponse({'error': str(e)}, status=400)
+    except Exception as e:
+        logger.exception(f"Forecast failed for {camera_slug}")
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+def tft_actuals_json(request, camera_slug):
+    """Return actual snapshot data for a date range (for hindcast comparison)."""
+    from apps.prediction.tft_service import tft_service
+
+    try:
+        webcam = WebCam.objects.select_related('beach').get(camera_slug=camera_slug)
+    except WebCam.DoesNotExist:
+        return JsonResponse({'error': 'Not found'}, status=404)
+
+    since_str = request.GET.get('since')
+    days = int(request.GET.get('days', 3))
+
+    if not since_str:
+        return JsonResponse({'error': 'since is required (YYYY-MM-DD)'}, status=400)
+
+    try:
+        date_from = tz.make_aware(datetime.strptime(since_str, '%Y-%m-%d'))
+    except ValueError:
+        return JsonResponse({'error': 'since must be YYYY-MM-DD'}, status=400)
+
+    date_to = date_from + timedelta(days=days)
+    actuals = tft_service.get_actuals(webcam, date_from, date_to)
+
+    return JsonResponse({
+        'webcam': camera_slug,
+        'since': since_str,
+        'days': days,
+        'actuals': actuals,
+    })
+
+
+def tft_metrics_json(request, camera_slug):
+    """Return pre-computed model metrics for this webcam."""
+    from apps.prediction.tft_service import tft_service
+
+    if not tft_service.models:
+        return JsonResponse({'error': 'Models not loaded'}, status=503)
+
+    metrics = tft_service.get_metrics(webcam_slug=camera_slug)
+    return JsonResponse({'webcam': camera_slug, 'models': metrics})
