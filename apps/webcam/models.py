@@ -23,12 +23,9 @@ class WebCam(models.Model):
     num_consecutive_failures = models.IntegerField(default=0)
     max_crowd_count = models.IntegerField(default=0)
     # Image masks
-    mask_beach = models.ImageField(upload_to='masks/beach/', blank=True, null=True,
-                                   help_text="Mask of the beach area (sand, areas with people, etc). For non-movable webcams only.")
-    mask_swimming = models.ImageField(upload_to='masks/swimming', blank=True, null=True,
-                                      help_text="Mask of the swimming area (near the beach, shallow waters). For non-movable webcams only.")
-    mask_boats = models.ImageField(upload_to='masks/ocean', blank=True, null=True,
-                                   help_text="Mask of the boat area (further from beach, deep waters). For non-movable webcams only.")
+    mask_beach = models.ImageField(upload_to='masks/beach/', blank=True, null=True, help_text="Mask of the beach area (sand, areas with people, etc). For non-movable webcams only.")
+    mask_swimming = models.ImageField(upload_to='masks/swimming', blank=True, null=True, help_text="Mask of the swimming area (near the beach, shallow waters). For non-movable webcams only.")
+    mask_boats = models.ImageField(upload_to='masks/ocean', blank=True, null=True, help_text="Mask of the boat area (further from beach, deep waters). For non-movable webcams only.")
     # Webcam info
     public_url = models.CharField(max_length=2048, blank=True, null=True, help_text="URL to redirect viewers to original source.")
     video_seconds = models.IntegerField(default=10, help_text="Seconds to record for the video", blank=True)
@@ -37,14 +34,12 @@ class WebCam(models.Model):
     # Webcam info: if provider is static image
     provider_stream_m3u8_url = models.CharField(max_length=2048, help_text=".m3u8 static url", blank=True, null=True)
     # Webcam info: if provider is m3u8 stream obtainable after parsing .html file (selenium not needed)
-    provider_streamfromregex_url = models.CharField(max_length=2048, help_text=".html url that contains a dynamically-generated .m3u8 that can be located with a regex match.",
-                                                    blank=True, null=True)
+    provider_streamfromregex_url = models.CharField(max_length=2048, help_text=".html url that contains a dynamically-generated .m3u8 that can be located with a regex match.", blank=True, null=True)
     provider_streamfromregex_regex = models.CharField(max_length=2048, help_text="Regex match.", blank=True, null=True)
     provider_streamfromregex_strformat = models.CharField(max_length=2048, help_text="String to be formatted with regex's match[1].", blank=True, null=True)
     # Webcam info: if provider is m3u8 stream obtainable after clicking on element (requires selenium)
     provider_streamfromclick_url = models.CharField(max_length=2048, help_text=".html url that generates a .m3u8 after clicking on a html element.", blank=True, null=True)
-    provider_streamfromclick_clickable_element_xpath = models.CharField(max_length=2048, help_text="XPath to the clickable element that generates the stream.", blank=True,
-                                                                        null=True)
+    provider_streamfromclick_clickable_element_xpath = models.CharField(max_length=2048, help_text="XPath to the clickable element that generates the stream.", blank=True, null=True)
     # Webcam info: if provider is static image
     provider_youtube_url = models.CharField(max_length=2048, help_text="Only for https://www.youtube.com/watch?v=(...) links.", blank=True, null=True)
 
@@ -52,7 +47,7 @@ class WebCam(models.Model):
         return f'WebCam {self.beach.beach_name} - {self.camera_slug}'
 
     def save(self, *args, **kwargs):
-        # Only auto-generate on create (or if camera_slug was left blank)
+    # Only auto-generate on create (or if camera_slug was left blank)
         if not self.camera_slug:
             slug_base = slugify(self.beach.beach_name) if self.beach_id else "webcam"
             slug_candidate = slug_base
@@ -73,8 +68,8 @@ class WebCam(models.Model):
 
     def history(self):
         from apps.prediction.models import Snapshot
-        # dt_since = timezone.now() - timedelta(days=100)
-        # return list(Snapshot.objects.filter(webcam=self).filter(ts__gt=dt_since).order_by('ts').all())
+        #dt_since = timezone.now() - timedelta(days=100)
+        #return list(Snapshot.objects.filter(webcam=self).filter(ts__gt=dt_since).order_by('ts').all())
         return list(Snapshot.objects.filter(webcam=self).order_by('ts').all())
 
     def relative_filepath(self, timestamp=None, subfolder=None, extension=None):
@@ -87,7 +82,7 @@ class WebCam(models.Model):
             path = path + ('' if extension.startswith('.') else '.') + extension
         os.makedirs(os.path.join(settings.MEDIA_ROOT, os.path.dirname(path)), exist_ok=True)
         return path
-
+    
     def create_snapshot(self):
         from apps.prediction.models import Snapshot
         ts = timezone.now()
@@ -100,7 +95,7 @@ class WebCam(models.Model):
                 raise RuntimeError(f"Image not created: {img_abs}")
             if vid_abs and not os.path.exists(vid_abs):
                 raise RuntimeError(f"Video not created: {vid_abs}")
-
+            
             snapshot = Snapshot.objects.create(
                 webcam=self,
                 ts=ts,
@@ -129,14 +124,13 @@ class WebCam(models.Model):
                 f.write(requests.get(url, verify=False).content)
             return None, image_path
         elif self.provider_stream_m3u8_url:
-            utils.video_and_image_from_m3u8(self.provider_stream_m3u8_url, self.video_seconds, os.path.join(settings.MEDIA_ROOT, video_path),
-                                            os.path.join(settings.MEDIA_ROOT, image_path))
+            utils.video_and_image_from_m3u8(self.provider_stream_m3u8_url, self.video_seconds, os.path.join(settings.MEDIA_ROOT, video_path), os.path.join(settings.MEDIA_ROOT, image_path))
             return video_path, image_path
         elif self.provider_streamfromregex_url:
             response = requests.get(self.provider_streamfromregex_url)
             if response.status_code == 200:
                 content = response.text
-                regex = self.provider_streamfromregex_regex.encode().decode('unicode-escape')  # Avoid escaping
+                regex = self.provider_streamfromregex_regex.encode().decode('unicode-escape')   # Avoid escaping
                 match = re.search(regex, content)
                 if match is None:
                     raise ValueError(f"Regex '{regex}' did not match any content.")
@@ -161,11 +155,12 @@ class WebCam(models.Model):
 
 
 class Beach(models.Model):
+
     # Basic info
     beach_slug = models.CharField(max_length=200, unique=True, help_text="Provided by FundacioBit")
     beach_name = models.CharField(max_length=200)
     source_url = models.URLField(max_length=2048, blank=True, null=True)
-
+    
     class Occupancy(models.TextChoices):
         HIGH = "HIGH", "Alto"
         MEDIUM = "MEDIUM", "Medio"
@@ -201,7 +196,8 @@ class Beach(models.Model):
         NORMAL = "NORMAL", "Ángulo normal"
         STEEP = "STEEP", "Pendiente brusco"
 
-    # Basic technical data
+
+    # Basic technical data 
     longitud = models.CharField(max_length=100, blank=True, null=True)
     anchura = models.CharField(max_length=100, blank=True, null=True)
     limites = models.CharField(max_length=255, blank=True, null=True)
