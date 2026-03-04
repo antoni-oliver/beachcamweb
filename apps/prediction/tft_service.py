@@ -133,7 +133,14 @@ class TFTService:
         available = [k for k in ['15d', '10d', '3d'] if k in self.models]
         return available[0] if available else None
 
+    def _ensure_loaded(self):
+        if not self.models:
+            logger.info("TFT: lazy loading models...")
+            self.load_models()
+            logger.info(f"TFT: loaded {len(self.models)} models")
+
     def predict(self, webcam, days=3, since=None):
+        self._ensure_loaded()
         model_key = self.select_model(days)
         if model_key is None:
             raise RuntimeError("No TFT models loaded")
