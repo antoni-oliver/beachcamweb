@@ -13,7 +13,6 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 from django.conf import settings
 from django.utils import timezone
@@ -61,6 +60,10 @@ class TFTService:
     _weather_lock = threading.Lock()
     _last_weather_call = 0
     _weather_cache = {}
+    _prediction_cache = {}
+    _prediction_cache_lock = threading.Lock()
+    PREDICTION_TTL = 3600
+    WEATHER_TTL = 300
 
     def __new__(cls):
         with cls._lock:
@@ -121,6 +124,7 @@ class TFTService:
                 'futr': config['futr_exog'],
                 'hist': config['hist_exog'],
                 'max_days': cfg['max_days'],
+                'stat_cols': list(static.columns.drop('unique_id')),
             }
             logger.info(f"Loaded TFT model: {key} (H={config['horizon']})")
 
@@ -145,6 +149,16 @@ class TFTService:
         if model_key is None:
             raise RuntimeError("No TFT models loaded")
 
+        # skip cache for hindcast requests
+        if not since:
+            cache_key = (webcam.camera_slug, days)
+            with self._prediction_cache_lock:
+                if cache_key in self._prediction_cache:
+                    cached_time, cached_result = self._prediction_cache[cache_key]
+                    if time.time() - cached_time < self.PREDICTION_TTL:
+                        logger.debug(f"Prediction cache hit: {cache_key}")
+                        return cached_result
+
         m = self.models[model_key]
         H = min(days * HOURS_PER_DAY, m['horizon'])
 
@@ -159,17 +173,18 @@ class TFTService:
 
         context = self._build_context(webcam, m, weather_all, since=since)
 
-        # Ensure weather covers the full prediction output period.
-        # Predictions start after last_real — if that's older than weather, re-fetch.
-        last_real = context['ds_real'].iloc[-1]
-        prediction_start = last_real.normalize()
-        weather_start = weather_all['ds_real'].min() if not weather_all.empty else pd.Timestamp.now()
+        if not since:
+            context_start = context['ds_real'].iloc[0]
+            weather_start = weather_all['ds_real'].min()
+            if context_start < weather_start:
+                context_weather = self._fetch_weather_for_period(
+                    lat, lon, context_start, days, context_days=2
+                )
+                context = self._build_context(webcam, m, context_weather, since=since)
+                weather_all = pd.concat([context_weather, weather_all], ignore_index=True)
+                weather_all = weather_all.drop_duplicates(subset='ds_real').sort_values('ds_real').reset_index(drop=True)
 
-        if prediction_start < weather_start and not since:
-            extra_days = (weather_start - prediction_start).days + 2
-            new_past = min(92, 10 + extra_days)
-            weather_all = self._fetch_weather_forecast(lat, lon, past_days=new_past, forecast_days=16)
-            context = self._merge_weather(context, self._filter_daytime(weather_all))
+        last_real = context['ds_real'].iloc[-1]
 
         weather_daytime = self._filter_daytime(weather_all)
         futr_df = self._build_future(context, weather_daytime, m, H)
@@ -178,9 +193,7 @@ class TFTService:
         train_cols = ['unique_id', 'ds', 'y'] + m['futr'] + m['hist']
         context_df = context[train_cols].copy()
 
-        static_df = m['static'][m['static']['unique_id'] == uid]
-        if static_df.empty:
-            static_df = self._make_static(uid, context)
+        static_df = self._make_static(uid, context, m['stat_cols'])
 
         with self._predict_lock:
             forecast = m['nf'].predict(
@@ -194,7 +207,7 @@ class TFTService:
         max_cc = webcam.max_crowd_count or 0
         predictions = self._format_output(forecast, weather_all, last_real, H, days, max_cc)
 
-        return {
+        result = {
             'model': model_key,
             'beach': webcam.beach.beach_name,
             'webcam': uid,
@@ -204,6 +217,12 @@ class TFTService:
             'last_data': last_real.strftime('%Y-%m-%dT%H:%M:%S'),
             'predictions': predictions,
         }
+
+        if not since:
+            with self._prediction_cache_lock:
+                self._prediction_cache[(webcam.camera_slug, days)] = (time.time(), result)
+
+        return result
 
     def _build_context(self, webcam, m, weather_all, since=None):
         from apps.prediction.models import Snapshot
@@ -255,7 +274,7 @@ class TFTService:
         with self._weather_lock:
             if cache_key in self._weather_cache:
                 cached_time, cached_df = self._weather_cache[cache_key]
-                if time.time() - cached_time < 300:
+                if time.time() - cached_time < self.WEATHER_TTL:
                     return cached_df.copy()
             self._rate_limit()
 
@@ -277,7 +296,7 @@ class TFTService:
         with self._weather_lock:
             if cache_key in self._weather_cache:
                 cached_time, cached_df = self._weather_cache[cache_key]
-                if time.time() - cached_time < 300:
+                if time.time() - cached_time < self.WEATHER_TTL:
                     return cached_df.copy()
             self._rate_limit()
 
@@ -383,21 +402,27 @@ class TFTService:
         futr_df['ds'] = futr_df['ds'].astype(int)
         return futr_df
 
-    def _make_static(self, uid, context):
+    def _make_static(self, uid, context, stat_cols):
         y = context['y']
-        return pd.DataFrame([{
+        row = {
             'unique_id': uid,
             'stat_mean_y': float(y.mean()),
             'stat_cv': float(y.std() / max(y.mean(), 1)),
-        }])
+        }
+        for col in stat_cols:
+            if col not in row:
+                row[col] = 0.0
+        return pd.DataFrame([row])
 
     def _format_output(self, forecast, weather, last_real, H, days, max_crowd_count):
         daytime_preds = [float(forecast.iloc[i]['TFT']) for i in range(min(H, len(forecast)))]
 
-        if last_real.hour >= HOUR_MAX:
-            first_forecast = (last_real + pd.Timedelta(days=1)).normalize().replace(hour=HOUR_MIN)
+        last_real_floored = last_real.replace(minute=0, second=0, microsecond=0)
+
+        if last_real_floored.hour >= HOUR_MAX:
+            first_forecast = (last_real_floored + pd.Timedelta(days=1)).normalize().replace(hour=HOUR_MIN)
         else:
-            first_forecast = last_real + pd.Timedelta(hours=1)
+            first_forecast = last_real_floored + pd.Timedelta(hours=1)
             if first_forecast.hour < HOUR_MIN:
                 first_forecast = first_forecast.normalize().replace(hour=HOUR_MIN)
 
@@ -493,6 +518,7 @@ class TFTService:
         actuals = []
         for s in snapshots:
             ts = timezone.localtime(s.ts).replace(tzinfo=None)
+            ts = ts.replace(minute=0, second=0, microsecond=0)
             if ts.hour < HOUR_MIN or ts.hour > HOUR_MAX:
                 continue
             actuals.append({

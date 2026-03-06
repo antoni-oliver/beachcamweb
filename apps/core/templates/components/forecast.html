@@ -180,14 +180,17 @@
     }
 
     function fmtTooltip(params) {
-      const ts = new Date(params[0].value[0]);
-      const dateStr = dateLabel(ts) + '/' + ts.getFullYear() + ' ' + pad(ts.getHours()) + ':00';
-      let html = `<b>${dateStr}</b><br/>`;
-      params.forEach(p => {
-        html += `${p.marker} ${p.seriesName}: <b>${p.value[1].toFixed(1)}</b><br/>`;
-      });
-      return html;
-    }
+  const ts = new Date(params[0].value[0]);
+  const dateStr = dateLabel(ts) + '/' + ts.getFullYear() + ' ' + pad(ts.getHours()) + ':00';
+  let html = `<b>${dateStr}</b><br/>`;
+  params.forEach(p => {
+    const val = p.seriesName === i18n.temperature + ' °C'
+      ? p.value[1].toFixed(1) + ' °C'
+      : p.value[1].toFixed(1) + '%';
+    html += `${p.marker} ${p.seriesName}: <b>${val}</b><br/>`;
+  });
+  return html;
+}
 
     function classifyLevel(cc, max) {
       if (!max || max <= 0) return 'VERY_LOW';
@@ -396,104 +399,106 @@
     });
 
     function renderMiniChart(el, preds) {
-      const chart = echarts.init(el);
-      const bars = [], temps = [];
+  const chart = echarts.init(el);
+  const bars = [], temps = [];
 
-      preds.forEach(p => {
-        const ts = new Date(p.timestamp).getTime();
-        const level = p.occupancy_level || classifyLevel(p.crowd_count, maxCrowd);
-        bars.push({value: [ts, p.crowd_count], itemStyle: {color: LEVEL_COLORS[level]}});
-        if (p.temperature != null) temps.push([ts, p.temperature]);
-      });
+  preds.forEach(p => {
+    const ts = new Date(p.timestamp).getTime();
+    const level = p.occupancy_level || classifyLevel(p.crowd_count, maxCrowd);
+    const pct = p.occupancy_ratio != null ? p.occupancy_ratio * 100 : 0;
+    bars.push({value: [ts, pct], itemStyle: {color: LEVEL_COLORS[level]}});
+    if (p.temperature != null) temps.push([ts, p.temperature]);
+  });
 
-      chart.setOption({
-        tooltip: {
-          trigger: 'axis', textStyle: {fontSize: 11},
-          formatter: function (params) {
-            const ts = new Date(params[0].value[0]);
-            let html = '<b>' + dateLabel(ts) + ' ' + pad(ts.getHours()) + ':00</b><br/>';
-            params.forEach((p, i) => {
-              const label = i === 0 ? i18n.people : '°C';
-              html += p.marker + ' ' + label + ': <b>' + p.value[1].toFixed(1) + '</b><br/>';
-            });
-            return html;
-          }
+  chart.setOption({
+    tooltip: {
+      trigger: 'axis', textStyle: {fontSize: 11},
+      formatter: function (params) {
+        const ts = new Date(params[0].value[0]);
+        let html = '<b>' + dateLabel(ts) + ' ' + pad(ts.getHours()) + ':00</b><br/>';
+        params.forEach((p, i) => {
+          const val = i === 0 ? p.value[1].toFixed(1) + '%' : p.value[1].toFixed(1) + ' °C';
+          html += p.marker + ' ' + val + '<br/>';
+        });
+        return html;
+      }
+    },
+    grid: {left: 35, right: 30, top: 8, bottom: 22},
+    xAxis: {
+      type: 'time', splitLine: {show: false},
+      axisLabel: {fontSize: 10, formatter: val => pad(new Date(val).getHours()) + 'h'},
+    },
+    yAxis: [
+      {type: 'value', min: 0, max: 100, axisLabel: {fontSize: 9, formatter: '{value}%'}, splitLine: {lineStyle: {opacity: 0.3}}},
+      {type: 'value', show: false},
+    ],
+    series: [
+      {
+        type: 'bar', data: bars, yAxisIndex: 0, barMaxWidth: 12,
+        markLine: {
+          silent: true, symbol: 'none', label: {show: false}, data: [
+            {yAxis: 75, lineStyle: {color: '#e74c3c', type: 'dashed', opacity: 0.4, width: 1}},
+            {yAxis: 50, lineStyle: {color: '#f39c12', type: 'dashed', opacity: 0.4, width: 1}},
+          ]
         },
-        grid: {left: 35, right: 30, top: 8, bottom: 22},
-        xAxis: {
-          type: 'time', splitLine: {show: false},
-          axisLabel: {fontSize: 10, formatter: val => pad(new Date(val).getHours()) + 'h'},
-        },
-        yAxis: [
-          {type: 'value', min: 0, axisLabel: {fontSize: 9}, splitLine: {lineStyle: {opacity: 0.3}}},
-          {type: 'value', show: false},
-        ],
-        series: [
-          {
-            type: 'bar', data: bars, yAxisIndex: 0, barMaxWidth: 12,
-            markLine: maxCrowd > 0 ? {
-              silent: true, symbol: 'none', label: {show: false}, data: [
-                {yAxis: maxCrowd * 0.75, lineStyle: {color: '#e74c3c', type: 'dashed', opacity: 0.4, width: 1}},
-                {yAxis: maxCrowd * 0.50, lineStyle: {color: '#f39c12', type: 'dashed', opacity: 0.4, width: 1}},
-              ]
-            } : {},
-          },
-          {
-            type: 'line', data: temps, yAxisIndex: 1, smooth: true, symbol: 'none',
-            lineStyle: {color: '#e67e22', width: 1, opacity: 0.6},
-            itemStyle: {color: '#e67e22'},
-          },
-        ],
-      });
-      window.addEventListener('resize', () => chart.resize());
-    }
+      },
+      {
+        type: 'line', data: temps, yAxisIndex: 1, smooth: true, symbol: 'none',
+        lineStyle: {color: '#e67e22', width: 1, opacity: 0.6},
+        itemStyle: {color: '#e67e22'},
+      },
+    ],
+  });
+  window.addEventListener('resize', () => chart.resize());
+}
 
     function renderForecast(el, data, days, maxCrowd) {
-      const chart = echarts.init(el);
-      const preds = data.predictions || [];
-      const bars = [], temps = [];
-      const wkBands = buildWeekendBands(preds);
+  const chart = echarts.init(el);
+  const preds = data.predictions || [];
+  const bars = [], temps = [];
+  const wkBands = buildWeekendBands(preds);
 
-      preds.forEach(p => {
-        if (p.available) {
-          bars.push({
-            value: [new Date(p.timestamp).getTime(), p.crowd_count],
-            itemStyle: {color: LEVEL_COLORS[p.occupancy_level] || '#3498db'},
-          });
-        }
-        if (p.temperature != null) temps.push([new Date(p.timestamp).getTime(), p.temperature]);
+  preds.forEach(p => {
+    if (p.available) {
+      const pct = p.occupancy_ratio != null ? p.occupancy_ratio * 100 : 0;
+      bars.push({
+        value: [new Date(p.timestamp).getTime(), pct],
+        itemStyle: {color: LEVEL_COLORS[p.occupancy_level] || '#3498db'},
       });
-
-      chart.setOption({
-        tooltip: {trigger: 'axis', formatter: fmtTooltip},
-        legend: {data: [i18n.occupancy, i18n.temperature + ' °C'], top: -5, right: 10, itemGap: 25},
-        grid: {left: 50, right: 50, bottom: 40, top: 40},
-        xAxis: {type: 'time', axisLabel: {formatter: fmtAxisLabel}},
-        yAxis: [
-          {type: 'value', name: i18n.people, min: 0},
-          {type: 'value', name: '°C', splitLine: {show: false}},
-        ],
-        series: [
-          {
-            name: i18n.occupancy, type: 'bar', data: bars, yAxisIndex: 0,
-            barMaxWidth: days <= 3 ? 12 : (days <= 14 ? 5 : 3),
-            markLine: maxCrowd > 0 ? {
-              silent: true, data: [
-                {yAxis: maxCrowd * 0.75, label: {formatter: i18n.levelHigh, position: 'end', fontSize: 9}, lineStyle: {color: '#e74c3c', type: 'dashed', opacity: 0.5}},
-                {yAxis: maxCrowd * 0.50, label: {formatter: i18n.levelMedium, position: 'end', fontSize: 9}, lineStyle: {color: '#f39c12', type: 'dashed', opacity: 0.5}},
-              ]
-            } : {},
-            markArea: wkBands.length ? {silent: true, itemStyle: {color: 'rgba(41,128,185,0.12)'}, data: wkBands} : undefined,
-          },
-          {
-            name: i18n.temperature + ' °C', type: 'line', data: temps, yAxisIndex: 1,
-            smooth: true, lineStyle: {color: '#e67e22', width: 1.5, opacity: 0.7},
-            itemStyle: {color: '#e67e22'}, symbol: 'none',
-          },
-        ],
-      });
-      window.addEventListener('resize', () => chart.resize());
     }
+    if (p.temperature != null) temps.push([new Date(p.timestamp).getTime(), p.temperature]);
+  });
+
+  chart.setOption({
+    tooltip: {trigger: 'axis', formatter: fmtTooltip},
+    legend: {data: [i18n.occupancy, i18n.temperature + ' °C'], top: -5, right: 10, itemGap: 25},
+    grid: {left: 50, right: 50, bottom: 40, top: 40},
+    xAxis: {type: 'time', axisLabel: {formatter: fmtAxisLabel}},
+    yAxis: [
+      {type: 'value', name: '%', min: 0, max: 100, axisLabel: {formatter: '{value}%'}},
+      {type: 'value', name: '°C', splitLine: {show: false}},
+    ],
+    series: [
+      {
+        name: i18n.occupancy, type: 'bar', data: bars, yAxisIndex: 0,
+        barMaxWidth: days <= 3 ? 12 : (days <= 14 ? 5 : 3),
+        markLine: {
+          silent: true, data: [
+            {yAxis: 75, label: {formatter: i18n.levelHigh, position: 'end', fontSize: 9}, lineStyle: {color: '#e74c3c', type: 'dashed', opacity: 0.5}},
+            {yAxis: 50, label: {formatter: i18n.levelMedium, position: 'end', fontSize: 9}, lineStyle: {color: '#f39c12', type: 'dashed', opacity: 0.5}},
+          ]
+        },
+        markArea: wkBands.length ? {silent: true, itemStyle: {color: 'rgba(41,128,185,0.12)'}, data: wkBands} : undefined,
+      },
+      {
+        name: i18n.temperature + ' °C', type: 'line', data: temps, yAxisIndex: 1,
+        smooth: true, lineStyle: {color: '#e67e22', width: 1.5, opacity: 0.7},
+        itemStyle: {color: '#e67e22'}, symbol: 'none',
+      },
+    ],
+  });
+  window.addEventListener('resize', () => chart.resize());
+}
 
     // ---- Hindcast ----
     window.runHindcast = async function () {
@@ -534,36 +539,39 @@
       preds.forEach(p => {
         if (p.available) {
           const level = p.occupancy_level || classifyLevel(p.crowd_count, maxCrowd);
-          predBars.push({
-            value: [new Date(p.timestamp).getTime(), p.crowd_count],
-            itemStyle: {color: LEVEL_COLORS[level], opacity: 0.7},
+          const pct = p.occupancy_ratio != null ? p.occupancy_ratio * 100 : 0;
+            predBars.push({
+              value: [new Date(p.timestamp).getTime(), pct],
+                itemStyle: {color: LEVEL_COLORS[level], opacity: 0.7},
           });
         }
       });
-      const actualLine = [];
-      (actData.actuals || []).forEach(a => {
-        actualLine.push([new Date(a.timestamp).getTime(), a.crowd_count]);
-      });
-      const predMap = {};
-      predBars.forEach(p => {
-        predMap[p.value[0]] = p.value[1];
-      });
-      let sumErr = 0, count = 0;
-      actualLine.forEach(([ts, val]) => {
-        if (predMap[ts] !== undefined) {
-          sumErr += Math.abs(predMap[ts] - val);
-          count++;
-        }
-      });
-      const mae = count > 0 ? (sumErr / count).toFixed(1) : '—';
+     const actualLine = [];
+        (actData.actuals || []).forEach(a => {
+          const aPct = maxCrowd > 0 ? (a.crowd_count / maxCrowd) * 100 : 0;
+          actualLine.push([new Date(a.timestamp).getTime(), aPct, a.crowd_count]);
+        });
+        const predMap = {};
+        predBars.forEach(p => {
+          predMap[p.value[0]] = p.value[1];
+        });
+        let sumErr = 0, count = 0;
+        actualLine.forEach(([ts, val, rawCount]) => {
+          if (predMap[ts] !== undefined) {
+            const predCount = maxCrowd > 0 ? (predMap[ts] / 100) * maxCrowd : 0;
+            sumErr += maxCrowd > 0 ? Math.abs(predCount - rawCount) / maxCrowd : 0;
+            count++;
+          }
+        });
+        const mae = count > 0 ? ((sumErr / count) * 100).toFixed(1) + '%' : '—';
 
-      chart.setOption({
-        title: {text: `${i18n.predVsActual} (MAE: ${mae}, ${i18n.hours}: ${count})`, left: 'center', textStyle: {fontSize: 13}},
-        tooltip: {trigger: 'axis', formatter: fmtTooltip},
-        legend: {data: [i18n.prediction, i18n.actual], top: 25, itemGap: 25},
+        chart.setOption({
+          title: {text: `${i18n.predVsActual} (relMAE: ${mae})`, left: 'center', textStyle: {fontSize: 13}},
+          tooltip: {trigger: 'axis', formatter: fmtTooltip},
+          legend: {data: [i18n.prediction, i18n.actual], top: 25, itemGap: 25},
         grid: {left: 50, right: 30, bottom: 40, top: 60},
         xAxis: {type: 'time', axisLabel: {formatter: fmtAxisLabel}},
-        yAxis: {type: 'value', name: i18n.people, min: 0},
+        yAxis: {type: 'value', name: '%', min: 0, max: 100, axisLabel: {formatter: '{value}%'}},
         series: [
           {
             name: i18n.prediction, type: 'bar', data: predBars, barMaxWidth: 8,
