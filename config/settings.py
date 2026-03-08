@@ -157,4 +157,10 @@ CSRF_TRUSTED_ORIGINS = ['https://ocupacioplatges.uib.es', 'https://ocupacioplatg
 
 API_JWT_SECRET = LOCAL_SETTINGS.API_JWT_SECRET
 API_JWT_ALGOS = LOCAL_SETTINGS.API_JWT_ALGOS
-TFT_MODELS_DIR = BASE_DIR / 'apps/prediction/tft_models'
+TFT_MODELS_DIR = '/Users/guilhermemossibento/Desktop/master_activities/TFM/beach_counting/beachcamweb/apps/prediction/tft_models'
+
+TFT_MODEL_SETS = {
+    'full_v7':   '/Users/guilhermemossibento/tft_sets/full_v7',
+    'cutoff_v7': '/Users/guilhermemossibento/tft_sets/cutoff_v7',
+    'old': '/Users/guilhermemossibento/Desktop/master_activities/TFM/beach_counting/beachcamweb/apps/prediction/tft_models',
+}

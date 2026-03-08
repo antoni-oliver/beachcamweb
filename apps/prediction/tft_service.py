@@ -75,102 +75,150 @@ class TFTService:
     def __init__(self):
         if self._initialized:
             return
-        self.models = {}
+        self.models = {}          # default set — backward compat
+        self.model_sets = {}      # name -> {3d: ..., 10d: ..., 15d: ...}
         self._initialized = True
 
-    def load_models(self, base_dir=None):
+    def _load_single_model(self, key, model_dir, max_days):
         from neuralforecast import NeuralForecast
+        model_dir = Path(model_dir)
 
+        with open(model_dir / 'config.json') as f:
+            config = json.load(f)
+
+        nf = NeuralForecast.load(str(model_dir / 'nf_model'))
+
+        BAD_KEYS = ['training_data_availability_threshold']
+        for model_obj in nf.models:
+            for attr in ['trainer_kwargs', 'pred_trainer_kwargs']:
+                d = getattr(model_obj, attr, None)
+                if isinstance(d, dict):
+                    for k in BAD_KEYS:
+                        d.pop(k, None)
+                    d['logger'] = False
+                    d['enable_progress_bar'] = False
+            if hasattr(model_obj, 'hparams'):
+                for k in BAD_KEYS:
+                    model_obj.hparams.pop(k, None)
+
+        static = pd.read_csv(model_dir / 'static_features.csv')
+        per_beach_path = model_dir / 'per_beach.csv'
+        per_beach = pd.read_csv(per_beach_path) if per_beach_path.exists() else pd.DataFrame()
+
+        all_features = config['futr_exog'] + config['hist_exog']
+        fi_path = model_dir / 'feature_importance.json'
+        if fi_path.exists():
+            with open(fi_path) as f:
+                raw_fi = json.load(f)
+            first_key = next(iter(raw_fi))
+            if isinstance(first_key, int) or (isinstance(first_key, str) and first_key.isdigit()):
+                feature_importance = {
+                    all_features[int(k)]: v
+                    for k, v in raw_fi.items()
+                    if int(k) < len(all_features)
+                }
+            else:
+                feature_importance = raw_fi
+        else:
+            feature_importance = {f: round(1.0 / len(all_features), 4) for f in all_features}
+
+        return {
+            'nf': nf,
+            'config': config,
+            'static': static,
+            'per_beach': per_beach,
+            'horizon': config['horizon'],
+            'input_size': config['input_size'],
+            'futr': config['futr_exog'],
+            'hist': config['hist_exog'],
+            'max_days': max_days,
+            'stat_cols': list(static.columns.drop('unique_id')),
+            'feature_importance': feature_importance,
+            'model_dir': str(model_dir),
+        }
+
+    def load_models(self, base_dir=None, set_name='default'):
         base_dir = Path(base_dir or getattr(settings, 'TFT_MODELS_DIR', 'tft_models'))
 
-        for key, cfg in MODEL_CONFIGS.items():
-            model_dir = base_dir / cfg['dir']
-            config_path = model_dir / 'config.json'
+        # Auto-discover horizon dirs — tries known patterns then glob
+        def find_dir(horizon_tag):
+            patterns = [
+                f'tft_model_{horizon_tag}',
+                f'tft_grid_model_full_{horizon_tag}',
+                f'tft_grid_model_cutoff_{horizon_tag}',
+            ]
+            for pattern in patterns:
+                p = base_dir / pattern
+                if (p / 'config.json').exists():
+                    return p
+            # glob fallback: any dir containing the horizon tag
+            for p in sorted(base_dir.glob(f'*{horizon_tag}*')):
+                if p.is_dir() and (p / 'config.json').exists():
+                    return p
+            return None
 
-            if not config_path.exists():
-                logger.warning(f"Model {key} not found at {model_dir}, skipping")
-                continue
-
-            with open(config_path) as f:
-                config = json.load(f)
-
-            nf = NeuralForecast.load(str(model_dir / 'nf_model'))
-
-            BAD_KEYS = ['training_data_availability_threshold']
-            for model_obj in nf.models:
-                for attr in ['trainer_kwargs', 'pred_trainer_kwargs']:
-                    d = getattr(model_obj, attr, None)
-                    if isinstance(d, dict):
-                        for k in BAD_KEYS:
-                            d.pop(k, None)
-                        d['logger'] = False
-                        d['enable_progress_bar'] = False
-                if hasattr(model_obj, 'hparams'):
-                    for k in BAD_KEYS:
-                        model_obj.hparams.pop(k, None)
-
-            static = pd.read_csv(model_dir / 'static_features.csv')
-
-            per_beach_path = model_dir / 'per_beach.csv'
-            per_beach = pd.read_csv(per_beach_path) if per_beach_path.exists() else pd.DataFrame()
-
-            fi_path = model_dir / 'feature_importance.json'
-            all_features = config['futr_exog'] + config['hist_exog']
-            if fi_path.exists():
-                with open(fi_path) as f:
-                    raw_fi = json.load(f)
-                # If keys are integers (list-index export), remap to feature names
-                first_key = next(iter(raw_fi))
-                if isinstance(first_key, int) or (isinstance(first_key, str) and first_key.isdigit()):
-                    feature_importance = {
-                        all_features[int(k)]: v
-                        for k, v in raw_fi.items()
-                        if int(k) < len(all_features)
-                    }
-                else:
-                    feature_importance = raw_fi
-            else:
-                feature_importance = {f: round(1.0 / len(all_features), 4) for f in all_features}
-
-            self.models[key] = {
-                'nf': nf,
-                'config': config,
-                'static': static,
-                'per_beach': per_beach,
-                'horizon': config['horizon'],
-                'input_size': config['input_size'],
-                'futr': config['futr_exog'],
-                'hist': config['hist_exog'],
-                'max_days': cfg['max_days'],
-                'stat_cols': list(static.columns.drop('unique_id')),
-                'feature_importance': feature_importance,
-            }
-            logger.info(f"Loaded TFT model: {key} (H={config['horizon']})")
-
-        logger.info(f"TFT Service ready: {len(self.models)} models loaded")
-
-    def select_model(self, days):
+        max_days_map = {'3d': 3, '10d': 10, '15d': 15}
+        loaded = {}
         for key in ['3d', '10d', '15d']:
-            if key in self.models and days <= self.models[key]['max_days']:
+            model_dir = find_dir(key)
+            if model_dir is None:
+                logger.warning(f"[{set_name}] Model {key} not found in {base_dir}, skipping")
+                continue
+            loaded[key] = self._load_single_model(key, model_dir, max_days_map[key])
+            logger.info(f"[{set_name}] Loaded {key} (H={loaded[key]['horizon']}) from {model_dir.name}")
+
+        self.model_sets[set_name] = loaded
+        if set_name == 'default':
+            self.models = loaded
+
+        logger.info(f"TFT set '{set_name}': {len(loaded)} models loaded")
+        return loaded
+
+    def list_model_sets(self):
+        loaded = {
+            name: {k: {'horizon': m['horizon'], 'max_days': m['max_days'], 'dir': m['model_dir']}
+                   for k, m in models.items()}
+            for name, models in self.model_sets.items()
+        }
+        # Include configured but not yet loaded sets
+        configured = getattr(settings, 'TFT_MODEL_SETS', {})
+        for name in configured:
+            if name not in loaded:
+                loaded[name] = {}  # will lazy-load on first predict
+        return loaded
+
+    def select_model(self, days, model_set='default'):
+        models = self.model_sets.get(model_set, self.models)
+        for key in ['3d', '10d', '15d']:
+            if key in models and days <= models[key]['max_days']:
                 return key
-        available = [k for k in ['15d', '10d', '3d'] if k in self.models]
+        available = [k for k in ['15d', '10d', '3d'] if k in models]
         return available[0] if available else None
 
-    def _ensure_loaded(self):
-        if not self.models:
-            logger.info("TFT: lazy loading models...")
-            self.load_models()
-            logger.info(f"TFT: loaded {len(self.models)} models")
+    def _ensure_loaded(self, model_set='default'):
+        if model_set not in self.model_sets:
+            if model_set == 'default':
+                logger.info("TFT: lazy loading default models...")
+                self.load_models()
+            else:
+                configured = getattr(settings, 'TFT_MODEL_SETS', {})
+                if model_set in configured:
+                    logger.info(f"TFT: lazy loading model set '{model_set}'...")
+                    self.load_models(base_dir=configured[model_set], set_name=model_set)
+                else:
+                    raise RuntimeError(f"Model set '{model_set}' not found. Available: {list(self.model_sets.keys())}")
 
-    def predict(self, webcam, days=3, since=None):
-        self._ensure_loaded()
-        model_key = self.select_model(days)
+    def predict(self, webcam, days=3, since=None, model_set='default'):
+        self._ensure_loaded(model_set)
+        if model_set not in self.model_sets:
+            raise RuntimeError(f"Model set '{model_set}' not loaded")
+        models = self.model_sets.get(model_set, self.models)
+        model_key = self.select_model(days, model_set=model_set)
         if model_key is None:
-            raise RuntimeError("No TFT models loaded")
+            raise RuntimeError(f"No TFT models loaded for set '{model_set}'")
 
-        # skip cache for hindcast requests
         if not since:
-            cache_key = (webcam.camera_slug, days)
+            cache_key = (webcam.camera_slug, days, model_set)
             with self._prediction_cache_lock:
                 if cache_key in self._prediction_cache:
                     cached_time, cached_result = self._prediction_cache[cache_key]
@@ -178,7 +226,7 @@ class TFTService:
                         logger.debug(f"Prediction cache hit: {cache_key}")
                         return cached_result
 
-        m = self.models[model_key]
+        m = models[model_key]
         H_model = m['horizon']                          # full model horizon for futr_df
         H_out = min(days * HOURS_PER_DAY, H_model)     # steps to include in output
 
@@ -229,6 +277,7 @@ class TFTService:
 
         result = {
             'model': model_key,
+            'model_set': model_set,
             'beach': webcam.beach.beach_name,
             'webcam': uid,
             'horizon_days': days,
@@ -241,7 +290,7 @@ class TFTService:
 
         if not since:
             with self._prediction_cache_lock:
-                self._prediction_cache[(webcam.camera_slug, days)] = (time.time(), result)
+                self._prediction_cache[(webcam.camera_slug, days, model_set)] = (time.time(), result)
 
         return result
 
@@ -516,9 +565,10 @@ class TFTService:
 
         return predictions
 
-    def get_metrics(self, webcam_slug=None):
+    def get_metrics(self, webcam_slug=None, model_set='default'):
+        models = self.model_sets.get(model_set, self.models)
         result = {}
-        for key, m in self.models.items():
+        for key, m in models.items():
             config = m['config']
             per_beach = m['per_beach']
 

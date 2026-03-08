@@ -1,4 +1,3 @@
-
 import logging
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
@@ -10,10 +9,12 @@ from .tft_service import tft_service
 
 logger = logging.getLogger(__name__)
 
+
 @require_GET
 def tft_forecast_json(request, camera_slug):
     days = int(request.GET.get('days', 3))
     days = max(1, min(days, 15))
+    model_set = request.GET.get('model_set', 'default')
 
     since_str = request.GET.get('since')
     since = None
@@ -29,7 +30,7 @@ def tft_forecast_json(request, camera_slug):
         return JsonResponse({'error': 'Not found'}, status=404)
 
     try:
-        result = tft_service.predict(webcam, days=days, since=since)
+        result = tft_service.predict(webcam, days=days, since=since, model_set=model_set)
         return JsonResponse(result)
     except ValueError as e:
         return JsonResponse({'error': str(e)}, status=400)
@@ -63,5 +64,12 @@ def tft_actuals_json(request, camera_slug):
 
 @require_GET
 def tft_metrics_json(request, camera_slug):
-    metrics = tft_service.get_metrics(webcam_slug=camera_slug)
-    return JsonResponse({'webcam': camera_slug, 'models': metrics})
+    model_set = request.GET.get('model_set', 'default')
+    metrics = tft_service.get_metrics(webcam_slug=camera_slug, model_set=model_set)
+    return JsonResponse({'webcam': camera_slug, 'model_set': model_set, 'models': metrics})
+
+
+@require_GET
+def tft_model_sets_json(request, camera_slug):
+    sets = tft_service.list_model_sets()
+    return JsonResponse({'model_sets': list(sets.keys())})

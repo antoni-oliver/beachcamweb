@@ -111,6 +111,38 @@
         </div>
         <div id="hindcast-chart" style="height:350px;display:none;"></div>
     </div>
+
+    <!-- Model Comparison -->
+    <div class="mt-4 p-3 border rounded bg-light">
+        <h5 class="text-muted mb-3">⚗️ Model Comparison</h5>
+        <div class="row g-2 align-items-end mb-3">
+            <div class="col-auto">
+                <label class="form-label small mb-0">Predict from:</label>
+                <input type="date" id="cmp-since" class="form-control form-control-sm">
+            </div>
+            <div class="col-auto">
+                <label class="form-label small mb-0">Days:</label>
+                <input type="number" id="cmp-days" class="form-control form-control-sm" value="3" min="1" max="15" style="width:70px;">
+            </div>
+            <div class="col-auto">
+                <label class="form-label small mb-0">Model Set A:</label>
+                <select id="cmp-set-a" class="form-select form-select-sm" style="min-width:140px;">
+                    <option value="default">default</option>
+                </select>
+            </div>
+            <div class="col-auto">
+                <label class="form-label small mb-0">Model Set B:</label>
+                <select id="cmp-set-b" class="form-select form-select-sm" style="min-width:140px;">
+                    <option value="default">default</option>
+                </select>
+            </div>
+            <div class="col-auto">
+                <button id="cmp-btn" class="btn btn-sm btn-outline-secondary" onclick="runComparison()">Compare</button>
+            </div>
+            <div id="cmp-status" class="col-auto small text-muted"></div>
+        </div>
+        <div id="cmp-chart" style="height:380px;display:none;"></div>
+    </div>
 </div>
 
 <script>
@@ -654,6 +686,137 @@
           },
           {
             name: i18n.actual, type: 'line', data: actualLine,
+            lineStyle: {color: '#e74c3c', width: 2}, itemStyle: {color: '#e74c3c'},
+            symbol: 'circle', symbolSize: 4,
+          },
+        ],
+      }, true);
+      window.addEventListener('resize', () => chart.resize());
+    }
+
+    // ---- Load model sets into dropdowns ----
+    fetch(`/platja/${slug}/model-sets/`)
+      .then(r => r.json())
+      .then(data => {
+        const sets = data.model_sets || [];
+        ['cmp-set-a', 'cmp-set-b'].forEach(id => {
+          const sel = document.getElementById(id);
+          sel.innerHTML = '';
+          sets.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s;
+            opt.textContent = s;
+            sel.appendChild(opt);
+          });
+        });
+        // Default B to second set if available
+        const selB = document.getElementById('cmp-set-b');
+        if (selB.options.length > 1) selB.selectedIndex = 1;
+      })
+      .catch(() => {});
+
+    // Default comparison date = 7 days ago
+    const cmpDd = new Date();
+    cmpDd.setDate(cmpDd.getDate() - 7);
+    document.getElementById('cmp-since').value = cmpDd.toISOString().slice(0, 10);
+
+    // ---- Comparison hindcast ----
+    window.runComparison = async function () {
+      const since = document.getElementById('cmp-since').value;
+      const days = Math.min(15, Math.max(1, parseInt(document.getElementById('cmp-days').value) || 3));
+      const setA = document.getElementById('cmp-set-a').value;
+      const setB = document.getElementById('cmp-set-b').value;
+      const status = document.getElementById('cmp-status');
+      const chartEl = document.getElementById('cmp-chart');
+      const btn = document.getElementById('cmp-btn');
+
+      if (!since) { status.textContent = 'Select a date'; return; }
+
+      btn.disabled = true;
+      status.textContent = 'Fetching...';
+      try {
+        const [resA, resB, resAct] = await Promise.all([
+          fetch(`/platja/${slug}/forecast/?days=${days}&since=${since}&model_set=${setA}`).then(r => r.json()),
+          fetch(`/platja/${slug}/forecast/?days=${days}&since=${since}&model_set=${setB}`).then(r => r.json()),
+          fetch(`/platja/${slug}/actuals/?since=${since}&days=${days}`).then(r => r.json()),
+        ]);
+
+        if (resA.error) throw new Error(`${setA}: ${resA.error}`);
+        if (resB.error) throw new Error(`${setB}: ${resB.error}`);
+
+        status.textContent = `${setA} (${resA.model}) vs ${setB} (${resB.model})`;
+        chartEl.style.display = 'block';
+        renderComparison(chartEl, resA, resB, resAct, setA, setB, days);
+      } catch (err) {
+        status.innerHTML = `<span class="text-danger">${err.message}</span>`;
+      } finally {
+        btn.disabled = false;
+      }
+    };
+
+    function computeRelMAE(predBars, actuals) {
+      const predMap = {};
+      predBars.forEach(p => { predMap[p.value[0]] = p.value[1]; });
+      let sum = 0, count = 0;
+      actuals.forEach(([ts, pct, raw]) => {
+        if (predMap[ts] !== undefined) {
+          const predRaw = maxCrowd > 0 ? (predMap[ts] / 100) * maxCrowd : 0;
+          sum += maxCrowd > 0 ? Math.abs(predRaw - raw) / maxCrowd : 0;
+          count++;
+        }
+      });
+      return count > 0 ? (sum / count * 100).toFixed(1) + '%' : '—';
+    }
+
+    function predsToBars(preds, opacity) {
+      return preds.filter(p => p.available).map(p => ({
+        value: [new Date(p.timestamp).getTime(), p.occupancy_ratio != null ? p.occupancy_ratio * 100 : 0],
+        itemStyle: {color: LEVEL_COLORS[p.occupancy_level] || '#3498db', opacity},
+      }));
+    }
+
+    function renderComparison(el, dataA, dataB, actData, nameA, nameB, days) {
+      const chart = echarts.init(el);
+      const barsA = predsToBars(dataA.predictions || [], 0.75);
+      const barsB = predsToBars(dataB.predictions || [], 0.75);
+      const actualLine = (actData.actuals || []).map(a => [
+        new Date(a.timestamp).getTime(),
+        maxCrowd > 0 ? (a.crowd_count / maxCrowd) * 100 : 0,
+        a.crowd_count,
+      ]);
+      const wkBands = buildWeekendBands(dataA.predictions || []);
+      const maeA = computeRelMAE(barsA, actualLine);
+      const maeB = computeRelMAE(barsB, actualLine);
+
+      chart.setOption({
+        title: {
+          text: `Model Comparison — relMAE: ${nameA}=${maeA}  ${nameB}=${maeB}`,
+          left: 'center', textStyle: {fontSize: 12},
+        },
+        tooltip: {
+          trigger: 'axis',
+          formatter(params) {
+            const ts = new Date(params[0].value[0]);
+            let html = `<b>${dateLabel(ts)}/${ts.getFullYear()} ${pad(ts.getHours())}:00</b><br/>`;
+            params.forEach(p => {
+              const v = Array.isArray(p.value) ? p.value[1] : p.value;
+              html += `${p.marker} ${p.seriesName}: <b>${v != null ? v.toFixed(1) + '%' : '—'}</b><br/>`;
+            });
+            return html;
+          }
+        },
+        legend: {data: [nameA, nameB, 'Actual'], top: 22, itemGap: 20},
+        grid: {left: 50, right: 30, bottom: 40, top: 60},
+        xAxis: {type: 'time', axisLabel: {formatter: fmtAxisLabel}},
+        yAxis: {type: 'value', name: '%', min: 0, max: 100, axisLabel: {formatter: '{value}%'}},
+        series: [
+          {
+            name: nameA, type: 'bar', data: barsA, barGap: '10%', barMaxWidth: days <= 3 ? 10 : 4,
+            markArea: wkBands.length ? {silent: true, itemStyle: {color: 'rgba(41,128,185,0.08)'}, data: wkBands} : undefined,
+          },
+          {name: nameB, type: 'bar', data: barsB, barMaxWidth: days <= 3 ? 10 : 4},
+          {
+            name: 'Actual', type: 'line', data: actualLine,
             lineStyle: {color: '#e74c3c', width: 2}, itemStyle: {color: '#e74c3c'},
             symbol: 'circle', symbolSize: 4,
           },
