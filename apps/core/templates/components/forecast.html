@@ -102,11 +102,7 @@
             </div>
             <div class="col-auto">
                 <label class="form-label small mb-0">{% translate "hindcast-days" %}:</label>
-                <select id="hindcast-days" class="form-select form-select-sm">
-                    <option value="3" selected>3</option>
-                    <option value="10">10</option>
-                    <option value="15">15</option>
-                </select>
+                <input type="number" id="hindcast-days" class="form-control form-control-sm" value="3" min="1" max="15" style="width:70px;">
             </div>
             <div class="col-auto">
                 <button id="hindcast-btn" class="btn btn-sm btn-outline-primary" onclick="runHindcast()">{% translate "hindcast-run" %}</button>
@@ -179,18 +175,95 @@
       return dateLabel(d) + '\n' + pad(d.getHours()) + ':00';
     }
 
-    function fmtTooltip(params) {
-  const ts = new Date(params[0].value[0]);
-  const dateStr = dateLabel(ts) + '/' + ts.getFullYear() + ' ' + pad(ts.getHours()) + ':00';
-  let html = `<b>${dateStr}</b><br/>`;
-  params.forEach(p => {
-    const val = p.seriesName === i18n.temperature + ' °C'
-      ? p.value[1].toFixed(1) + ' °C'
-      : p.value[1].toFixed(1) + '%';
-    html += `${p.marker} ${p.seriesName}: <b>${val}</b><br/>`;
-  });
-  return html;
-}
+    const FEATURE_DISPLAY_NAMES = {
+      'om_temperature_2m':          '🌡️ Temperature',
+      'om_shortwave_radiation':      '☀️ Solar Radiation',
+      'om_cloud_cover_low':          '☁️ Low Cloud Cover',
+      'om_vapour_pressure_deficit':  '💧 Vapour Pressure Def.',
+      'hour':                        '🕐 Hour of Day',
+      'day_of_week':                 '📅 Day of Week',
+      'month':                       '📆 Month',
+      'is_weekend':                  '🏖️ Weekend',
+      'is_summer':                   '☀️ Summer Season',
+      'stat_mean_y':                 '📊 Beach Avg. Occupancy',
+      'stat_cv':                     '📊 Occupancy Variability',
+      // Feature values labels (from _format_output)
+      'Temperature (°C)':            '🌡️ Temperature',
+      'Solar Radiation (W/m²)':      '☀️ Solar Radiation',
+      'Low Cloud Cover (%)':         '☁️ Low Cloud Cover',
+      'Vapour Pressure Deficit (kPa)': '💧 Vapour Pressure Def.',
+      'Weekend':                     '🏖️ Weekend',
+      'Summer':                      '☀️ Summer Season',
+    };
+
+    function featLabel(k) {
+      return FEATURE_DISPLAY_NAMES[k] || k.replace(/^om_/, '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    }
+
+    function featValue(k, v) {
+      if (k.includes('Temperature') || k === 'om_temperature_2m') return v + ' °C';
+      if (k.includes('Radiation') || k === 'om_shortwave_radiation') return v + ' W/m²';
+      if (k.includes('Cloud') || k === 'om_cloud_cover_low') return v + '%';
+      if (k.includes('Vapour') || k === 'om_vapour_pressure_deficit') return v + ' kPa';
+      if (k === 'Weekend' || k === 'Summer' || k === 'is_weekend' || k === 'is_summer') return v ? 'Yes' : 'No';
+      return v;
+    }
+
+    function fmtTooltip(params, featureImportance) {
+      const ts = new Date(params[0].value[0]);
+      const dateStr = dateLabel(ts) + '/' + ts.getFullYear() + ' ' + pad(ts.getHours()) + ':00';
+
+      const barParam = params.find(p => p.seriesType === 'bar');
+      const features = barParam?.data?.features || {};
+      const pct = barParam ? barParam.value[1].toFixed(1) + '%' : null;
+      const tempParam = params.find(p => p.seriesType === 'line');
+      const temp = tempParam ? tempParam.value[1].toFixed(1) + ' °C' : null;
+
+      let html = `<div style="min-width:220px;max-width:260px;font-size:12px;line-height:1.5;">`;
+      html += `<div style="font-weight:700;margin-bottom:6px;font-size:13px;">${dateStr}</div>`;
+
+      // Main values
+      if (pct) html += `<div style="display:flex;justify-content:space-between;margin-bottom:2px;"><span style="color:#888;">Occupancy</span><span style="font-weight:700;color:${barParam.color};">${pct}</span></div>`;
+      if (temp) html += `<div style="display:flex;justify-content:space-between;margin-bottom:8px;"><span style="color:#888;">Temperature</span><span style="font-weight:600;color:#e67e22;">${temp}</span></div>`;
+
+      // Input feature values
+      if (Object.keys(features).length) {
+        html += `<div style="border-top:1px solid #e8e8e8;padding-top:6px;margin-bottom:6px;">`;
+        html += `<div style="font-size:10px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Conditions</div>`;
+        Object.entries(features).forEach(([k, v]) => {
+          if (k === 'Temperature (°C)') return; // already shown above
+          html += `<div style="display:flex;justify-content:space-between;margin-bottom:1px;">`;
+          html += `<span style="color:#555;">${featLabel(k)}</span>`;
+          html += `<span style="font-weight:600;color:#333;">${featValue(k, v)}</span>`;
+          html += `</div>`;
+        });
+        html += `</div>`;
+      }
+
+      // Feature importance bars
+      if (featureImportance && Object.keys(featureImportance).length) {
+        const sorted = Object.entries(featureImportance).sort((a, b) => b[1] - a[1]);
+        const maxVal = sorted[0][1];
+        html += `<div style="border-top:1px solid #e8e8e8;padding-top:6px;">`;
+        html += `<div style="font-size:10px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Feature Importance</div>`;
+        sorted.forEach(([k, v]) => {
+          const pctWidth = maxVal > 0 ? Math.round((v / maxVal) * 100) : 0;
+          const displayPct = (v * 100).toFixed(1);
+          html += `<div style="margin-bottom:3px;">`;
+          html += `<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:1px;">`;
+          html += `<span style="color:#555;">${featLabel(k)}</span>`;
+          html += `<span style="color:#888;font-size:10px;">${displayPct}%</span>`;
+          html += `</div>`;
+          html += `<div style="height:4px;background:#f0f0f0;border-radius:2px;">`;
+          html += `<div style="height:4px;width:${pctWidth}%;background:linear-gradient(90deg,#3498db,#2980b9);border-radius:2px;"></div>`;
+          html += `</div></div>`;
+        });
+        html += `</div>`;
+      }
+
+      html += `</div>`;
+      return html;
+    }
 
     function classifyLevel(cc, max) {
       if (!max || max <= 0) return 'VERY_LOW';
@@ -455,6 +528,7 @@
     function renderForecast(el, data, days, maxCrowd) {
   const chart = echarts.init(el);
   const preds = data.predictions || [];
+  const featureImportance = data.feature_importance || {};
   const bars = [], temps = [];
   const wkBands = buildWeekendBands(preds);
 
@@ -464,13 +538,14 @@
       bars.push({
         value: [new Date(p.timestamp).getTime(), pct],
         itemStyle: {color: LEVEL_COLORS[p.occupancy_level] || '#3498db'},
+        features: p.features || {},
       });
     }
     if (p.temperature != null) temps.push([new Date(p.timestamp).getTime(), p.temperature]);
   });
 
   chart.setOption({
-    tooltip: {trigger: 'axis', formatter: fmtTooltip},
+    tooltip: {trigger: 'axis', formatter: params => fmtTooltip(params, featureImportance)},
     legend: {data: [i18n.occupancy, i18n.temperature + ' °C'], top: -5, right: 10, itemGap: 25},
     grid: {left: 50, right: 50, bottom: 40, top: 40},
     xAxis: {type: 'time', axisLabel: {formatter: fmtAxisLabel}},
@@ -503,7 +578,7 @@
     // ---- Hindcast ----
     window.runHindcast = async function () {
       const since = document.getElementById('hindcast-since').value;
-      const days = document.getElementById('hindcast-days').value;
+      const days = Math.min(15, Math.max(1, parseInt(document.getElementById('hindcast-days').value) || 3));
       const status = document.getElementById('hindcast-status');
       const chartEl = document.getElementById('hindcast-chart');
       const btn = document.getElementById('hindcast-btn');

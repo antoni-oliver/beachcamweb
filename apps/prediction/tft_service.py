@@ -114,6 +114,24 @@ class TFTService:
             per_beach_path = model_dir / 'per_beach.csv'
             per_beach = pd.read_csv(per_beach_path) if per_beach_path.exists() else pd.DataFrame()
 
+            fi_path = model_dir / 'feature_importance.json'
+            all_features = config['futr_exog'] + config['hist_exog']
+            if fi_path.exists():
+                with open(fi_path) as f:
+                    raw_fi = json.load(f)
+                # If keys are integers (list-index export), remap to feature names
+                first_key = next(iter(raw_fi))
+                if isinstance(first_key, int) or (isinstance(first_key, str) and first_key.isdigit()):
+                    feature_importance = {
+                        all_features[int(k)]: v
+                        for k, v in raw_fi.items()
+                        if int(k) < len(all_features)
+                    }
+                else:
+                    feature_importance = raw_fi
+            else:
+                feature_importance = {f: round(1.0 / len(all_features), 4) for f in all_features}
+
             self.models[key] = {
                 'nf': nf,
                 'config': config,
@@ -125,6 +143,7 @@ class TFTService:
                 'hist': config['hist_exog'],
                 'max_days': cfg['max_days'],
                 'stat_cols': list(static.columns.drop('unique_id')),
+                'feature_importance': feature_importance,
             }
             logger.info(f"Loaded TFT model: {key} (H={config['horizon']})")
 
@@ -160,7 +179,8 @@ class TFTService:
                         return cached_result
 
         m = self.models[model_key]
-        H = min(days * HOURS_PER_DAY, m['horizon'])
+        H_model = m['horizon']                          # full model horizon for futr_df
+        H_out = min(days * HOURS_PER_DAY, H_model)     # steps to include in output
 
         lat = float(webcam.camera_latitude or webcam.beach.coordenadas_geograficas.split(',')[0] if webcam.beach.coordenadas_geograficas else 39.5)
         lon = float(webcam.camera_longitude or webcam.beach.coordenadas_geograficas.split(',')[1] if webcam.beach.coordenadas_geograficas else 2.6)
@@ -187,7 +207,7 @@ class TFTService:
         last_real = context['ds_real'].iloc[-1]
 
         weather_daytime = self._filter_daytime(weather_all)
-        futr_df = self._build_future(context, weather_daytime, m, H)
+        futr_df = self._build_future(context, weather_daytime, m, H_model)
 
         uid = webcam.camera_slug
         train_cols = ['unique_id', 'ds', 'y'] + m['futr'] + m['hist']
@@ -205,16 +225,17 @@ class TFTService:
         forecast['TFT'] = forecast['TFT'].clip(lower=0)
 
         max_cc = webcam.max_crowd_count or 0
-        predictions = self._format_output(forecast, weather_all, last_real, H, days, max_cc)
+        predictions = self._format_output(forecast, weather_all, last_real, H_out, days, max_cc)
 
         result = {
             'model': model_key,
             'beach': webcam.beach.beach_name,
             'webcam': uid,
             'horizon_days': days,
-            'horizon_hours': H,
+            'horizon_hours': H_out,
             'max_crowd_count': max_cc,
             'last_data': last_real.strftime('%Y-%m-%dT%H:%M:%S'),
+            'feature_importance': m['feature_importance'],
             'predictions': predictions,
         }
 
@@ -434,10 +455,25 @@ class TFTService:
             if ts.hour > HOUR_MAX:
                 ts = (ts + pd.Timedelta(days=1)).normalize().replace(hour=HOUR_MIN)
 
+        FEATURE_LABELS = {
+            'om_temperature_2m': 'Temperature (°C)',
+            'om_shortwave_radiation': 'Solar Radiation (W/m²)',
+            'om_cloud_cover_low': 'Low Cloud Cover (%)',
+            'om_vapour_pressure_deficit': 'Vapour Pressure Deficit (kPa)',
+            'is_weekend': 'Weekend',
+            'is_summer': 'Summer',
+        }
+
         weather_map = {}
         for _, row in weather.iterrows():
             key = row['ds_real'].strftime('%Y-%m-%dT%H:00')
-            weather_map[key] = float(row['om_temperature_2m']) if pd.notna(row.get('om_temperature_2m')) else None
+            entry = {}
+            if pd.notna(row.get('om_temperature_2m')):
+                entry['temperature'] = round(float(row['om_temperature_2m']), 1)
+            for col in ['om_shortwave_radiation', 'om_cloud_cover_low', 'om_vapour_pressure_deficit']:
+                if col in row and pd.notna(row[col]):
+                    entry[col] = round(float(row[col]), 2)
+            weather_map[key] = entry
 
         start_day = first_forecast.normalize()
         predictions = []
@@ -447,11 +483,15 @@ class TFTService:
             for hour in range(24):
                 ts = current_day.replace(hour=hour)
                 key = ts.strftime('%Y-%m-%dT%H:00')
-                temp = weather_map.get(key)
+                w = weather_map.get(key, {})
+                temp = w.get('temperature')
 
                 if key in pred_map:
                     cc = round(pred_map[key], 1)
                     level = classify_occupancy(cc, max_crowd_count)
+                    features = {FEATURE_LABELS.get(k, k): v for k, v in w.items()}
+                    features['Weekend'] = int(ts.weekday() >= 5)
+                    features['Summer'] = int(ts.month in (6, 7, 8))
                     predictions.append({
                         'timestamp': ts.isoformat(),
                         'hour': hour,
@@ -460,6 +500,7 @@ class TFTService:
                         'occupancy_level': level,
                         'occupancy_ratio': round(cc / max_crowd_count, 3) if max_crowd_count > 0 else None,
                         'temperature': temp,
+                        'features': features,
                     })
                 else:
                     predictions.append({
@@ -470,6 +511,7 @@ class TFTService:
                         'occupancy_level': None,
                         'occupancy_ratio': None,
                         'temperature': temp,
+                        'features': {},
                     })
 
         return predictions
