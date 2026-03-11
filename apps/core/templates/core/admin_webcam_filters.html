@@ -1,0 +1,345 @@
+{% extends 'core/parent.html' %}
+{% load static %}
+
+{% block title %}
+Gestión filtros webcam
+{% endblock %}
+
+{% block content %}
+<section class="container py-5">
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <div class="row g-3 align-items-end">
+        <div class="col-lg-4">
+          <h2 class="h5 mb-2">Webcam</h2>
+          <p class="mb-1"><strong>ID:</strong> {{ webcam.id }}</p>
+          <p class="mb-1"><strong>Playa:</strong> {{ webcam.beach.beach_name }}</p>
+          <p class="mb-0"><strong>Slug:</strong> {{ webcam.camera_slug }}</p>
+        </div>
+
+        <div class="col-lg-4">
+          <label for="webcam-navigation-select" class="form-label">Cambiar de webcam</label>
+          <select id="webcam-navigation-select" class="form-select"
+            onchange="if (this.value) window.location.href=this.value;">
+            {% for item in all_webcams %}
+            {% if item.id == webcam.id %}
+            <option value="{% url current_view_name webcam_id=item.id %}" selected>
+              {{ item.camera_slug }} - {{ item.beach.beach_name }}
+            </option>
+            {% else %}
+            <option value="{% url current_view_name webcam_id=item.id %}">
+              {{ item.camera_slug }} - {{ item.beach.beach_name }}
+            </option>
+            {% endif %}
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-lg-4">
+          <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'admin-webcam-filters' webcam_id=webcam.id %}" class="btn btn-outline-primary">
+              Filtros webcam
+            </a>
+            <a href="{% url 'admin-webcam-snapshots-filters' webcam_id=webcam.id %}" class="btn btn-outline-primary">
+              Filtros snapshots
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if request.GET.saved_filters %}
+  <div class="alert alert-success" role="alert">
+    Los filtros se han guardado correctamente.
+  </div>
+  {% endif %}
+
+  {% if request.GET.saved_mask %}
+  <div class="alert alert-success" role="alert">
+    La máscara se ha generado y guardado correctamente.
+  </div>
+  {% endif %}
+
+  <div class="row g-4 mb-4">
+    <div class="col-lg-7">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h2 class="h4 mb-3">Última imagen</h2>
+
+          {% if latest_snapshot and latest_snapshot.webcam_image %}
+          <p class="mb-2">
+            <strong>Timestamp:</strong> {{ latest_snapshot.ts }}
+          </p>
+          <a href="{{ latest_snapshot.webcam_image.url }}" target="_blank">
+            <img src="{{ latest_snapshot.webcam_image.url }}" alt="Última imagen de la webcam"
+              class="img-fluid img-thumbnail" />
+          </a>
+          {% else %}
+          <p class="mb-0">No hay ninguna imagen disponible para esta webcam.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h2 class="h4 mb-3">Filtros</h2>
+
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="form_type" value="filters" />
+
+            <div class="form-check mb-3">
+              {{ form.filter_frozen_image }}
+              <label class="form-check-label" for="{{ form.filter_frozen_image.id_for_label }}">
+                Frozen image
+              </label>
+            </div>
+
+            <div class="form-check mb-3">
+              {{ form.filter_blurry_image }}
+              <label class="form-check-label" for="{{ form.filter_blurry_image.id_for_label }}">
+                Blurry image
+              </label>
+            </div>
+
+            <div class="form-check mb-4">
+              {{ form.filter_moving_camera }}
+              <label class="form-check-label" for="{{ form.filter_moving_camera.id_for_label }}">
+                Moving camera
+              </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+              Guardar filtros
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h2 class="h4 mb-3">Crear máscaras a partir de un polígono</h2>
+
+      {% if mask_form.non_field_errors %}
+      <div class="alert alert-danger">
+        {{ mask_form.non_field_errors }}
+      </div>
+      {% endif %}
+
+      {% if latest_snapshot and latest_snapshot.webcam_image %}
+      <form method="post" id="mask-polygon-form" class="mb-4">
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="mask_polygon" />
+        {{ mask_form.polygon_points }}
+
+        <div class="row g-3 align-items-end mb-3">
+          <div class="col-md-4">
+            <label class="form-label" for="{{ mask_form.mask_field.id_for_label }}">
+              Tipo de máscara
+            </label>
+            {{ mask_form.mask_field }}
+            {% if mask_form.mask_field.errors %}
+            <div class="text-danger small">{{ mask_form.mask_field.errors }}</div>
+            {% endif %}
+          </div>
+
+          <div class="col-md-auto">
+            <button type="submit" class="btn btn-primary">
+              Guardar máscara
+            </button>
+          </div>
+        </div>
+
+        {% if mask_form.polygon_points.errors %}
+        <div class="text-danger small mb-3">{{ mask_form.polygon_points.errors }}</div>
+        {% endif %}
+
+        <p class="text-muted mb-3">
+          Usa las herramientas del mapa para dibujar o editar un polígono sobre la imagen.
+          Debe quedar exactamente un polígono antes de guardar.
+        </p>
+
+        <div class="border rounded p-2 bg-light">
+          <div id="mask-editor-map" data-image-url="{{ latest_snapshot.webcam_image.url }}"
+            data-image-width="{{ latest_snapshot.webcam_image.width }}"
+            data-image-height="{{ latest_snapshot.webcam_image.height }}"
+            style="width: 100%; height: 70vh; min-height: 500px;"></div>
+        </div>
+      </form>
+      {% else %}
+      <p class="mb-0">
+        No se puede generar una máscara porque esta webcam no tiene una imagen base disponible.
+      </p>
+      {% endif %}
+
+      <hr class="my-4" />
+
+      <h3 class="h5 mb-3">Máscaras actuales</h3>
+      <div class="row g-3">
+        <div class="col-md-4">
+          <div class="border rounded p-3 h-100">
+            <p class="fw-semibold mb-2">Mask sand</p>
+            {% if webcam.mask_sand %}
+            <a href="{{ webcam.mask_sand.url }}" target="_blank">
+              <img src="{{ webcam.mask_sand.url }}" alt="Mask sand" class="img-fluid img-thumbnail" />
+            </a>
+            {% else %}
+            <p class="mb-0 text-muted">No disponible.</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="border rounded p-3 h-100">
+            <p class="fw-semibold mb-2">Mask swimming water</p>
+            {% if webcam.mask_swimming_water %}
+            <a href="{{ webcam.mask_swimming_water.url }}" target="_blank">
+              <img src="{{ webcam.mask_swimming_water.url }}" alt="Mask swimming water"
+                class="img-fluid img-thumbnail" />
+            </a>
+            {% else %}
+            <p class="mb-0 text-muted">No disponible.</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="border rounded p-3 h-100">
+            <p class="fw-semibold mb-2">Mask sand and water</p>
+            {% if webcam.mask_sand_and_water %}
+            <a href="{{ webcam.mask_sand_and_water.url }}" target="_blank">
+              <img src="{{ webcam.mask_sand_and_water.url }}" alt="Mask sand and water"
+                class="img-fluid img-thumbnail" />
+            </a>
+            {% else %}
+            <p class="mb-0 text-muted">No disponible.</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const mapContainer = document.getElementById('mask-editor-map');
+    const coordinatesField = document.getElementById('coordinates');
+    const maskForm = document.getElementById('mask-polygon-form');
+
+    if (!mapContainer || !coordinatesField || !maskForm) {
+      return;
+    }
+
+    const imageUrl = mapContainer.dataset.imageUrl;
+    const imageWidth = parseInt(mapContainer.dataset.imageWidth, 10);
+    const imageHeight = parseInt(mapContainer.dataset.imageHeight, 10);
+
+    const bounds = [[0, 0], [imageHeight, imageWidth]];
+
+    const map = L.map('mask-editor-map', {
+      crs: L.CRS.Simple,
+      minZoom: -3,
+      maxZoom: 2,
+      zoomSnap: 0.25,
+    });
+
+    L.imageOverlay(imageUrl, bounds).addTo(map);
+    map.fitBounds(bounds);
+
+    const drawnItems = new L.FeatureGroup();
+    map.addLayer(drawnItems);
+
+    const drawControl = new L.Control.Draw({
+      draw: {
+        polyline: false,
+        rectangle: false,
+        circle: false,
+        marker: false,
+        circlemarker: false,
+        polygon: {
+          allowIntersection: false,
+          showArea: false,
+        }
+      },
+      edit: {
+        featureGroup: drawnItems,
+        edit: true,
+        remove: true,
+      }
+    });
+
+    map.addControl(drawControl);
+
+    function syncPolygonToHiddenField() {
+      const layers = drawnItems.getLayers();
+
+      if (layers.length !== 1) {
+        coordinatesField.value = '';
+        return;
+      }
+
+      const layer = layers[0];
+
+      if (!(layer instanceof L.Polygon)) {
+        coordinatesField.value = '';
+        return;
+      }
+
+      const latLngs = layer.getLatLngs();
+
+      if (!latLngs || !latLngs.length || !latLngs[0].length) {
+        coordinatesField.value = '';
+        return;
+      }
+
+      const points = latLngs[0].map(function (latLng) {
+        return {
+          x: Math.round(latLng.lng),
+          y: Math.round(imageHeight - latLng.lat)
+        };
+      });
+
+      coordinatesField.value = JSON.stringify(points);
+    }
+
+    map.on(L.Draw.Event.CREATED, function (event) {
+      drawnItems.clearLayers();
+      drawnItems.addLayer(event.layer);
+      syncPolygonToHiddenField();
+    });
+
+    map.on(L.Draw.Event.EDITED, function () {
+      syncPolygonToHiddenField();
+    });
+
+    map.on(L.Draw.Event.DELETED, function () {
+      syncPolygonToHiddenField();
+    });
+
+    maskForm.addEventListener('submit', function (event) {
+      syncPolygonToHiddenField();
+
+      if (!coordinatesField.value) {
+        event.preventDefault();
+        alert('Debes dejar exactamente un polígono dibujado antes de guardar.');
+      }
+    });
+  });
+</script>
+{% endblock %}

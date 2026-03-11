@@ -23,9 +23,13 @@ class WebCam(models.Model):
     num_consecutive_failures = models.IntegerField(default=0)
     max_crowd_count = models.IntegerField(default=0)
     # Image masks
-    mask_beach = models.ImageField(upload_to='masks/beach/', blank=True, null=True, help_text="Mask of the beach area (sand, areas with people, etc). For non-movable webcams only.")
-    mask_swimming = models.ImageField(upload_to='masks/swimming', blank=True, null=True, help_text="Mask of the swimming area (near the beach, shallow waters). For non-movable webcams only.")
-    mask_boats = models.ImageField(upload_to='masks/ocean', blank=True, null=True, help_text="Mask of the boat area (further from beach, deep waters). For non-movable webcams only.")
+    mask_sand = models.ImageField(upload_to='masks/beach/', blank=True, null=True, help_text="Mask of the beach area (sand, areas with people, etc). For non-movable webcams only.")
+    mask_swimming_water = models.ImageField(upload_to='masks/swimming', blank=True, null=True, help_text="Mask of the swimming area (near the beach, shallow waters). For non-movable webcams only.")
+    mask_sand_and_water = models.ImageField(upload_to='masks/sand_and_water/', blank=True, null=True, help_text="Mask of the whole area of interest (beach + swimming water). For non-movable webcams only.")
+    # Filters
+    filter_frozen_image = models.BooleanField(default=False)
+    filter_blurry_image = models.BooleanField(default=False)
+    filter_moving_camera = models.BooleanField(default=False)
     # Webcam info
     public_url = models.CharField(max_length=2048, blank=True, null=True, help_text="URL to redirect viewers to original source.")
     video_seconds = models.IntegerField(default=10, help_text="Seconds to record for the video", blank=True)
@@ -99,6 +103,12 @@ class WebCam(models.Model):
             snapshot = Snapshot.objects.create(
                 webcam=self,
                 ts=ts,
+                filter_frozen_image=self.filter_frozen_image,
+                filter_blurry_image=self.filter_blurry_image,
+                filter_moving_camera=self.filter_moving_camera,
+                mask_sand=self.mask_sand,
+                mask_swimming_water=self.mask_swimming_water,
+                mask_sand_and_water=self.mask_sand_and_water,   
                 predicted_crowd_count=None,
             )
             snapshot.webcam_video.name = video_path
