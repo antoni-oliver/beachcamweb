@@ -1,0 +1,145 @@
+{% extends 'core/parent.html' %}
+
+{% block title %}
+Gestión filtros snapshots
+{% endblock %}
+
+{% block content %}
+<section class="container py-5">
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <div class="row g-3 align-items-end">
+        <div class="col-lg-4">
+          <h2 class="mb-2">Webcam</h2>
+          <p class="mb-1"><strong>ID:</strong> {{ webcam.id }}</p>
+          <p class="mb-1"><strong>Playa:</strong> {{ webcam.beach.beach_name }}</p>
+          <p class="mb-0"><strong>Slug:</strong> {{ webcam.camera_slug }}</p>
+        </div>
+
+        <div class="col-lg-4">
+          <label for="webcam-navigation-select" class="form-label">Cambiar de webcam</label>
+          <select id="webcam-navigation-select" class="form-select"
+            onchange="if (this.value) window.location.href=this.value;">
+            {% for item in all_webcams %}
+            {% if item.id == webcam.id %}
+            <option value="{% url current_view_name webcam_id=item.id %}" selected>
+              {{ item.camera_slug }} - {{ item.beach.beach_name }}
+            </option>
+            {% else %}
+            <option value="{% url current_view_name webcam_id=item.id %}">
+              {{ item.camera_slug }} - {{ item.beach.beach_name }}
+            </option>
+            {% endif %}
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-lg-4">
+          <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'admin-webcam-filters' webcam_id=webcam.id %}" class="btn btn-outline-primary">
+              Filtros webcam
+            </a>
+            <a href="{% url 'admin-webcam-snapshots-filters' webcam_id=webcam.id %}" class="btn btn-outline-primary">
+              Filtros snapshots
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  {% if updated_count is not None %}
+  <div class="alert alert-success" role="alert">
+    Se han actualizado {{ updated_count }} snapshots.
+  </div>
+  {% endif %}
+
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <h2 class="h4 mb-3">Actualizar filtros de Snapshots por rango temporal</h2>
+
+      <form method="post">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+          {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label" for="{{ form.timestamp_since.id_for_label }}">
+              Timestamp since
+            </label>
+            {{ form.timestamp_since }}
+            {% if form.timestamp_since.errors %}
+            <div class="text-danger small">{{ form.timestamp_since.errors }}</div>
+            {% endif %}
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label" for="{{ form.timestamp_until.id_for_label }}">
+              Timestamp until
+            </label>
+            {{ form.timestamp_until }}
+            {% if form.timestamp_until.errors %}
+            <div class="text-danger small">{{ form.timestamp_until.errors }}</div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="form-check mb-3">
+          {{ form.filter_frozen_image }}
+          <label class="form-check-label" for="{{ form.filter_frozen_image.id_for_label }}">
+            Frozen image
+          </label>
+        </div>
+
+        <div class="form-check mb-3">
+          {{ form.filter_blurry_image }}
+          <label class="form-check-label" for="{{ form.filter_blurry_image.id_for_label }}">
+            Blurry image
+          </label>
+        </div>
+
+        <div class="form-check mb-4">
+          {{ form.filter_moving_camera }}
+          <label class="form-check-label" for="{{ form.filter_moving_camera.id_for_label }}">
+            Moving camera
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+          Actualizar snapshots
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h2 class="h4 mb-3">Snapshots de la webcam</h2>
+
+      {% if snapshots %}
+      <ul class="mb-0">
+        {% for snapshot in snapshots %}
+        <li class="mb-2">
+          {% if snapshot.webcam_image %}
+          <a href="{{ snapshot.webcam_image.url }}" target="_blank">
+            {{ snapshot.ts }}
+          </a>
+          {% else %}
+          {{ snapshot.ts }}
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="mb-0">No hay snapshots con imagen para esta webcam.</p>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}
