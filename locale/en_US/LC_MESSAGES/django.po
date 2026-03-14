@@ -228,3 +228,15 @@ msgstr "Model"
 
 msgid "hindcast-last-data"
 msgstr "Last data"
+
+msgid "overview"
+msgstr "Overview"
+
+msgid "debug"
+msgstr "Debug"
+
+msgid "fundaciobit-debug"
+msgstr "FundacioBit Debug"
+
+msgid "forecast"
+msgstr "Forecast"

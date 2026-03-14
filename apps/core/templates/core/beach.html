@@ -19,12 +19,13 @@
 
     {% include 'components/history.html' with history=history %}
 
-    {% include 'components/forecast.html' with cam=cam %}
-
     <a href="{{ prediction.predicted_image.url }}" target="_blank" title="{% translate 'current-occupation-estimation' %} {{cam.beach.beach_name}}">
-    <img class="d-block mx-auto mb-4 my-5 img-thumbnail" src="{{ prediction.predicted_image.url }}" alt="" />
+        <img class="d-block mx-auto mb-4 my-5 img-thumbnail" src="{{ prediction.predicted_image.url }}" alt="" />
     </a>
     <a href="{{ cam.public_url }}" target="_blank">{% translate "original source" %}: {{ cam.public_url }}</a>
+
+    {% include 'components/forecast.html' with cam=cam %}
+
   </section>
 
   {% translate "other-beaches" as gallery_title %}

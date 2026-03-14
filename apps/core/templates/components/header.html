@@ -10,7 +10,18 @@
       <a href="/#platges" class="nav-link">{% translate "beaches" %}</a>
     </li>
     <li class="nav-item">
+      <a href="/overview" class="nav-link">{% translate "overview" %}</a>
+    </li>
+    <li class="nav-item">
       <a href="{% url 'analyze-image' %}" class="nav-link {% if active_url == '/analyze-image' %}active{% endif %}">{% translate "analyze-image" %}</a>
     </li>
+    {% if request.user.is_staff %}
+    <li class="nav-item">
+      <a href="/forecast" class="nav-link {% if active_url == '/forecast' %}active{% endif %}">{% translate "forecast" %}</a>
+    </li>
+    <li class="nav-item">
+      <a href="{% url 'fundaciobit-debug' %}" class="nav-link {% if active_url == '/debug/fundaciobit/' %}active{% endif %}">{% translate "fundaciobit-debug" %}</a>
+    </li>
+    {% endif %}
   </ul>
 </header>

@@ -138,7 +138,7 @@ LANGUAGES = [
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-MEDIA_URL = 'media/'
+MEDIA_URL = 'https://ocupacioplatges.uib.es/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # run python manage.py collectstatic
@@ -157,10 +157,13 @@ CSRF_TRUSTED_ORIGINS = ['https://ocupacioplatges.uib.es', 'https://ocupacioplatg
 
 API_JWT_SECRET = LOCAL_SETTINGS.API_JWT_SECRET
 API_JWT_ALGOS = LOCAL_SETTINGS.API_JWT_ALGOS
-TFT_MODELS_DIR = '/Users/guilhermemossibento/Desktop/master_activities/TFM/beach_counting/beachcamweb/apps/prediction/tft_models'
+TFT_MODELS_DIR = 'apps/prediction/tft_models'
 
 TFT_MODEL_SETS = {
-    'full_v7':   '/Users/guilhermemossibento/tft_sets/full_v7',
-    'cutoff_v7': '/Users/guilhermemossibento/tft_sets/cutoff_v7',
-    'old': '/Users/guilhermemossibento/Desktop/master_activities/TFM/beach_counting/beachcamweb/apps/prediction/tft_models',
+    # 'tft_old_script_new_dataset': '/TFM/beach_counting/weather_data/tft_old_new_dataset',
 }
+
+PYTORCH_ENABLE_MPS_FALLBACK=1
+os.putenv("PYTORCH_ENABLE_MPS_FALLBACK", "1")
+TFT_WEATHER_CACHE_PATH = 'apps/prediction/weather_archive_cache.pkl'
+TFT_EVAL_JSON = 'apps/prediction/model_evaluation.json'

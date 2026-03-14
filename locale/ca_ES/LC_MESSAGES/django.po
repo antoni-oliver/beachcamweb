@@ -228,3 +228,15 @@ msgstr "Model"
 
 msgid "hindcast-last-data"
 msgstr "Últimes dades"
+
+msgid "overview"
+msgstr "Visió general"
+
+msgid "debug"
+msgstr "Depuració"
+
+msgid "fundaciobit-debug"
+msgstr "FundacioBit Depuración"
+
+msgid "forecast"
+msgstr "Previsió"

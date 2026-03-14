@@ -1,0 +1,586 @@
+{% extends 'core/parent.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% translate "forecast" %} — All Beaches (15 Days){% endblock %}
+
+{% block styles %}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap');
+
+  .fo-page { background: #f8fafc; min-height: calc(100vh - 80px); padding-bottom: 4rem; }
+
+  .fo-hero {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+    color: #fff;
+    padding: 2.5rem 0 2rem;
+  }
+  .fo-hero h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.25rem; }
+  .fo-subtitle { font-family: 'DM Mono', monospace; font-size: 0.72rem; color: rgba(255,255,255,0.45); }
+  .fo-legend { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem; }
+  .fo-legend-item { display: flex; align-items: center; gap: 0.35rem; font-size: 0.7rem; color: rgba(255,255,255,0.65); }
+  .fo-legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+
+  .fo-summary { display: flex; background: #fff; border-bottom: 1px solid #e2e8f0; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .fo-stat { flex: 1; padding: 1rem 1.5rem; border-right: 1px solid #e2e8f0; text-align: center; }
+  .fo-stat:last-child { border-right: none; }
+  .fo-stat .val { font-size: 1.4rem; font-weight: 700; color: #0ea5e9; line-height: 1; font-family: 'DM Mono', monospace; }
+  .fo-stat .lbl { font-size: 0.63rem; color: #94a3b8; margin-top: 0.25rem; text-transform: uppercase; letter-spacing: 0.06em; }
+
+  /* Controls */
+  .fo-controls { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 0.7rem 1.5rem; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+  .fo-controls label { font-size: 0.7rem; color: #64748b; font-family: 'DM Mono', monospace; white-space: nowrap; }
+  .fo-btns { display: flex; gap: 0.25rem; }
+  .fo-btn { border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; border-radius: 4px; padding: 0.18rem 0.55rem; font-size: 0.7rem; font-family: 'DM Mono', monospace; cursor: pointer; transition: all 0.12s; }
+  .fo-btn:hover { border-color: #0ea5e9; color: #0ea5e9; }
+  .fo-btn.active { background: #0ea5e9; border-color: #0ea5e9; color: #fff; }
+  .fo-sort { border: 1px solid #e2e8f0; background: #f8fafc; color: #374151; border-radius: 4px; padding: 0.2rem 0.5rem; font-size: 0.7rem; font-family: 'DM Mono', monospace; cursor: pointer; }
+
+  /* View switcher */
+  .fo-view-switcher { display: flex; background: #f1f5f9; border-radius: 6px; padding: 2px; gap: 2px; }
+  .fo-view-btn { border: none; background: transparent; color: #64748b; border-radius: 4px; padding: 0.28rem 0.85rem; font-size: 0.72rem; font-family: 'DM Mono', monospace; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .fo-view-btn.active { background: #fff; color: #0f172a; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-weight: 600; }
+  .fo-divider { width: 1px; height: 20px; background: #e2e8f0; margin: 0 0.1rem; align-self: center; }
+
+  /* Daily heatmap */
+  .fo-grid-wrap { padding: 1.25rem 1.5rem; overflow-x: auto; }
+  .fo-grid { min-width: 900px; }
+  .fo-date-row { display: grid; grid-template-columns: 175px repeat(15, 1fr); gap: 2px; margin-bottom: 3px; }
+  .fo-date-cell { text-align: center; font-family: 'DM Mono', monospace; font-size: 0.6rem; color: #94a3b8; padding: 0.15rem 0; line-height: 1.4; }
+  .fo-date-cell.weekend { color: #7c3aed; font-weight: 500; }
+  .fo-beach-row { display: grid; grid-template-columns: 175px repeat(15, 1fr); gap: 2px; margin-bottom: 2px; opacity: 0; transform: translateY(5px); animation: foUp 0.22s ease forwards; }
+  @keyframes foUp { to { opacity: 1; transform: translateY(0); } }
+  .fo-beach-label { display: flex; align-items: center; font-size: 0.7rem; font-weight: 600; color: #374151; padding-right: 0.5rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; transition: color 0.12s; }
+  .fo-beach-label:hover { color: #0ea5e9; }
+  .fo-cell { position: relative; height: 36px; border-radius: 4px; cursor: pointer; transition: transform 0.1s, filter 0.1s; overflow: hidden; }
+  .fo-cell:hover { transform: scale(1.07); filter: brightness(1.12); z-index: 10; }
+  .fo-cell.fo-null   { background: #f1f5f9; border: 1px solid #e2e8f0; }
+  .fo-cell.fo-vlow   { background: #bfdbfe; }
+  .fo-cell.fo-low    { background: #0ea5e9; }
+  .fo-cell.fo-medium { background: #f59e0b; }
+  .fo-cell.fo-high   { background: #ef4444; }
+  .fo-fill { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.11); }
+  .fo-pct { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: 'DM Mono', monospace; font-size: 0.57rem; font-weight: 500; color: rgba(0,0,0,0.55); pointer-events: none; }
+  .fo-cell.fo-low .fo-pct, .fo-cell.fo-medium .fo-pct, .fo-cell.fo-high .fo-pct { color: rgba(255,255,255,0.92); }
+
+  /* Beach cards */
+  .fo-cards-wrap { padding: 1.25rem 1.5rem; }
+  .fo-cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(480px, 1fr)); gap: 1rem; }
+  @media (max-width: 600px) { .fo-cards-grid { grid-template-columns: 1fr; } }
+
+  .fo-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    opacity: 0;
+    transform: translateY(6px);
+    animation: foUp 0.25s ease forwards;
+    transition: box-shadow 0.15s, border-color 0.15s;
+  }
+  .fo-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); border-color: #cbd5e1; }
+
+  .fo-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem 0.6rem;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .fo-card-name { font-size: 0.85rem; font-weight: 700; color: #0f172a; cursor: pointer; transition: color 0.12s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .fo-card-name:hover { color: #0ea5e9; }
+  .fo-card-meta { display: flex; gap: 1rem; flex-shrink: 0; margin-left: 0.75rem; }
+  .fo-card-stat .v { font-family: 'DM Mono', monospace; font-size: 0.82rem; font-weight: 600; color: #374151; }
+  .fo-card-stat .l { font-size: 0.58rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.04em; }
+
+  .fo-card-chart {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0.6rem 0.75rem 0.2rem;
+    scrollbar-width: thin;
+    scrollbar-color: #e2e8f0 transparent;
+  }
+  .fo-card-chart::-webkit-scrollbar { height: 4px; }
+  .fo-card-chart::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 2px; }
+  .fo-chart-svg { display: block; cursor: crosshair; }
+
+  .fo-card-footer {
+    display: flex;
+    gap: 0.3rem;
+    padding: 0.45rem 0.75rem 0.6rem;
+    flex-wrap: wrap;
+    border-top: 1px solid #f8fafc;
+  }
+  .fo-day-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem;
+    padding: 0.12rem 0.45rem;
+    border-radius: 3px;
+    color: #fff;
+    white-space: nowrap;
+    cursor: default;
+  }
+
+  /* Tooltip */
+  #fo-tip { position: fixed; background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 0.65rem 0.85rem; pointer-events: none; z-index: 9999; font-family: 'DM Mono', monospace; font-size: 0.7rem; color: #f1f5f9; line-height: 1.65; max-width: 210px; display: none; box-shadow: 0 8px 24px rgba(0,0,0,0.35); }
+  #fo-tip .fo-tip-name { font-weight: 600; font-size: 0.76rem; margin-bottom: 0.15rem; }
+  #fo-tip .fo-tip-date { color: #38bdf8; margin-bottom: 0.35rem; }
+  #fo-tip .fo-tip-badge { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 0.6rem; margin-bottom: 0.25rem; }
+
+  #fo-status { text-align: center; padding: 3rem; color: #94a3b8; font-family: 'DM Mono', monospace; font-size: 0.78rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="fo-page">
+
+  <div class="fo-hero">
+    <div class="container">
+      <h1>{% translate "forecast" %} — All Beaches</h1>
+      <div class="fo-subtitle" id="fo-gen-at">Loading…</div>
+      <div class="fo-legend">
+        <div class="fo-legend-item"><div class="fo-legend-dot" style="background:#f1f5f9;border:1px solid #cbd5e1"></div> No data</div>
+        <div class="fo-legend-item"><div class="fo-legend-dot" style="background:#bfdbfe"></div> Very low &lt;25%</div>
+        <div class="fo-legend-item"><div class="fo-legend-dot" style="background:#0ea5e9"></div> Low 25–50%</div>
+        <div class="fo-legend-item"><div class="fo-legend-dot" style="background:#f59e0b"></div> Medium 50–75%</div>
+        <div class="fo-legend-item"><div class="fo-legend-dot" style="background:#ef4444"></div> High ≥75%</div>
+        <div class="fo-legend-item"><div class="fo-legend-dot" style="background:#7c3aed"></div> Weekend</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="fo-summary" id="fo-summary" style="display:none">
+    <div class="fo-stat"><div class="val" id="fo-s-n">—</div><div class="lbl">Beaches</div></div>
+    <div class="fo-stat"><div class="val" id="fo-s-day">—</div><div class="lbl">Busiest day</div></div>
+    <div class="fo-stat"><div class="val" id="fo-s-beach">—</div><div class="lbl">Busiest beach</div></div>
+    <div class="fo-stat"><div class="val" id="fo-s-avg">—</div><div class="lbl">Avg occupancy 15d</div></div>
+  </div>
+
+  <div class="fo-controls">
+    <div class="fo-view-switcher" id="fo-view-switcher">
+      <button class="fo-view-btn active" data-v="daily">📅 Daily heatmap</button>
+      <button class="fo-view-btn" data-v="cards">📊 Beach cards</button>
+    </div>
+    <div class="fo-divider"></div>
+
+    <div id="fo-daily-ctl" style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap">
+      <label>Metric:</label>
+      <div class="fo-btns" id="fo-metric-btns">
+        <button class="fo-btn active" data-m="avg">Daily avg</button>
+        <button class="fo-btn" data-m="peak">Peak</button>
+        <button class="fo-btn" data-m="12">12:00</button>
+        <button class="fo-btn" data-m="14">14:00</button>
+      </div>
+      <label>Sort:</label>
+      <select class="fo-sort" id="fo-sort">
+        <option value="name">Name</option>
+        <option value="peak">Peak ↓</option>
+        <option value="avg">Avg ↓</option>
+      </select>
+    </div>
+
+    <div id="fo-cards-ctl" style="display:none;align-items:center;gap:0.6rem;flex-wrap:wrap">
+      <label>Sort:</label>
+      <select class="fo-sort" id="fo-sort-cards">
+        <option value="name">Name</option>
+        <option value="peak">Peak ↓</option>
+        <option value="avg">Avg ↓</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="fo-status">Fetching forecasts for all beaches…</div>
+
+  <div class="fo-grid-wrap" id="fo-daily-view" style="display:none">
+    <div class="fo-grid" id="fo-grid"></div>
+  </div>
+
+  <div class="fo-cards-wrap" id="fo-cards-view" style="display:none">
+    <div class="fo-cards-grid" id="fo-cards"></div>
+  </div>
+
+</div>
+<div id="fo-tip"></div>
+
+<script>
+const FO_DAYS = 15;
+const FO_HMIN = 8, FO_HMAX = 18;
+const FO_HOURS = Array.from({length: FO_HMAX - FO_HMIN + 1}, (_, i) => FO_HMIN + i);
+const FO_DN = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const FO_MN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+let foData = [], foMetric = 'avg', foSort = 'name', foSortCards = 'name', foView = 'daily';
+
+const FO_COL = {high:'#ef4444', medium:'#f59e0b', low:'#0ea5e9', vlow:'#bfdbfe', null:'#e2e8f0'};
+const FO_TXT = {high:'#fff', medium:'#fff', low:'#fff', vlow:'#1e3a5f', null:'#94a3b8'};
+const FO_LBL = {high:'HIGH', medium:'MEDIUM', low:'LOW', vlow:'VERY LOW', null:'No data'};
+
+function foClassify(rel) {
+  if (rel == null) return 'null';
+  if (rel >= 0.75) return 'high';
+  if (rel >= 0.50) return 'medium';
+  if (rel >= 0.25) return 'low';
+  return 'vlow';
+}
+function foPct(rel) { return rel == null ? '—' : Math.round(rel * 100) + '%'; }
+
+function foGetDays() {
+  const t = new Date(); t.setHours(0,0,0,0);
+  return Array.from({length: FO_DAYS}, (_, i) => {
+    const d = new Date(t); d.setDate(t.getDate() + i + 1); return d;
+  });
+}
+
+function foHourMap(fc) {
+  const m = {};
+  for (const p of (fc.predictions || []))
+    if (p.available) m[p.timestamp.substring(0, 13)] = p;
+  return m;
+}
+
+function foDayVal(map, date, mode) {
+  const base = date.toISOString().substring(0, 10);
+  const preds = [];
+  for (let h = FO_HMIN; h <= FO_HMAX; h++) {
+    const p = map[`${base}T${String(h).padStart(2,'0')}`];
+    if (p) preds.push(p);
+  }
+  if (!preds.length) return null;
+  if (mode === 'avg')  return preds.reduce((s,p) => s + (p.occupancy_ratio??0), 0) / preds.length;
+  if (mode === 'peak') return Math.max(...preds.map(p => p.occupancy_ratio??0));
+  const p = map[`${base}T${String(parseInt(mode)).padStart(2,'0')}`];
+  return p ? (p.occupancy_ratio??null) : null;
+}
+
+// ── Shared summary ─────────────────────────────────────────────────────────────
+function foUpdateSummary(days) {
+  let tRel=0, tN=0, pdVal=0, pdIdx=0, pbName='', pbVal=0;
+  const dt = days.map(() => ({sum:0,n:0}));
+  for (const fc of foData) {
+    let fcPeak=0;
+    days.forEach((d,i) => {
+      const v = foDayVal(fc._m, d, 'avg');
+      if (v!=null){tRel+=v;tN++;dt[i].sum+=v;dt[i].n++;fcPeak=Math.max(fcPeak,v);}
+    });
+    if (fcPeak>pbVal){pbVal=fcPeak;pbName=fc.beach;}
+  }
+  dt.forEach((x,i)=>{const a=x.n?x.sum/x.n:0;if(a>pdVal){pdVal=a;pdIdx=i;}});
+  document.getElementById('fo-s-n').textContent = foData.length;
+  const pd = days[pdIdx];
+  document.getElementById('fo-s-day').textContent = pd?`${FO_DN[pd.getDay()]} ${pd.getDate()} ${FO_MN[pd.getMonth()]}`:'—';
+  document.getElementById('fo-s-beach').textContent = pbName||'—';
+  document.getElementById('fo-s-avg').textContent = tN?foPct(tRel/tN):'—';
+  document.getElementById('fo-summary').style.display='flex';
+}
+
+// ── Daily heatmap ──────────────────────────────────────────────────────────────
+function foRenderDaily() {
+  const days = foGetDays();
+  foUpdateSummary(days);
+  const grid = document.getElementById('fo-grid');
+  grid.innerHTML = '';
+
+  let sorted = [...foData];
+  if (foSort==='name') sorted.sort((a,b)=>a.beach.localeCompare(b.beach));
+  else {
+    const m = foSort==='peak'?'peak':'avg';
+    sorted.sort((a,b)=>{
+      const sc=fc=>{const v=days.map(d=>foDayVal(fc._m,d,m)).filter(v=>v!=null);return v.length?(m==='peak'?Math.max(...v):v.reduce((a,b)=>a+b)/v.length):0;};
+      return sc(b)-sc(a);
+    });
+  }
+
+  // Header row
+  const hdr = document.createElement('div');
+  hdr.className = 'fo-date-row';
+  hdr.appendChild(document.createElement('div'));
+  days.forEach(d => {
+    const we = d.getDay()===0||d.getDay()===6;
+    const c = document.createElement('div');
+    c.className = 'fo-date-cell'+(we?' weekend':'');
+    c.innerHTML = `${FO_DN[d.getDay()]}<br>${d.getDate()} ${FO_MN[d.getMonth()]}`;
+    hdr.appendChild(c);
+  });
+  grid.appendChild(hdr);
+
+  sorted.forEach((fc, ri) => {
+    const row = document.createElement('div');
+    row.className = 'fo-beach-row';
+    row.style.animationDelay = `${ri*16}ms`;
+    const lbl = document.createElement('div');
+    lbl.className = 'fo-beach-label';
+    lbl.textContent = fc.beach;
+    lbl.onclick = () => window.location.href = `/platja/${(fc.webcam || fc.cameras?.[0]?.webcam)}/`;
+    row.appendChild(lbl);
+    days.forEach(d => {
+      const rel = foDayVal(fc._m, d, foMetric);
+      const level = foClassify(rel);
+      const cell = document.createElement('div');
+      cell.className = `fo-cell fo-${level}`;
+      if (rel != null) {
+        const fill = document.createElement('div'); fill.className='fo-fill'; fill.style.height=Math.min(100,Math.round(rel*100))+'%'; cell.appendChild(fill);
+        const pct = document.createElement('div'); pct.className='fo-pct'; pct.textContent=Math.round(rel*100)+'%'; cell.appendChild(pct);
+      }
+      cell.addEventListener('mouseenter', e => foShowDayTip(e, fc, d, rel, level));
+      cell.addEventListener('mousemove', foMoveTip);
+      cell.addEventListener('mouseleave', foHideTip);
+      row.appendChild(cell);
+    });
+    grid.appendChild(row);
+  });
+
+  document.getElementById('fo-daily-view').style.display='block';
+}
+
+// ── Beach cards with bar charts ────────────────────────────────────────────────
+// Bar chart constants
+const BAR_W = 5;    // px per bar
+const BAR_G = 1;    // gap between bars within a day
+const DAY_G = 5;    // gap between day groups
+const CH    = 80;   // chart area height
+const LBL_H = 18;  // x-axis label height
+
+function foRenderCards() {
+  const days = foGetDays();
+  foUpdateSummary(days);
+  const container = document.getElementById('fo-cards');
+  container.innerHTML = '';
+
+  let sorted = [...foData];
+  if (foSortCards==='name') sorted.sort((a,b)=>a.beach.localeCompare(b.beach));
+  else {
+    const m = foSortCards==='peak'?'peak':'avg';
+    sorted.sort((a,b)=>{
+      const sc=fc=>{const v=days.map(d=>foDayVal(fc._m,d,m)).filter(v=>v!=null);return v.length?(m==='peak'?Math.max(...v):v.reduce((a,b)=>a+b)/v.length):0;};
+      return sc(b)-sc(a);
+    });
+  }
+
+  const ns = 'http://www.w3.org/2000/svg';
+  const dayW = FO_HOURS.length * (BAR_W + BAR_G) - BAR_G; // width of one day group
+  const totalW = days.length * (dayW + DAY_G) - DAY_G;
+
+  sorted.forEach((fc, ri) => {
+    // Header stats
+    const allVals = [];
+    days.forEach(d => FO_HOURS.forEach(h => {
+      const p = fc._m[`${d.toISOString().substring(0,10)}T${String(h).padStart(2,'0')}`];
+      if (p && p.occupancy_ratio != null) allVals.push(p.occupancy_ratio);
+    }));
+    const avgVal  = allVals.length ? allVals.reduce((a,b)=>a+b)/allVals.length : null;
+    const peakVal = allVals.length ? Math.max(...allVals) : null;
+    const peakLevel = foClassify(peakVal);
+
+    const card = document.createElement('div');
+    card.className = 'fo-card';
+    card.style.animationDelay = `${ri*30}ms`;
+
+    // ── Header ──────────────────────────────
+    const hdr = document.createElement('div');
+    hdr.className = 'fo-card-header';
+    hdr.innerHTML = `
+      <div class="fo-card-name" onclick="window.location.href='/platja/${(fc.webcam || fc.cameras?.[0]?.webcam)}/'" title="${(fc.webcam || fc.cameras?.[0]?.webcam)}">${fc.beach}</div>
+      <div class="fo-card-meta">
+        <div class="fo-card-stat">
+          <div class="v">${avgVal!=null?foPct(avgVal):'—'}</div>
+          <div class="l">15d avg</div>
+        </div>
+        <div class="fo-card-stat">
+          <div class="v" style="color:${FO_COL[peakLevel]}">${peakVal!=null?foPct(peakVal):'—'}</div>
+          <div class="l">peak</div>
+        </div>
+      </div>
+    `;
+    card.appendChild(hdr);
+
+    // ── SVG bar chart ────────────────────────
+    const chartWrap = document.createElement('div');
+    chartWrap.className = 'fo-card-chart';
+
+    const svg = document.createElementNS(ns,'svg');
+    svg.setAttribute('viewBox', `0 0 ${totalW} ${CH + LBL_H}`);
+    svg.setAttribute('width', totalW);
+    svg.setAttribute('height', CH + LBL_H);
+    svg.classList.add('fo-chart-svg');
+
+    // Baseline
+    const base = document.createElementNS(ns,'line');
+    base.setAttribute('x1',0); base.setAttribute('y1',CH);
+    base.setAttribute('x2',totalW); base.setAttribute('y2',CH);
+    base.setAttribute('stroke','#e2e8f0'); base.setAttribute('stroke-width','1');
+    svg.appendChild(base);
+
+    // 50% guide line
+    const guide = document.createElementNS(ns,'line');
+    guide.setAttribute('x1',0); guide.setAttribute('y1',CH*0.5);
+    guide.setAttribute('x2',totalW); guide.setAttribute('y2',CH*0.5);
+    guide.setAttribute('stroke','#e2e8f0'); guide.setAttribute('stroke-width','0.5');
+    guide.setAttribute('stroke-dasharray','3,3');
+    svg.appendChild(guide);
+
+    days.forEach((d, di) => {
+      const we = d.getDay()===0||d.getDay()===6;
+      const dx = di * (dayW + DAY_G);
+
+      // Weekend tint
+      if (we) {
+        const bg = document.createElementNS(ns,'rect');
+        bg.setAttribute('x',dx); bg.setAttribute('y',0);
+        bg.setAttribute('width',dayW); bg.setAttribute('height',CH);
+        bg.setAttribute('fill','rgba(124,58,237,0.05)');
+        svg.appendChild(bg);
+      }
+
+      // Day label
+      const lbl = document.createElementNS(ns,'text');
+      lbl.setAttribute('x', dx + dayW/2);
+      lbl.setAttribute('y', CH + LBL_H - 3);
+      lbl.setAttribute('text-anchor','middle');
+      lbl.setAttribute('font-family','DM Mono, monospace');
+      lbl.setAttribute('font-size','7');
+      lbl.setAttribute('fill', we?'#7c3aed':'#94a3b8');
+      lbl.textContent = `${d.getDate()}/${d.getMonth()+1}`;
+      svg.appendChild(lbl);
+
+      // Bars
+      FO_HOURS.forEach((h, hi) => {
+        const key = `${d.toISOString().substring(0,10)}T${String(h).padStart(2,'0')}`;
+        const p   = fc._m[key];
+        const rel = p ? (p.occupancy_ratio??null) : null;
+        const cc  = p ? (p.crowd_count??null) : null;
+        const level = foClassify(rel);
+        const barH = rel != null ? Math.max(2, Math.round(rel * CH)) : 2;
+        const bx = dx + hi*(BAR_W+BAR_G);
+
+        const bar = document.createElementNS(ns,'rect');
+        bar.setAttribute('x', bx);
+        bar.setAttribute('y', CH - barH);
+        bar.setAttribute('width', BAR_W);
+        bar.setAttribute('height', barH);
+        bar.setAttribute('fill', rel!=null ? FO_COL[level] : '#e8edf2');
+        bar.setAttribute('rx','1');
+        svg.appendChild(bar);
+
+        // Hover zone
+        const zone = document.createElementNS(ns,'rect');
+        zone.setAttribute('x', bx); zone.setAttribute('y', 0);
+        zone.setAttribute('width', BAR_W); zone.setAttribute('height', CH);
+        zone.setAttribute('fill','transparent');
+        zone.addEventListener('mouseenter', e => foShowBarTip(e, fc.beach, d, h, rel, cc, level));
+        zone.addEventListener('mousemove', foMoveTip);
+        zone.addEventListener('mouseleave', foHideTip);
+        svg.appendChild(zone);
+      });
+    });
+
+    chartWrap.appendChild(svg);
+    card.appendChild(chartWrap);
+
+    // ── Footer: daily peak badges ────────────
+    const footer = document.createElement('div');
+    footer.className = 'fo-card-footer';
+    days.forEach(d => {
+      const v = foDayVal(fc._m, d, 'peak');
+      if (v == null) return;
+      const level = foClassify(v);
+      const span = document.createElement('span');
+      span.className = 'fo-day-badge';
+      span.style.background = FO_COL[level];
+      span.style.color = FO_TXT[level];
+      span.title = `${FO_DN[d.getDay()]} ${d.getDate()} ${FO_MN[d.getMonth()]} — peak ${foPct(v)}`;
+      span.textContent = `${d.getDate()}/${d.getMonth()+1} ${foPct(v)}`;
+      footer.appendChild(span);
+    });
+    card.appendChild(footer);
+
+    container.appendChild(card);
+  });
+
+  document.getElementById('fo-cards-view').style.display='block';
+}
+
+// ── Tooltips ───────────────────────────────────────────────────────────────────
+function foShowDayTip(e, fc, date, rel, level) {
+  const base = date.toISOString().substring(0,10);
+  let peakH=null, peakV=0;
+  for (let h=FO_HMIN;h<=FO_HMAX;h++){
+    const p=fc._m[`${base}T${String(h).padStart(2,'0')}`];
+    if(p&&(p.occupancy_ratio??0)>peakV){peakV=p.occupancy_ratio??0;peakH=h;}
+  }
+  document.getElementById('fo-tip').innerHTML=`
+    <div class="fo-tip-name">${fc.beach}</div>
+    <div class="fo-tip-date">${FO_DN[date.getDay()]}, ${date.getDate()} ${FO_MN[date.getMonth()]}</div>
+    <span class="fo-tip-badge" style="background:${FO_COL[level]};color:${FO_TXT[level]}">${FO_LBL[level]}</span>
+    ${rel!=null?`<div>${foPct(rel)} avg occupancy</div>`:''}
+    ${peakH!=null?`<div style="color:#94a3b8">Peak ~${peakH}:00 (${foPct(peakV)})</div>`:''}
+  `;
+  document.getElementById('fo-tip').style.display='block';
+  foMoveTip(e);
+}
+
+function foShowBarTip(e, beachName, date, hour, rel, cc, level) {
+  document.getElementById('fo-tip').innerHTML=`
+    <div class="fo-tip-name">${beachName}</div>
+    <div class="fo-tip-date">${FO_DN[date.getDay()]} ${date.getDate()} ${FO_MN[date.getMonth()]} · ${hour}:00</div>
+    <span class="fo-tip-badge" style="background:${FO_COL[level]};color:${FO_TXT[level]}">${FO_LBL[level]}</span>
+    ${rel!=null?`<div>${foPct(rel)} occupancy</div>`:'<div style="color:#64748b">No data</div>'}
+    ${cc!=null?`<div style="color:#94a3b8">${Math.round(cc)} people</div>`:''}
+  `;
+  document.getElementById('fo-tip').style.display='block';
+  foMoveTip(e);
+}
+
+function foMoveTip(e) {
+  const tip = document.getElementById('fo-tip');
+  tip.style.left = Math.min(e.clientX+14, window.innerWidth-220)+'px';
+  tip.style.top  = Math.max(e.clientY-10, 10)+'px';
+}
+function foHideTip() { document.getElementById('fo-tip').style.display='none'; }
+
+// ── View switch ────────────────────────────────────────────────────────────────
+function foSwitchView(v) {
+  foView = v;
+  document.querySelectorAll('.fo-view-btn').forEach(b => b.classList.toggle('active', b.dataset.v===v));
+  document.getElementById('fo-daily-ctl').style.display  = v==='daily' ? 'flex' : 'none';
+  document.getElementById('fo-cards-ctl').style.display  = v==='cards' ? 'flex' : 'none';
+  document.getElementById('fo-daily-view').style.display = 'none';
+  document.getElementById('fo-cards-view').style.display = 'none';
+  if (v==='daily') foRenderDaily();
+  else foRenderCards();
+}
+
+// ── Load ───────────────────────────────────────────────────────────────────────
+async function foLoad() {
+  try {
+    const res = await fetch('/beach/full-forecast/?days=15');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const fcs = data.forecasts ?? (data.predictions ? [data] : []);
+    if (!fcs.length) { document.getElementById('fo-status').textContent='No forecast data available.'; return; }
+    foData = fcs.map(fc => ({ beach:fc.beach, webcam:(fc.webcam || fc.cameras?.[0]?.webcam), _m:foHourMap(fc) }));
+    document.getElementById('fo-gen-at').textContent =
+      `Generated ${new Date().toLocaleTimeString()} · ${foData.length} beaches · next 15 days`;
+    document.getElementById('fo-status').style.display='none';
+    foSwitchView('daily');
+  } catch(err) {
+    document.getElementById('fo-status').textContent='Error: '+err.message;
+  }
+}
+
+// ── Listeners ──────────────────────────────────────────────────────────────────
+document.getElementById('fo-view-switcher').addEventListener('click', e => {
+  const btn = e.target.closest('.fo-view-btn'); if(!btn) return;
+  foSwitchView(btn.dataset.v);
+});
+document.getElementById('fo-metric-btns').addEventListener('click', e => {
+  const btn = e.target.closest('.fo-btn'); if(!btn) return;
+  document.querySelectorAll('.fo-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active'); foMetric=btn.dataset.m; foRenderDaily();
+});
+document.getElementById('fo-sort').addEventListener('change', e => { foSort=e.target.value; foRenderDaily(); });
+document.getElementById('fo-sort-cards').addEventListener('change', e => { foSortCards=e.target.value; foRenderCards(); });
+
+foLoad();
+</script>
+{% endblock %}

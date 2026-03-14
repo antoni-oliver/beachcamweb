@@ -1,0 +1,188 @@
+{% extends 'core/parent.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% translate "beaches" %} — Overview{% endblock %}
+
+{% block styles %}
+<style>
+  .beach-card {
+    cursor: pointer;
+    transition: box-shadow 0.2s, transform 0.2s;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #fff;
+  }
+  .beach-card:hover {
+    box-shadow: 0 6px 24px rgba(0,0,0,0.13);
+    transform: translateY(-2px);
+  }
+  .beach-card .thumb {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    display: block;
+  }
+  .beach-card .no-img {
+    height: 160px;
+    background: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #bbb;
+    font-size: 0.85rem;
+  }
+  .chart-area {
+    height: 120px;
+    width: 100%;
+  }
+  .chart-placeholder {
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ccc;
+    font-size: 0.8rem;
+  }
+  .card-body {
+    padding: 10px 14px 12px;
+  }
+  .beach-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .beach-meta {
+    font-size: 0.78rem;
+    color: #888;
+  }
+  #overview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="container py-5">
+  <h1 class="mb-1 text-center">{% translate "beaches" %}</h1>
+  <p class="text-center text-muted mb-4" style="font-size:0.9rem;">Historical crowd count — click a card to open beach detail</p>
+
+  <div id="overview-grid">
+    {% for cam in cams %}
+    {% if cam.camera_slug %}
+    {% with id=cam.camera_slug|slugify %}
+    <div class="beach-card" id="card-{{ id }}" onclick="window.location.href='{% url 'beach' cam.camera_slug %}'">
+      <div id="img-{{ id }}" class="no-img">No image</div>
+      <div class="chart-area">
+        <div id="chart-{{ id }}" style="height:100%;width:100%;display:none;"></div>
+        <div id="placeholder-{{ id }}" class="chart-placeholder">
+          <div class="spinner-border spinner-border-sm text-secondary" role="status"></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="beach-name">{{ cam.beach.beach_name }}</div>
+        <div class="beach-meta">{{ cam.camera_slug }}</div>
+      </div>
+    </div>
+    {% endwith %}
+    {% endif %}
+    {% endfor %}
+  </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const slugs = [{% for cam in cams %}{% if cam.camera_slug %}'{{ cam.camera_slug }}',{% endif %}{% endfor %}];
+  const CONCURRENCY = 6;
+  let active = 0, idx = 0;
+
+  function safeId(slug) {
+    return slug.replace(/[^a-z0-9_-]/gi, '-').toLowerCase();
+  }
+
+  function loadNext() {
+    while (active < CONCURRENCY && idx < slugs.length) {
+      const slug = slugs[idx++];
+      active++;
+      fetchHistory(slug).finally(() => { active--; loadNext(); });
+    }
+  }
+
+  async function fetchHistory(slug) {
+    const id = safeId(slug);
+    const chartEl = document.getElementById('chart-' + id);
+    const placeholder = document.getElementById('placeholder-' + id);
+    const imgWrap = document.getElementById('img-' + id);
+
+    try {
+      const r = await fetch(`/platja/${slug}/history/`);
+      if (!r.ok) throw new Error(r.statusText);
+      const { data, image_url } = await r.json();
+
+      // Show image or latest count
+      if (image_url) {
+        const img = document.createElement('img');
+        img.className = 'thumb';
+        img.src = image_url;
+        img.alt = slug;
+        imgWrap.replaceWith(img);
+      } else if (data && data.length) {
+        const latest = data[data.length - 1];
+        const count = latest[1];
+        imgWrap.style.cssText = 'height:160px;background:#f8fafc;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;';
+        imgWrap.innerHTML = `
+          <div style="font-size:2rem;font-weight:700;color:#3498db;">${count}</div>
+          <div style="font-size:0.72rem;color:#aaa;">last recorded count</div>
+          <div style="font-size:0.68rem;color:#ccc;">${latest[0].slice(0,10)}</div>
+        `;
+      }
+
+      if (!data || !data.length) {
+        const card = document.getElementById('card-' + id);
+        if (card) card.remove();
+        return;
+      }
+
+      placeholder.style.display = 'none';
+      chartEl.style.display = 'block';
+      const chart = echarts.init(chartEl);
+      chart.setOption({
+        grid: { left: 36, right: 8, top: 6, bottom: 6 },
+        xAxis: { type: 'value', show: false },
+        yAxis: {
+          type: 'value', min: 0,
+          axisLabel: { fontSize: 9 },
+          splitLine: { lineStyle: { color: '#f5f5f5' } },
+        },
+        tooltip: {
+          trigger: 'axis',
+          formatter: p => {
+            const ts = (data[p[0].value[0]] || [])[0] || '';
+            return `${ts.slice(0, 10)}<br/>Count: ${p[0].value[1]}`;
+          },
+        },
+        series: [{
+          type: 'line',
+          data: data.map((d, i) => [i, d[1]]),
+          showSymbol: false,
+          lineStyle: { width: 1, color: '#3498db' },
+          areaStyle: { color: 'rgba(52,152,219,0.12)' },
+        }],
+      });
+      chart.resize();
+    } catch (e) {
+      const card = document.getElementById('card-' + id);
+      if (card) card.remove();
+    }
+  }
+
+  loadNext();
+});
+</script>
+{% endblock %}

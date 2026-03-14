@@ -19,10 +19,10 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 
-from apps.core import views
+from apps.core import core_views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("api/", include("apps.api.urls")),
-    path('', include('apps.core.urls')),
+    path('', include('apps.core.core_urls')),
     path('api/beach/', include('apps.beachImage.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

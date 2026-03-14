@@ -3,6 +3,80 @@
 <div id="forecast-section" class="mt-5">
     <h2 class="text-center mb-4">{% translate "forecast-title" %}</h2>
 
+    <!-- Help panel -->
+    <div class="mb-4">
+        <button class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1"
+                type="button" data-bs-toggle="collapse" data-bs-target="#forecast-help"
+                aria-expanded="false">
+            <span>ℹ️</span> <span>How to use this page</span>
+            <span class="ms-1" style="font-size:0.75rem;">▼</span>
+        </button>
+        <div class="collapse mt-2" id="forecast-help">
+            <div class="card card-body small text-muted" style="font-size:0.83rem;line-height:1.6;">
+
+                <div class="row g-3">
+                    <!-- Summary cards -->
+                    <div class="col-md-4">
+                        <p class="fw-semibold text-dark mb-1">📅 Summary Cards (top row)</p>
+                        <p class="mb-0">Three mini-charts show a quick occupancy snapshot:
+                            <strong>Tomorrow</strong>, <strong>This Weekend</strong>, and <strong>Next Weekend</strong>.
+                            Bars are coloured by occupancy level (see legend below).
+                            The orange line is the forecast temperature.
+                            Hover over any bar to see the exact predicted crowd count and temperature for that hour.
+                        </p>
+                    </div>
+                    <!-- Full charts -->
+                    <div class="col-md-4">
+                        <p class="fw-semibold text-dark mb-1">📈 Forecast Charts (3 / 10 / 15 days)</p>
+                        <p class="mb-0">Detailed hourly charts at three forecast horizons.
+                            Bars show occupancy as a % of beach capacity, coloured by level.
+                            <span style="display:inline-block;width:14px;height:10px;background:rgba(41,128,185,0.15);border:1px solid rgba(41,128,185,0.4);border-radius:2px;vertical-align:middle;"></span>
+                            Light-blue bands mark weekends.
+                            The orange line is temperature (°C, right axis).
+                            Hover for details. Accuracy decreases at longer horizons.
+                        </p>
+                    </div>
+                    <!-- Metrics & features -->
+                    <div class="col-md-4">
+                        <p class="fw-semibold text-dark mb-1">📊 Model Ranking &amp; 🔍 Features</p>
+                        <p class="mb-0">The ranking table lists every trained model set ordered by
+                            <strong>relMAE</strong> (lower = better).
+                            ⭐ marks the best model per horizon.
+                            The Features panel shows which weather and calendar inputs each model uses,
+                            split into <span class="badge text-bg-success" style="font-size:0.75rem;">future-known</span>,
+                            <span class="badge text-bg-warning text-dark" style="font-size:0.75rem;">historical-only</span>, and
+                            <span class="badge text-bg-primary" style="font-size:0.75rem;">temporal</span> categories.
+                        </p>
+                    </div>
+                    <!-- Comparison widget -->
+                    <div class="col-12">
+                        <hr class="my-1">
+                        <p class="fw-semibold text-dark mb-1">⚗️ Model Comparison Widget</p>
+                        <div class="row g-2">
+                            <div class="col-md-5">
+                                <ol class="mb-0 ps-3">
+                                    <li>Pick a <strong>start date</strong> in the past (must have snapshot data) and the number of <strong>days</strong> to hindcast.</li>
+                                    <li>Choose up to <strong>3 model sets</strong> (A / B / C) to compare side by side. Leave C blank to compare only two.</li>
+                                    <li>Click <strong>Compare</strong> — the chart and performance cards appear below.</li>
+                                </ol>
+                            </div>
+                            <div class="col-md-7">
+                                <p class="mb-1"><strong>Reading the results:</strong></p>
+                                <ul class="mb-0 ps-3">
+                                    <li><strong>CV table</strong> — cross-validation relMAE from <code>evaluate_model_sets</code>, grouped by horizon. Best cell per column is <strong class="text-success">green</strong>.</li>
+                                    <li><strong>Performance cards</strong> — show CV relMAE and live hindcast relMAE for each selected model. ⭐ marks the best hindcast.</li>
+                                    <li><strong>Hindcast chart</strong> — coloured bars = model predictions; red line = actual recorded occupancy. Overlapping bars let you compare model accuracy directly.</li>
+                                    <li><strong>Click any bar</strong> on the chart to load the original webcam image for that hour alongside the model's density-map prediction image.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
     <!-- Summary Mini Charts -->
     <div class="row g-3 mb-4">
         <div class="col-md-4">
@@ -90,31 +164,38 @@
             {% translate "loading-metrics" %}...
         </div>
         <div id="metrics-table" style="display:none;"></div>
+        <div id="metrics-eval-note" class="text-muted small mt-1" style="display:none;"></div>
     </div>
 
-    <!-- Hindcast Debug -->
-    <div class="mt-5 p-3 border rounded bg-light">
-        <h5 class="text-muted mb-3">🔍 {% translate "hindcast-title" %}</h5>
-        <div class="row g-2 align-items-end mb-3">
-            <div class="col-auto">
-                <label class="form-label small mb-0">{% translate "hindcast-predict-from" %}:</label>
-                <input type="date" id="hindcast-since" class="form-control form-control-sm">
-            </div>
-            <div class="col-auto">
-                <label class="form-label small mb-0">{% translate "hindcast-days" %}:</label>
-                <input type="number" id="hindcast-days" class="form-control form-control-sm" value="3" min="1" max="15" style="width:70px;">
-            </div>
-            <div class="col-auto">
-                <button id="hindcast-btn" class="btn btn-sm btn-outline-primary" onclick="runHindcast()">{% translate "hindcast-run" %}</button>
-            </div>
-            <div id="hindcast-status" class="col-auto small text-muted"></div>
+    <!-- Model Input Features -->
+    <div class="mt-3 p-3 border rounded bg-light">
+        <h5 class="text-muted mb-2">🔍 Model Input Features</h5>
+        <div id="features-loading" class="text-center text-muted py-2 small">
+            <div class="spinner-border spinner-border-sm me-1" role="status"></div>
+            Loading...
         </div>
-        <div id="hindcast-chart" style="height:350px;display:none;"></div>
+        <div id="features-panel" style="display:none;">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="fw-semibold small text-muted mb-1">📅 Future Exogenous <span class="badge bg-secondary ms-1" style="font-size:0.7rem;">known at forecast time</span></div>
+                    <div id="features-futr" class="d-flex flex-wrap gap-1"></div>
+                </div>
+                <div class="col-md-4">
+                    <div class="fw-semibold small text-muted mb-1">📈 Historical Exogenous <span class="badge bg-secondary ms-1" style="font-size:0.7rem;">weather, observed only</span></div>
+                    <div id="features-hist" class="d-flex flex-wrap gap-1"></div>
+                </div>
+                <div class="col-md-4">
+                    <div class="fw-semibold small text-muted mb-1">🕐 Temporal <span class="badge bg-secondary ms-1" style="font-size:0.7rem;">derived, always known</span></div>
+                    <div id="features-temporal" class="d-flex flex-wrap gap-1"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Model Comparison -->
     <div class="mt-4 p-3 border rounded bg-light">
-        <h5 class="text-muted mb-3">⚗️ Model Comparison</h5>
+        <h5 class="text-muted mb-1">⚗️ Model Comparison</h5>
+        <p class="text-muted small mb-3">Select a past date range and up to 3 model sets, then click <strong>Compare</strong>. <strong>Click any bar</strong> on the chart to view the original webcam image and prediction map for that hour.</p>
         <div class="row g-2 align-items-end mb-3">
             <div class="col-auto">
                 <label class="form-label small mb-0">Predict from:</label>
@@ -137,11 +218,33 @@
                 </select>
             </div>
             <div class="col-auto">
+                <label class="form-label small mb-0">Model Set C:</label>
+                <select id="cmp-set-c" class="form-select form-select-sm" style="min-width:140px;">
+                    <option value="">(none)</option>
+                </select>
+            </div>
+            <div class="col-auto">
                 <button id="cmp-btn" class="btn btn-sm btn-outline-secondary" onclick="runComparison()">Compare</button>
             </div>
             <div id="cmp-status" class="col-auto small text-muted"></div>
         </div>
+        <hr class="my-2">
+        <div id="cmp-eval-table" style="display:none;" class="mb-3"></div>
+        <div id="cmp-perf-summary" style="display:none;" class="mb-2 p-2 rounded" style="background:#f8f9fa;"></div>
         <div id="cmp-chart" style="height:380px;display:none;"></div>
+        <div id="cmp-image-panel" style="display:none;" class="mt-3">
+            <p id="cmp-image-ts" class="small text-muted mb-2 text-center"></p>
+            <div class="d-flex gap-3 justify-content-center">
+                <div class="text-center">
+                    <p class="small text-muted mb-1">Original</p>
+                    <img id="cmp-image-original" src="" alt="Original" class="img-thumbnail" style="max-height:280px;" />
+                </div>
+                <div class="text-center">
+                    <p class="small text-muted mb-1">Prediction</p>
+                    <img id="cmp-image-prediction" src="" alt="Prediction" class="img-thumbnail" style="max-height:280px;display:none;" />
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -161,15 +264,9 @@
       levelHigh: '{% translate "level-high" %}',
       levelMedium: '{% translate "level-medium" %}',
       predVsActual: '{% translate "hindcast-pred-vs-actual" %}',
-      hours: '{% translate "hindcast-hours" %}',
       noMetrics: '{% translate "metrics-none" %}',
       metricsUnavailable: '{% translate "metrics-unavailable" %}',
       forecastUnavailable: '{% translate "forecast-unavailable" %}',
-      selectDate: '{% translate "hindcast-select-date" %}',
-      fetchingPrediction: '{% translate "hindcast-fetching-prediction" %}',
-      fetchingActuals: '{% translate "hindcast-fetching-actuals" %}',
-      model: '{% translate "hindcast-model-label" %}',
-      lastData: '{% translate "hindcast-last-data" %}',
       tblModel: '{% translate "metrics-tbl-model" %}',
       tblHorizon: '{% translate "metrics-tbl-horizon" %}',
       tblOverallRelMAE: '{% translate "metrics-tbl-overall-relmae" %}',
@@ -241,8 +338,9 @@
       return v;
     }
 
-    function fmtTooltip(params, featureImportance) {
+    function fmtTooltip(params) {
       const ts = new Date(params[0].value[0]);
+      const isPast = ts <= new Date();
       const dateStr = dateLabel(ts) + '/' + ts.getFullYear() + ' ' + pad(ts.getHours()) + ':00';
 
       const barParam = params.find(p => p.seriesType === 'bar');
@@ -254,16 +352,14 @@
       let html = `<div style="min-width:220px;max-width:260px;font-size:12px;line-height:1.5;">`;
       html += `<div style="font-weight:700;margin-bottom:6px;font-size:13px;">${dateStr}</div>`;
 
-      // Main values
       if (pct) html += `<div style="display:flex;justify-content:space-between;margin-bottom:2px;"><span style="color:#888;">Occupancy</span><span style="font-weight:700;color:${barParam.color};">${pct}</span></div>`;
       if (temp) html += `<div style="display:flex;justify-content:space-between;margin-bottom:8px;"><span style="color:#888;">Temperature</span><span style="font-weight:600;color:#e67e22;">${temp}</span></div>`;
 
-      // Input feature values
+      // Show input conditions whenever available
       if (Object.keys(features).length) {
         html += `<div style="border-top:1px solid #e8e8e8;padding-top:6px;margin-bottom:6px;">`;
-        html += `<div style="font-size:10px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Conditions</div>`;
+        html += `<div style="font-size:10px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Input Conditions</div>`;
         Object.entries(features).forEach(([k, v]) => {
-          if (k === 'Temperature (°C)') return; // already shown above
           html += `<div style="display:flex;justify-content:space-between;margin-bottom:1px;">`;
           html += `<span style="color:#555;">${featLabel(k)}</span>`;
           html += `<span style="font-weight:600;color:#333;">${featValue(k, v)}</span>`;
@@ -272,29 +368,7 @@
         html += `</div>`;
       }
 
-      // Feature importance bars
-      if (featureImportance && Object.keys(featureImportance).length) {
-        const sorted = Object.entries(featureImportance).sort((a, b) => b[1] - a[1]);
-        const maxVal = sorted[0][1];
-        html += `<div style="border-top:1px solid #e8e8e8;padding-top:6px;">`;
-        html += `<div style="font-size:10px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Feature Importance</div>`;
-        sorted.forEach(([k, v]) => {
-          const pctWidth = maxVal > 0 ? Math.round((v / maxVal) * 100) : 0;
-          const displayPct = (v * 100).toFixed(1);
-          html += `<div style="margin-bottom:3px;">`;
-          html += `<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:1px;">`;
-          html += `<span style="color:#555;">${featLabel(k)}</span>`;
-          html += `<span style="color:#888;font-size:10px;">${displayPct}%</span>`;
-          html += `</div>`;
-          html += `<div style="height:4px;background:#f0f0f0;border-radius:2px;">`;
-          html += `<div style="height:4px;width:${pctWidth}%;background:linear-gradient(90deg,#3498db,#2980b9);border-radius:2px;"></div>`;
-          html += `</div></div>`;
-        });
-        html += `</div>`;
-      }
-
-      html += `</div>`;
-      return html;
+      return html + `</div>`;
     }
 
     function classifyLevel(cc, max) {
@@ -385,38 +459,88 @@
       return {from, to, label: dateLabel(from), title: i18n.tomorrow};
     }
 
-    // Default hindcast date = 7 days ago
-    const dd = new Date();
-    dd.setDate(dd.getDate() - 7);
-    document.getElementById('hindcast-since').value = dd.toISOString().slice(0, 10);
-
-    // ---- Metrics ----
-    fetch(`/platja/${slug}/metrics/`)
-      .then(r => r.json())
+    // ---- Metrics from eval JSON ----
+    let _evalData = null;
+    fetch(`/platja/${slug}/eval-ranking/`)
+      .then(r => r.ok ? r.json() : Promise.reject(r.status))
       .then(data => {
+        _evalData = data;
         document.getElementById('metrics-loading').style.display = 'none';
         const el = document.getElementById('metrics-table');
         el.style.display = 'block';
-        const models = data.models || {};
-        const keys = Object.keys(models).sort((a, b) => (models[a].season_relMAE || 0) - (models[b].season_relMAE || 0));
-        if (!keys.length) {
+        const ranking = data.ranking || [];
+        const bestByHorizon = data.best_by_horizon || {};
+
+        if (!ranking.length) {
           el.innerHTML = `<span class="text-muted small">${i18n.noMetrics}</span>`;
           return;
         }
-        let html = '<table class="table table-sm table-bordered mb-0" style="font-size:0.85rem;">';
-        html += `<thead><tr><th>${i18n.tblModel}</th><th>${i18n.tblHorizon}</th><th>${i18n.tblOverallRelMAE}</th><th>${i18n.tblSeasonRelMAE}</th></tr></thead><tbody>`;
-        keys.forEach(k => {
-          const m = models[k];
-          html += `<tr><td><strong>${k}</strong></td>`;
-          html += `<td>${m.horizon_days}d (${m.horizon}h)</td>`;
-          html += `<td>${m.overall_relMAE != null ? (m.overall_relMAE * 100).toFixed(1) + '%' : '—'}</td>`;
-          html += `<td>${m.season_relMAE != null ? (m.season_relMAE * 100).toFixed(1) + '%' : '—'}</td></tr>`;
+
+        const note = document.getElementById('metrics-eval-note');
+        if (data.evaluated_at) {
+          const d = new Date(data.evaluated_at);
+          const dr = data.date_range || {};
+          note.textContent = `Evaluated: ${d.toLocaleDateString()} | Range: ${dr.since || ''}–${dr.until || ''}`;
+          note.style.display = 'block';
+        }
+
+        const fmt = v => v != null ? (v * 100).toFixed(2) + '%' : '—';
+        const horizons = [...new Set(ranking.map(r => r.model_key))].sort((a, b) => parseInt(a) - parseInt(b));
+
+        let html = '';
+        horizons.forEach(hk => {
+          const best = bestByHorizon[hk];
+          const rows = ranking.filter(r => r.model_key === hk).sort((a, b) => (a.relMAE_all || 1) - (b.relMAE_all || 1));
+          html += `<div class="mb-3">`;
+          html += `<div class="d-flex align-items-center gap-2 mb-1">`;
+          html += `<span class="badge bg-secondary">${hk}</span>`;
+          if (best) html += `<span class="small text-muted">Best: <strong>${best.model_set}</strong> — ${fmt(best.relMAE_all)}</span>`;
+          html += `</div>`;
+          html += `<table class="table table-sm table-bordered mb-0" style="font-size:0.82rem;">`;
+          html += `<thead class="table-light"><tr><th>Model Set</th><th>relMAE all</th><th>Summer</th><th>Season</th><th>vs best</th></tr></thead><tbody>`;
+          const bestRelMAE = best?.relMAE_all;
+          rows.forEach((r, i) => {
+            const isBest = best && r.model_set === best.model_set;
+            const pct = (isBest || bestRelMAE == null || r.relMAE_all == null)
+              ? '—'
+              : '+' + (((r.relMAE_all - bestRelMAE) / bestRelMAE) * 100).toFixed(1) + '%';
+            html += `<tr class="${isBest ? 'table-success' : ''}">`;
+            html += `<td>${isBest ? '⭐ ' : ''}<strong>${r.model_set}</strong></td>`;
+            html += `<td>${fmt(r.relMAE_all)}</td>`;
+            html += `<td>${fmt(r.relMAE_summer)}</td>`;
+            html += `<td>${fmt(r.relMAE_season)}</td>`;
+            html += `<td class="text-muted">${pct}</td>`;
+            html += `</tr>`;
+          });
+          html += `</tbody></table></div>`;
         });
-        html += '</tbody></table>';
         el.innerHTML = html;
       })
       .catch(() => {
-        document.getElementById('metrics-loading').innerHTML = `<span class="text-muted small">${i18n.metricsUnavailable}</span>`;
+        // Fallback to config-based metrics
+        fetch(`/platja/${slug}/metrics/`)
+          .then(r => r.json())
+          .then(data => {
+            document.getElementById('metrics-loading').style.display = 'none';
+            const el = document.getElementById('metrics-table');
+            el.style.display = 'block';
+            const models = data.models || {};
+            const keys = Object.keys(models).sort((a, b) => (models[a].season_relMAE || 0) - (models[b].season_relMAE || 0));
+            if (!keys.length) { el.innerHTML = `<span class="text-muted small">${i18n.noMetrics}</span>`; return; }
+            let html = '<table class="table table-sm table-bordered mb-0" style="font-size:0.85rem;">';
+            html += `<thead><tr><th>${i18n.tblModel}</th><th>${i18n.tblHorizon}</th><th>${i18n.tblOverallRelMAE}</th><th>${i18n.tblSeasonRelMAE}</th></tr></thead><tbody>`;
+            keys.forEach(k => {
+              const m = models[k];
+              html += `<tr><td><strong>${k}</strong></td><td>${m.horizon_days}d</td>`;
+              html += `<td>${m.overall_relMAE != null ? (m.overall_relMAE * 100).toFixed(1) + '%' : '—'}</td>`;
+              html += `<td>${m.season_relMAE != null ? (m.season_relMAE * 100).toFixed(1) + '%' : '—'}</td></tr>`;
+            });
+            html += '</tbody></table>';
+            el.innerHTML = html;
+          })
+          .catch(() => {
+            document.getElementById('metrics-loading').innerHTML = `<span class="text-muted small">${i18n.metricsUnavailable}</span>`;
+          });
       });
 
     // ---- Fetch models and render ----
@@ -443,6 +567,11 @@
           fullLoadEl.style.display = 'none';
           fullChartEl.style.display = 'block';
           renderForecast(fullChartEl, data, cfg.days, maxCrowd);
+
+          // Populate features panel from the first forecast that returns
+          if (cfg.days === 3 && !document.getElementById('features-panel').dataset.loaded) {
+            renderFeaturesPanel(data);
+          }
 
           // Summary card
           let range = null;
@@ -560,7 +689,6 @@
     function renderForecast(el, data, days, maxCrowd) {
   const chart = echarts.init(el);
   const preds = data.predictions || [];
-  const featureImportance = data.feature_importance || {};
   const bars = [], temps = [];
   const wkBands = buildWeekendBands(preds);
 
@@ -577,7 +705,7 @@
   });
 
   chart.setOption({
-    tooltip: {trigger: 'axis', formatter: params => fmtTooltip(params, featureImportance)},
+    tooltip: {trigger: 'axis', formatter: params => fmtTooltip(params)},
     legend: {data: [i18n.occupancy, i18n.temperature + ' °C'], top: -5, right: 10, itemGap: 25},
     grid: {left: 50, right: 50, bottom: 40, top: 40},
     xAxis: {type: 'time', axisLabel: {formatter: fmtAxisLabel}},
@@ -607,91 +735,135 @@
   window.addEventListener('resize', () => chart.resize());
 }
 
-    // ---- Hindcast ----
-    window.runHindcast = async function () {
-      const since = document.getElementById('hindcast-since').value;
-      const days = Math.min(15, Math.max(1, parseInt(document.getElementById('hindcast-days').value) || 3));
-      const status = document.getElementById('hindcast-status');
-      const chartEl = document.getElementById('hindcast-chart');
-      const btn = document.getElementById('hindcast-btn');
-      if (!since) {
-        status.textContent = i18n.selectDate;
+
+    function renderFeaturesPanel(data) {
+      const panel = document.getElementById('features-panel');
+      const loading = document.getElementById('features-loading');
+      const futrEl = document.getElementById('features-futr');
+      const histEl = document.getElementById('features-hist');
+      const tempEl = document.getElementById('features-temporal');
+
+      const futr = data.futr_features || [];
+      const hist = data.hist_features || [];
+
+      if (!futr.length && !hist.length) {
+        loading.textContent = 'Feature info not available.';
         return;
       }
-      btn.disabled = true;
-      status.textContent = i18n.fetchingPrediction;
-      try {
-        const predRes = await fetch(`/platja/${slug}/forecast/?days=${days}&since=${since}`);
-        if (!predRes.ok) throw new Error((await predRes.json()).error || predRes.statusText);
-        const predData = await predRes.json();
-        status.textContent = i18n.fetchingActuals;
-        const actRes = await fetch(`/platja/${slug}/actuals/?since=${since}&days=${days}`);
-        if (!actRes.ok) throw new Error((await actRes.json()).error || actRes.statusText);
-        const actData = await actRes.json();
-        status.textContent = `${i18n.model}: ${predData.model} | ${i18n.lastData}: ${fmtDate(predData.last_data)}`;
-        chartEl.style.display = 'block';
-        renderHindcast(chartEl, predData, actData);
-      } catch (err) {
-        status.innerHTML = `<span class="text-danger">${err.message}</span>`;
-      } finally {
-        btn.disabled = false;
-      }
-    };
 
-    function renderHindcast(el, predData, actData) {
-      const chart = echarts.init(el);
-      const preds = predData.predictions || [];
-      const wkBands = buildWeekendBands(preds);
-      const predBars = [];
-      preds.forEach(p => {
-        if (p.available) {
-          const level = p.occupancy_level || classifyLevel(p.crowd_count, maxCrowd);
-          const pct = p.occupancy_ratio != null ? p.occupancy_ratio * 100 : 0;
-            predBars.push({
-              value: [new Date(p.timestamp).getTime(), pct],
-                itemStyle: {color: LEVEL_COLORS[level], opacity: 0.7},
-          });
+      // Temporal features are calendar/clock derived — always known for future
+      const TEMPORAL_FEATURES = new Set(['hour', 'day_of_week', 'month', 'is_weekend', 'is_summer',
+        'day_of_year', 'week_of_year', 'is_holiday']);
+
+      function chip(name, color) {
+        const span = document.createElement('span');
+        span.className = 'badge rounded-pill border';
+        span.style.cssText = `font-size:0.78rem;font-weight:500;padding:4px 10px;background:${color || '#f8f9fa'};color:#333;`;
+        span.title = name;
+        span.textContent = featLabel(name);
+        return span;
+      }
+
+      // Split futr into temporal vs weather/other
+      futr.forEach(f => {
+        if (TEMPORAL_FEATURES.has(f)) {
+          tempEl.appendChild(chip(f, '#eaf4ff'));
+        } else {
+          futrEl.appendChild(chip(f, '#eafaf1'));
         }
       });
-     const actualLine = [];
-        (actData.actuals || []).forEach(a => {
-          const aPct = maxCrowd > 0 ? (a.crowd_count / maxCrowd) * 100 : 0;
-          actualLine.push([new Date(a.timestamp).getTime(), aPct, a.crowd_count]);
-        });
-        const predMap = {};
-        predBars.forEach(p => {
-          predMap[p.value[0]] = p.value[1];
-        });
-        let sumErr = 0, count = 0;
-        actualLine.forEach(([ts, val, rawCount]) => {
-          if (predMap[ts] !== undefined) {
-            const predCount = maxCrowd > 0 ? (predMap[ts] / 100) * maxCrowd : 0;
-            sumErr += maxCrowd > 0 ? Math.abs(predCount - rawCount) / maxCrowd : 0;
-            count++;
-          }
-        });
-        const mae = count > 0 ? ((sumErr / count) * 100).toFixed(1) + '%' : '—';
+      hist.forEach(f => histEl.appendChild(chip(f, '#fef9e7')));
 
-        chart.setOption({
-          title: {text: `${i18n.predVsActual} (relMAE: ${mae})`, left: 'center', textStyle: {fontSize: 13}},
-          tooltip: {trigger: 'axis', formatter: fmtTooltip},
-          legend: {data: [i18n.prediction, i18n.actual], top: 25, itemGap: 25},
-        grid: {left: 50, right: 30, bottom: 40, top: 60},
-        xAxis: {type: 'time', axisLabel: {formatter: fmtAxisLabel}},
-        yAxis: {type: 'value', name: '%', min: 0, max: 100, axisLabel: {formatter: '{value}%'}},
-        series: [
-          {
-            name: i18n.prediction, type: 'bar', data: predBars, barMaxWidth: 8,
-            markArea: wkBands.length ? {silent: true, itemStyle: {color: 'rgba(41,128,185,0.12)'}, data: wkBands} : undefined,
-          },
-          {
-            name: i18n.actual, type: 'line', data: actualLine,
-            lineStyle: {color: '#e74c3c', width: 2}, itemStyle: {color: '#e74c3c'},
-            symbol: 'circle', symbolSize: 4,
-          },
-        ],
-      }, true);
-      window.addEventListener('resize', () => chart.resize());
+      // Always add standard temporal features even if not in futr_features
+      if (!tempEl.children.length) {
+        ['hour', 'day_of_week', 'month', 'is_weekend', 'is_summer'].forEach(f =>
+          tempEl.appendChild(chip(f, '#eaf4ff'))
+        );
+      }
+
+      loading.style.display = 'none';
+      panel.style.display = 'block';
+      panel.dataset.loaded = '1';
+    }
+
+    function renderEvalComparison(modelSets, ranking, bestByHorizon) {
+      const el = document.getElementById('cmp-eval-table');
+      if (!el) return;
+
+      // Show all horizons for the selected model sets
+      const rows = ranking.filter(r => modelSets.includes(r.model_set));
+      if (!rows.length) { el.style.display = 'none'; return; }
+
+      // Group by horizon key
+      const horizons = [...new Set(rows.map(r => r.model_key))].sort();
+
+      // For each horizon, best relMAE_all among selected sets
+      function bestValFor(hk) {
+        return Math.min(...rows.filter(r => r.model_key === hk).map(r => r.relMAE_all || Infinity));
+      }
+
+      let html = '<p class="small text-muted mb-1 fw-semibold">Cross-Validation Performance (model_evaluation.json)</p>';
+      html += '<table class="table table-sm table-bordered mb-0" style="font-size:0.82rem;">';
+      html += '<thead class="table-light"><tr>'
+        + '<th>Model Set</th><th>Horizon</th>'
+        + '<th>relMAE all</th><th>vs best</th>'
+        + '<th>Summer</th><th>Season</th><th>Best?</th>'
+        + '</tr></thead><tbody>';
+
+      horizons.forEach(hk => {
+        const hRows = rows.filter(r => r.model_key === hk).sort((a, b) => a.relMAE_all - b.relMAE_all);
+        const bestVal = bestValFor(hk);
+        const bestKey = bestByHorizon[hk]?.model_set;
+        hRows.forEach(r => {
+          const isBest = r.model_set === bestKey;
+          const diff = (r.relMAE_all != null && bestVal > 0) ? (r.relMAE_all - bestVal) / bestVal * 100 : null;
+          const pct = (isBest || diff === null || diff === 0) ? '—' : '+' + diff.toFixed(1) + '%';
+          const rowClass = isBest ? 'table-success' : (hRows.indexOf(r) === 0 ? 'table-warning fw-semibold' : '');
+          html += `<tr class="${rowClass}">`;
+          html += `<td>${r.model_set}</td><td>${hk}</td>`;
+          html += `<td>${r.relMAE_all != null ? (r.relMAE_all * 100).toFixed(2) + '%' : '—'}</td>`;
+          html += `<td class="text-muted">${pct}</td>`;
+          html += `<td>${r.relMAE_summer != null ? (r.relMAE_summer * 100).toFixed(2) + '%' : '—'}</td>`;
+          html += `<td>${r.relMAE_season != null ? (r.relMAE_season * 100).toFixed(2) + '%' : '—'}</td>`;
+          html += `<td>${isBest ? '⭐' : ''}</td></tr>`;
+        });
+      });
+      html += '</tbody></table>';
+      el.innerHTML = html;
+      el.style.display = 'block';
+    }
+
+    async function showSnapshotImage(params, panelId, tsId, origId, predId) {
+      if (!params.value) return;
+      const ts = new Date(params.value[0]);
+      const iso = ts.toISOString().slice(0, 19);
+      const panel = document.getElementById(panelId);
+      panel.style.display = 'none';
+      try {
+        const res = await fetch(`/platja/${slug}/snapshot-image/?ts=${encodeURIComponent(iso)}`);
+        const data = await res.json();
+        document.getElementById(tsId).textContent = iso.replace('T', ' ');
+        const orig = document.getElementById(origId);
+        const pred = document.getElementById(predId);
+        if (data.url && data.url !== 'null') {
+          orig.src = data.url;
+          orig.style.display = '';
+        } else {
+          orig.src = '';
+          orig.style.display = 'none';
+        }
+        if (data.prediction_url && data.prediction_url !== 'null') {
+          pred.src = data.prediction_url;
+          pred.style.display = '';
+        } else {
+          pred.src = '';
+          pred.style.display = 'none';
+        }
+        if (data.url || data.prediction_url) {
+          panel.style.display = 'block';
+          panel.scrollIntoView({behavior: 'smooth', block: 'center'});
+        }
+      } catch (e) { console.error('snapshot fetch error', e); }
     }
 
     // ---- Load model sets into dropdowns ----
@@ -709,9 +881,19 @@
             sel.appendChild(opt);
           });
         });
-        // Default B to second set if available
+        // Set C has a (none) option first
+        const selC = document.getElementById('cmp-set-c');
+        selC.innerHTML = '<option value="">(none)</option>';
+        sets.forEach(s => {
+          const opt = document.createElement('option');
+          opt.value = s;
+          opt.textContent = s;
+          selC.appendChild(opt);
+        });
+        // Defaults: A=first, B=second, C=third if available
         const selB = document.getElementById('cmp-set-b');
         if (selB.options.length > 1) selB.selectedIndex = 1;
+        if (selC.options.length > 2) selC.selectedIndex = 2;
       })
       .catch(() => {});
 
@@ -726,6 +908,7 @@
       const days = Math.min(15, Math.max(1, parseInt(document.getElementById('cmp-days').value) || 3));
       const setA = document.getElementById('cmp-set-a').value;
       const setB = document.getElementById('cmp-set-b').value;
+      const setC = document.getElementById('cmp-set-c').value;
       const status = document.getElementById('cmp-status');
       const chartEl = document.getElementById('cmp-chart');
       const btn = document.getElementById('cmp-btn');
@@ -735,18 +918,34 @@
       btn.disabled = true;
       status.textContent = 'Fetching...';
       try {
-        const [resA, resB, resAct] = await Promise.all([
+        const fetches = [
           fetch(`/platja/${slug}/forecast/?days=${days}&since=${since}&model_set=${setA}`).then(r => r.json()),
           fetch(`/platja/${slug}/forecast/?days=${days}&since=${since}&model_set=${setB}`).then(r => r.json()),
           fetch(`/platja/${slug}/actuals/?since=${since}&days=${days}`).then(r => r.json()),
-        ]);
+          _evalData ? Promise.resolve(_evalData) : fetch(`/platja/${slug}/eval-ranking/`).then(r => r.ok ? r.json() : null).catch(() => null),
+        ];
+        if (setC) fetches.push(fetch(`/platja/${slug}/forecast/?days=${days}&since=${since}&model_set=${setC}`).then(r => r.json()));
+
+        const results = await Promise.all(fetches);
+        const [resA, resB, resAct, evalData] = results;
+        const resC = setC ? results[4] : null;
 
         if (resA.error) throw new Error(`${setA}: ${resA.error}`);
         if (resB.error) throw new Error(`${setB}: ${resB.error}`);
+        if (resC && resC.error) throw new Error(`${setC}: ${resC.error}`);
 
-        status.textContent = `${setA} (${resA.model}) vs ${setB} (${resB.model})`;
+        // Show eval metrics comparison table
+        if (evalData && evalData.ranking) {
+          const setsToShow = [setA, setB];
+          if (setC) setsToShow.push(setC);
+          renderEvalComparison(setsToShow, evalData.ranking, evalData.best_by_horizon || {});
+        }
+
+        const labels = [`${setA}(${resA.model})`, `${setB}(${resB.model})`];
+        if (resC) labels.push(`${setC}(${resC.model})`);
+        status.textContent = labels.join(' vs ');
         chartEl.style.display = 'block';
-        renderComparison(chartEl, resA, resB, resAct, setA, setB, days);
+        renderComparison(chartEl, resA, resB, resAct, setA, setB, days, resC, setC, evalData);
       } catch (err) {
         status.innerHTML = `<span class="text-danger">${err.message}</span>`;
       } finally {
@@ -772,13 +971,16 @@
       return preds.filter(p => p.available).map(p => ({
         value: [new Date(p.timestamp).getTime(), p.occupancy_ratio != null ? p.occupancy_ratio * 100 : 0],
         itemStyle: {color: LEVEL_COLORS[p.occupancy_level] || '#3498db', opacity},
+        features: p.features || {},
+        temperature: p.temperature,
       }));
     }
 
-    function renderComparison(el, dataA, dataB, actData, nameA, nameB, days) {
+    function renderComparison(el, dataA, dataB, actData, nameA, nameB, days, dataC, nameC, evalData) {
       const chart = echarts.init(el);
-      const barsA = predsToBars(dataA.predictions || [], 0.75);
-      const barsB = predsToBars(dataB.predictions || [], 0.75);
+      const barsA = predsToBars(dataA.predictions || [], 0.8);
+      const barsB = predsToBars(dataB.predictions || [], 0.8);
+      const barsC = dataC ? predsToBars(dataC.predictions || [], 0.8) : [];
       const actualLine = (actData.actuals || []).map(a => [
         new Date(a.timestamp).getTime(),
         maxCrowd > 0 ? (a.crowd_count / maxCrowd) * 100 : 0,
@@ -787,41 +989,117 @@
       const wkBands = buildWeekendBands(dataA.predictions || []);
       const maeA = computeRelMAE(barsA, actualLine);
       const maeB = computeRelMAE(barsB, actualLine);
+      const maeC = dataC ? computeRelMAE(barsC, actualLine) : null;
+
+      const barWidth = days <= 3 ? 8 : 3;
+      const seriesNames = [nameA, nameB];
+      if (dataC) seriesNames.push(nameC);
+      const legendData = [...seriesNames, 'Actual'];
+
+      // Overall relMAE from model_evaluation.json for the matching horizon key
+      const horizonKey = days + 'd';
+      function overallRelMAE(setName) {
+        if (!evalData || !evalData.ranking) return null;
+        const row = evalData.ranking.find(r => r.model_set === setName && r.model_key === horizonKey);
+        return row ? row.relMAE_all : null;
+      }
+      function fmtMAE(v) { return v != null ? (v * 100).toFixed(1) + '%' : '—'; }
+
+      const oA = overallRelMAE(nameA), oB = overallRelMAE(nameB), oC = dataC ? overallRelMAE(nameC) : null;
+
+      // Render performance summary as HTML above chart (avoids ECharts title/legend overlap)
+      const perfEl = document.getElementById('cmp-perf-summary');
+      if (perfEl) {
+        const sets = [[nameA, oA, maeA], [nameB, oB, maeB]];
+        if (dataC) sets.push([nameC, oC, maeC]);
+        const best_cv  = Math.min(...sets.map(s => s[1]).filter(v => v != null));
+        const best_hc  = Math.min(...sets.map(s => parseFloat(s[2])).filter(v => !isNaN(v)));
+        let html = '<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;">';
+        html += '<span style="font-size:0.78rem;font-weight:700;color:#555;white-space:nowrap;">Performance comparison:</span>';
+        sets.forEach(([name, cv, hc]) => {
+          const cvBest = cv != null && cv === best_cv;
+          const hcVal  = parseFloat(hc);
+          const hcBest = !isNaN(hcVal) && hcVal === best_hc;
+          html += `<div style="background:#fff;border:1px solid #dee2e6;border-radius:6px;padding:5px 10px;font-size:0.8rem;">`;
+          html += `<div style="font-weight:700;color:#333;margin-bottom:2px;">${name}</div>`;
+          html += `<div style="display:flex;gap:10px;">`;
+          html += `<span title="Overall CV relMAE (model_evaluation.json)">`;
+          html += `<span style="color:#888;font-size:0.72rem;">CV all </span>`;
+          html += `<span style="font-weight:700;color:${cvBest ? '#27ae60' : '#333'};">${fmtMAE(cv)}${cvBest ? ' ⭐' : ''}</span>`;
+          html += `</span>`;
+          html += `<span title="Hindcast relMAE for this date window">`;
+          html += `<span style="color:#888;font-size:0.72rem;">hindcast </span>`;
+          html += `<span style="font-weight:700;color:${hcBest ? '#2980b9' : '#555'};">${hc}${hcBest ? ' ⭐' : ''}</span>`;
+          html += `</span>`;
+          html += `</div></div>`;
+        });
+        html += '</div>';
+        perfEl.innerHTML = html;
+        perfEl.style.display = 'block';
+      }
+
+      let titleText = `Hindcast relMAE — ${nameA}: ${maeA}  ${nameB}: ${maeB}`;
+      if (maeC) titleText += `  ${nameC}: ${maeC}`;
+
+      const series = [
+        {
+          name: nameA, type: 'bar', data: barsA, barGap: '5%', barMaxWidth: barWidth,
+          markArea: wkBands.length ? {silent: true, itemStyle: {color: 'rgba(41,128,185,0.08)'}, data: wkBands} : undefined,
+        },
+        {name: nameB, type: 'bar', data: barsB, barMaxWidth: barWidth},
+      ];
+      if (dataC) series.push({name: nameC, type: 'bar', data: barsC, barMaxWidth: barWidth});
+      series.push({
+        name: 'Actual', type: 'line', data: actualLine,
+        lineStyle: {color: '#e74c3c', width: 2}, itemStyle: {color: '#e74c3c'},
+        symbol: 'circle', symbolSize: 4,
+      });
 
       chart.setOption({
-        title: {
-          text: `Model Comparison — relMAE: ${nameA}=${maeA}  ${nameB}=${maeB}`,
-          left: 'center', textStyle: {fontSize: 12},
-        },
         tooltip: {
           trigger: 'axis',
           formatter(params) {
             const ts = new Date(params[0].value[0]);
-            let html = `<b>${dateLabel(ts)}/${ts.getFullYear()} ${pad(ts.getHours())}:00</b><br/>`;
+            const dateStr = `${dateLabel(ts)}/${ts.getFullYear()} ${pad(ts.getHours())}:00`;
+            let html = `<div style="min-width:240px;font-size:12px;line-height:1.5;">`;
+            html += `<div style="font-weight:700;margin-bottom:6px;">${dateStr}</div>`;
+
+            // Occupancy values per model
             params.forEach(p => {
               const v = Array.isArray(p.value) ? p.value[1] : p.value;
-              html += `${p.marker} ${p.seriesName}: <b>${v != null ? v.toFixed(1) + '%' : '—'}</b><br/>`;
+              html += `<div style="display:flex;justify-content:space-between;margin-bottom:2px;">`;
+              html += `<span>${p.marker} ${p.seriesName}</span>`;
+              html += `<span style="font-weight:700;color:${p.color};">${v != null ? v.toFixed(1) + '%' : '—'}</span>`;
+              html += `</div>`;
             });
+
+            // Feature values from model A (they share same input features)
+            const barParam = params.find(p => p.seriesType === 'bar' && p.data?.features);
+            const features = barParam?.data?.features || {};
+            if (Object.keys(features).length) {
+              html += `<div style="border-top:1px solid #eee;margin-top:6px;padding-top:6px;">`;
+              html += `<div style="font-size:10px;font-weight:700;color:#999;text-transform:uppercase;margin-bottom:4px;">Input Conditions</div>`;
+              Object.entries(features).forEach(([k, v]) => {
+                html += `<div style="display:flex;justify-content:space-between;margin-bottom:1px;">`;
+                html += `<span style="color:#555;">${featLabel(k)}</span>`;
+                html += `<span style="font-weight:600;color:#333;">${featValue(k, v)}</span>`;
+                html += `</div>`;
+              });
+              html += `</div>`;
+            }
+
+            html += `</div>`;
             return html;
           }
         },
-        legend: {data: [nameA, nameB, 'Actual'], top: 22, itemGap: 20},
-        grid: {left: 50, right: 30, bottom: 40, top: 60},
+        legend: {data: legendData, top: 22, itemGap: 20},
+        grid: {left: 50, right: 30, bottom: 40, top: 55},
         xAxis: {type: 'time', axisLabel: {formatter: fmtAxisLabel}},
         yAxis: {type: 'value', name: '%', min: 0, max: 100, axisLabel: {formatter: '{value}%'}},
-        series: [
-          {
-            name: nameA, type: 'bar', data: barsA, barGap: '10%', barMaxWidth: days <= 3 ? 10 : 4,
-            markArea: wkBands.length ? {silent: true, itemStyle: {color: 'rgba(41,128,185,0.08)'}, data: wkBands} : undefined,
-          },
-          {name: nameB, type: 'bar', data: barsB, barMaxWidth: days <= 3 ? 10 : 4},
-          {
-            name: 'Actual', type: 'line', data: actualLine,
-            lineStyle: {color: '#e74c3c', width: 2}, itemStyle: {color: '#e74c3c'},
-            symbol: 'circle', symbolSize: 4,
-          },
-        ],
+        series,
       }, true);
+
+      chart.on('click', params => showSnapshotImage(params, 'cmp-image-panel', 'cmp-image-ts', 'cmp-image-original', 'cmp-image-prediction'));
       window.addEventListener('resize', () => chart.resize());
     }
   });
