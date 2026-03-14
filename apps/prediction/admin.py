@@ -1,78 +1,47 @@
 from django.contrib import admin
-from django.db.models import Q, Count
-from adminfilters.mixin import AdminFiltersMixin
-from adminfilters.filters import (
-    RelatedFieldComboFilter,
-    DateInDateRangeFilter,
-    NumberFilter,
-)
-from .models import Snapshot
+from apps.prediction import models
+from apps.webcam.models import WebCam
 
 
-class HasWebcamImageFilter(admin.SimpleListFilter):
-    title = "Has webcam image"
-    parameter_name = "has_webcam_image"
+class WebCamFilter(admin.SimpleListFilter):
+    title = 'webcam'
+    parameter_name = 'webcam'
 
     def lookups(self, request, model_admin):
-        return (("1", "Yes"), ("0", "No"))
+        webcams = WebCam.objects.order_by('camera_slug')
+        return [(webcam.id, str(webcam)) for webcam in webcams]
 
     def queryset(self, request, queryset):
-        val = self.value()
-        if val == "1":
-            return queryset.exclude(Q(webcam_image__isnull=True) | Q(webcam_image=""))
-        if val == "0":
-            return queryset.filter(Q(webcam_image__isnull=True) | Q(webcam_image=""))
+        if self.value():
+            return queryset.filter(webcam_id=self.value())
         return queryset
 
 
-class HasWebcamVideoFilter(admin.SimpleListFilter):
-    title = "Has webcam video"
-    parameter_name = "has_webcam_video"
-
-    def lookups(self, request, model_admin):
-        return (("1", "Yes"), ("0", "No"))
-
-    def queryset(self, request, queryset):
-        val = self.value()
-        if val == "1":
-            return queryset.exclude(Q(webcam_video__isnull=True) | Q(webcam_video=""))
-        if val == "0":
-            return queryset.filter(Q(webcam_video__isnull=True) | Q(webcam_video=""))
-        return queryset
-
-
-class HasPredictionFilter(admin.SimpleListFilter):
-    title = "Has prediction"
-    parameter_name = "has_prediction"
-
-    def lookups(self, request, model_admin):
-        return (("1", "Yes"), ("0", "No"))
-
-    def queryset(self, request, queryset):
-        if self.value() == "1":
-            return queryset.exclude(predicted_crowd_count__isnull=True)
-        if self.value() == "0":
-            return queryset.filter(predicted_crowd_count__isnull=True)
-        return queryset
-
-
-@admin.register(Snapshot)
-class SnapshotAdmin(AdminFiltersMixin, admin.ModelAdmin):
-    list_display = ("get_beach", "webcam", "ts", "predicted_crowd_count", "webcam_image", "webcam_video")
-    list_filter = (
-        ("webcam__beach", RelatedFieldComboFilter),
-        ("webcam", RelatedFieldComboFilter),
-        ("ts", DateInDateRangeFilter),
-        ("predicted_crowd_count", NumberFilter),
-        HasPredictionFilter,
-        HasWebcamImageFilter,
-        HasWebcamVideoFilter,
+@admin.register(models.Snapshot)
+class SnapshotAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'webcam',
+        'get_beach',
+        'ts',
+        'filter_frozen_image',
+        'filter_blurry_image',
+        'filter_moving_camera',
+        'predicted_crowd_count',
     )
-    search_fields = ("webcam__camera_slug", "webcam__beach__beach_name")
-    date_hierarchy = "ts"
-    list_select_related = ("webcam", "webcam__beach")
-    list_per_page = 50
+    list_filter = (
+        WebCamFilter,
+        'filter_frozen_image',
+        'filter_blurry_image',
+        'filter_moving_camera',
+    )
+    search_fields = (
+        'webcam__camera_slug',
+        'webcam__beach__beach_name',
+    )
+    date_hierarchy = 'ts'
+    ordering = ('-ts',)
 
-    @admin.display(description="Beach", ordering="webcam__beach__beach_name")
+    @admin.display(description='Playa')
     def get_beach(self, obj):
         return obj.webcam.beach.beach_name
