@@ -14,3 +14,7 @@ config/local_settings.py
 /logs/
 
 *.sqlite3
+
+*model_evaluation.json
+*model_evaluation_cache.json
+*weather_archive_cache.pkl
