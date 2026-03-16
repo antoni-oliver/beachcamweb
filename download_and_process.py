@@ -35,11 +35,11 @@ def main():
         
         for predictor in predictors:
             try:
-                mask_paths = [
-                    mask.path
-                    for mask in (beachcam.mask_beach, beachcam.mask_swimming)
-                    if mask
-                ]
+                if snapshot.mask_sand_and_water:
+                    mask_paths = [snapshot.mask_sand_and_water.path]
+                else:
+                    mask_paths = []
+
                 predictionDTO = predictor.predict(snapshot.webcam_image.path, mask_paths)
                 print('  Prediction done.')
                 snapshot.predicted_crowd_count = predictionDTO.crowd_count
