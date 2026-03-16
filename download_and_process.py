@@ -24,7 +24,7 @@ predictors = [BayesianPredictor()]
 
 
 def main():
-    for beachcam in WebCam.objects.order_by('-id').all():
+    for beachcam in WebCam.objects.order_by('beach__beach_name').all():
 
         print(f"Processing webcam {beachcam.beach.beach_name}.")
         snapshot = beachcam.create_snapshot()
@@ -35,11 +35,11 @@ def main():
         
         for predictor in predictors:
             try:
-                mask_paths = [
-                    mask.path
-                    for mask in (beachcam.mask_beach, beachcam.mask_swimming)
-                    if mask
-                ]
+                if snapshot.mask_sand_and_water:
+                    mask_paths = [snapshot.mask_sand_and_water.path]
+                else:
+                    mask_paths = []
+
                 predictionDTO = predictor.predict(snapshot.webcam_image.path, mask_paths)
                 print('  Prediction done.')
                 snapshot.predicted_crowd_count = predictionDTO.crowd_count
