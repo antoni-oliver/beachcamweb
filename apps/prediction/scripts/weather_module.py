@@ -31,7 +31,7 @@ try:
     from django.conf import settings as _settings
     CACHE_DIR = Path(_settings.WEATHER_CACHE_DIR)
 except Exception:
-    CACHE_DIR = Path.cwd() / 'apps' / 'prediction' / 'cache' / 'weather'
+    CACHE_DIR = Path(__file__).resolve().parent.parent / 'cache' / 'weather'
 
 ARCHIVE_DIR = CACHE_DIR / 'archive'
 RESULTS_DIR = CACHE_DIR / 'results'

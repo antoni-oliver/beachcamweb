@@ -173,7 +173,7 @@ TFT_MODEL_SETS = {
 TFT_HINDCAST_CACHE_DIR = BASE_DIR / 'apps/prediction/cache/hindcast_cache'
 
 # ── Pipeline ──────────────────────────────────────────────────────────────────
-PIPELINE_MEDIA_2022_DIR = BASE_DIR / 'media_2022'
+PIPELINE_MEDIA_2022_DIR = BASE_DIR / 'BeachCamDataset_NoVideos'
 PIPELINE_CUDA_DEVICE    = '0'
 
 cron_every_day = '0 2 * * *'  # every day at 2:00 AM

@@ -615,142 +615,14 @@ def print_summary(df):
               f"weather: {weather_pct:.0f}% | {source_str}{flags}{id_str}")
 
 
-def clean_weather_cache(cache_dir="cache/weather"):
-    cache_path = Path(cache_dir)
-    if not cache_path.exists():
-        print(f"Weather cache not found: {cache_path}")
-        return 0
-
-    removed = 0
-    for json_file in cache_path.glob("om_*.json"):
-        try:
-            with open(json_file, "r") as f:
-                json.load(f)
-        except (json.JSONDecodeError, ValueError):
-            json_file.unlink()
-            removed += 1
-
-    print(f"Cleaned {removed} corrupted Open-Meteo cache files from {cache_path}")
-    return removed
+def clean_weather_cache(cache_dir=None):
+    if HAS_WEATHER:
+        _weather_module.clear_archive()
+    else:
+        print("weather_module not available — cannot clear cache")
 
 
-OPENMETEO_VARS = [
-    'temperature_2m', 'apparent_temperature', 'dewpoint_2m', 'relative_humidity_2m',
-    'pressure_msl', 'precipitation', 'rain', 'wind_speed_10m', 'wind_direction_10m',
-    'wind_gusts_10m', 'cloud_cover', 'cloud_cover_low', 'cloud_cover_mid', 'cloud_cover_high',
-    'sunshine_duration', 'vapour_pressure_deficit', 'direct_radiation', 'shortwave_radiation'
-]
 
-
-def _bulk_fetch_openmeteo(lat, lon, start_date, end_date, delay=1.5):
-    import requests
-
-    # Open-Meteo archive API allows large date ranges in one call
-    # Split into yearly chunks to avoid response size issues
-    all_data = {}
-    current_start = start_date
-
-    while current_start <= end_date:
-        current_end = min(end_date, current_start.replace(year=current_start.year + 1) - pd.Timedelta(days=1))
-
-        try:
-            time.sleep(delay)
-            resp = requests.get(
-                "https://archive-api.open-meteo.com/v1/archive",
-                params={
-                    'latitude': round(lat, 4),
-                    'longitude': round(lon, 4),
-                    'start_date': str(current_start),
-                    'end_date': str(current_end),
-                    'hourly': ','.join(OPENMETEO_VARS),
-                    'timezone': 'UTC'
-                },
-                timeout=60
-            )
-            resp.raise_for_status()
-            data = resp.json()
-
-            if 'hourly' in data:
-                times = pd.to_datetime(data['hourly']['time'])
-                for i, t in enumerate(times):
-                    row = {}
-                    for var in OPENMETEO_VARS:
-                        if var in data['hourly']:
-                            val = data['hourly'][var][i]
-                            if val is not None:
-                                row[f'om_{var}'] = val
-                    if row:
-                        all_data[t] = row
-
-            print(f"    Fetched {current_start} → {current_end}: {len(data.get('hourly', {}).get('time', []))} hours")
-
-        except requests.exceptions.HTTPError as e:
-            if e.response.status_code == 429:
-                print(f"    Rate limited, waiting 30s...")
-                time.sleep(30)
-                continue  # retry same chunk
-            print(f"    HTTP error {current_start}→{current_end}: {e}")
-        except Exception as e:
-            print(f"    Error {current_start}→{current_end}: {e}")
-
-        current_start = current_end + pd.Timedelta(days=1)
-
-    return all_data
-
-
-def _bulk_aemet_interpolate(locations_dates, aemet_module):
-    """Batch AEMET interpolation for multiple (lat, lon, datetime) tuples."""
-    results = {}
-
-    try:
-        df_aemet = aemet_module._load_aemet_data()
-        if df_aemet is None or len(df_aemet) == 0:
-            return results
-    except Exception:
-        return results
-
-    # Group by date to reuse time-filtered data
-    by_date = {}
-    for lat, lon, dt in locations_dates:
-        d = dt.date() if hasattr(dt, 'date') else dt
-        by_date.setdefault(d, []).append((lat, lon, dt))
-
-    for date_key, entries in by_date.items():
-        time_data = df_aemet[df_aemet['fint'].dt.date == date_key]
-        if len(time_data) == 0:
-            continue
-
-        available_vars = [v for v in aemet_module.AEMET_VARS if v in time_data.columns]
-        if not available_vars:
-            continue
-
-        stations = time_data.groupby(['idema', 'lat', 'lon']).agg(
-            {v: 'mean' for v in available_vars}
-        ).reset_index()
-
-        for lat, lon, dt in entries:
-            target = np.array([[lon, lat]])
-            row = {}
-            for var in available_vars:
-                var_stations = stations[['lon', 'lat', var]].dropna()
-                if len(var_stations) < 3:
-                    if len(var_stations) > 0:
-                        row[f'ae_{var}'] = round(float(var_stations[var].mean()), 4)
-                    continue
-                try:
-                    val = aemet_module._hull_multipoint_interpolate(
-                        var_stations[['lon', 'lat']].values,
-                        var_stations[var].values,
-                        target
-                    )
-                    if val is not None:
-                        row[f'ae_{var}'] = round(val, 4)
-                except Exception:
-                    pass
-            if row:
-                results[(lat, lon, dt)] = row
-
-    return results
 
 
 def enrich_weather(df, delay=1.5, save_every=500, output_path=None):
@@ -762,9 +634,12 @@ def enrich_weather(df, delay=1.5, save_every=500, output_path=None):
         print("All records already have weather data.")
         return df
 
+    if not HAS_WEATHER:
+        print("weather_module not available — skipping weather enrichment")
+        return df
+
     missing = df.loc[missing_idx]
 
-    # Find unique locations
     locations = missing.groupby(
         [missing["lat"].round(4), missing["lon"].round(4)]
     ).agg(
@@ -777,9 +652,7 @@ def enrich_weather(df, delay=1.5, save_every=500, output_path=None):
     print(f"  {len(missing_idx)} records missing weather")
     print(f"  {len(locations)} unique locations to fetch")
 
-    # Phase 1: Bulk fetch Open-Meteo (one call per location per year)
-    print(f"\n  Phase 1: Open-Meteo bulk fetch...")
-    om_lookup = {}  # (lat_round, lon_round) -> {datetime -> {om_vars}}
+    om_lookup = {}  # (lat_round, lon_round) -> {Timestamp -> {om_vars}}
 
     for _, loc in locations.iterrows():
         lat, lon = loc["lat"], loc["lon"]
@@ -787,27 +660,17 @@ def enrich_weather(df, delay=1.5, save_every=500, output_path=None):
         end = loc["max_date"].date()
         print(f"  Location ({lat:.4f}, {lon:.4f}): {start} → {end} ({loc['count']} records)")
 
-        data = _bulk_fetch_openmeteo(lat, lon, start, end, delay=delay)
-        om_lookup[(round(lat, 4), round(lon, 4))] = data
+        weather_df = _weather_module.get_for_period(lat, lon, start, end, context_days=0)
+        if weather_df.empty:
+            continue
 
-    # Phase 2: AEMET batch interpolation
-    aemet_results = {}
-    if HAS_WEATHER:
-        print(f"\n  Phase 2: AEMET batch interpolation...")
-        try:
-            locations_dates = [
-                (row["lat"], row["lon"], row["ds"].to_pydatetime())
-                for _, row in missing.iterrows()
-            ]
-            aemet_results = _bulk_aemet_interpolate(locations_dates, _weather_module)
-            print(f"    AEMET: {len(aemet_results)} results")
-        except Exception as e:
-            print(f"    AEMET skipped: {e}")
-    else:
-        print(f"\n  Phase 2: AEMET skipped (weather_module not available)")
+        loc_data = {}
+        for _, wrow in weather_df.iterrows():
+            ts = wrow['ds_real'].floor('h')
+            loc_data[ts] = {col: wrow[col] for col in weather_df.columns if col.startswith('om_') and pd.notna(wrow[col])}
+        om_lookup[(round(lat, 4), round(lon, 4))] = loc_data
 
-    # Phase 3: Apply to DataFrame
-    print(f"\n  Phase 3: Applying to dataset...")
+    print(f"\n  Applying to dataset...")
     filled = 0
     for idx in missing_idx:
         row = df.loc[idx]
@@ -815,17 +678,7 @@ def enrich_weather(df, delay=1.5, save_every=500, output_path=None):
         lon_r = round(row["lon"], 4)
         ds_hour = row["ds"].floor("h")
 
-        weather = {}
-
-        # Open-Meteo lookup
-        loc_data = om_lookup.get((lat_r, lon_r), {})
-        if ds_hour in loc_data:
-            weather.update(loc_data[ds_hour])
-
-        # AEMET lookup
-        aemet_key = (row["lat"], row["lon"], row["ds"].to_pydatetime())
-        if aemet_key in aemet_results:
-            weather.update(aemet_results[aemet_key])
+        weather = om_lookup.get((lat_r, lon_r), {}).get(ds_hour, {})
 
         if weather:
             for k, v in weather.items():

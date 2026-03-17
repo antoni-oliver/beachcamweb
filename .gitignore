@@ -5,8 +5,10 @@ __pycache__/
 
 /media
 /media_2022
+BeachCamDataset_NoVideos/*
+
 cache/*
-apps/prediction/cache/*
+apps/prediction/cache/**
 apps/prediction/pipeline_workspace/*
 *panel_data.csv
 /static
