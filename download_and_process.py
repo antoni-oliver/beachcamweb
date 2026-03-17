@@ -26,7 +26,7 @@ predictors = [BayesianPredictor()]
 def main():
     for beachcam in WebCam.objects.all():
 
-        print(f"Processing webcam {beachcam.beach.beach_name}.")
+        print(f"Processing webcam {beachcam.beach.beach_name} - {beachcam.camera_slug} ({beachcam.pk}).")
         snapshot = beachcam.create_snapshot()
         if not snapshot:
             print("  Snapshot failed.")
@@ -37,7 +37,7 @@ def main():
             try:
                 mask_paths = [
                     mask.path
-                    for mask in (beachcam.mask_beach, beachcam.mask_swimming)
+                    for mask in (beachcam.mask_sand_and_water, )
                     if mask
                 ]
                 predictionDTO = predictor.predict(snapshot.webcam_image.path, mask_paths)
@@ -54,6 +54,7 @@ def main():
             except Exception as e:
                 # Handle any exception
                 print(f"download_and_process.py an error ocurred: {e}")
+                # raise e
                 # TODO: make it NOT available.
 
     # print(f"Deleting old data.")
