@@ -2,15 +2,46 @@
 {% load i18n %}
 
 <header class="d-flex justify-content-center py-5">
-  <ul class="nav nav-pills">
-    <li class="nav-item">
-      <a href="/" class="nav-link {% if active_url == '/' %}active{% endif %}">{% translate "home" %}</a>
-    </li>
-    <li class="nav-item">
-      <a href="/#platges" class="nav-link">{% translate "beaches" %}</a>
-    </li>
-    <li class="nav-item">
-      <a href="{% url 'analyze-image' %}" class="nav-link {% if active_url == '/analyze-image' %}active{% endif %}">{% translate "analyze-image" %}</a>
-    </li>
-  </ul>
+    <ul class="nav nav-pills align-items-center">
+        <li class="nav-item">
+            <a href="/" class="nav-link {% if active_url == '/' %}active{% endif %}">{% translate "home" %}</a>
+        </li>
+        <li class="nav-item">
+            <a href="/overview" class="nav-link {% if active_url == '/overview' %}active{% endif %}">{% translate "overview" %}</a>
+        </li>
+        <li class="nav-item">
+            <a href="{% url 'analyze-image' %}" class="nav-link {% if active_url == '/analyze-image' %}active{% endif %}">{% translate "analyze-image" %}</a>
+        </li>
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle {% if active_url|slice:':9' == '/forecast' or active_url == '/debug/fundaciobit/' or active_url == '/pipeline/report/' %}active{% endif %}"
+               href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                {% translate "forecast" %}
+            </a>
+            <ul class="dropdown-menu">
+                <li>
+                    <a class="dropdown-item {% if active_url == '/forecast' %}active{% endif %}" href="/forecast">
+                        {% translate "forecast-overview" %}
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item {% if active_url == '/forecast/report/' %}active{% endif %}" href="{% url 'forecast-model-report' %}">
+                        {% translate "forecast-model-report" %}
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <a class="dropdown-item {% if active_url == '/pipeline/report/' %}active{% endif %}" href="{% url 'pipeline-report' %}">
+                        {% translate "forecast-data-report" %}
+                    </a>
+                </li>
+                {% if request.user.is_staff %}
+                <li>
+                    <a class="dropdown-item {% if active_url == '/debug/fundaciobit/' %}active{% endif %}" href="{% url 'fundaciobit-debug' %}">
+                        {% translate "fundaciobit-debug" %}
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </li>
+    </ul>
 </header>

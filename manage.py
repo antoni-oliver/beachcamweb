@@ -2,7 +2,15 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
+import warnings
+import logging
 
+warnings.filterwarnings("ignore", message="pkg_resources is deprecated")
+warnings.filterwarnings("ignore", message=".*litlogger.*")
+warnings.filterwarnings("ignore", message=".*ModelSummary.*")
+
+logging.getLogger("pytorch_lightning").setLevel(logging.ERROR)
+logging.getLogger("lightning").setLevel(logging.ERROR)
 
 def main():
     """Run administrative tasks."""

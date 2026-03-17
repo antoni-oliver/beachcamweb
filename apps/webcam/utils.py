@@ -1,6 +1,5 @@
 import random
 import subprocess
-from pathlib import Path
 from time import sleep
 from io import BytesIO
 
@@ -10,7 +9,7 @@ from PIL import Image, ImageChops, ImageDraw
 from selenium.common import ElementClickInterceptedException, WebDriverException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from seleniumwire import webdriver  # Import from seleniumwire
+from seleniumwire import webdriver
 
 
 def m3u8_from_clickable_element(url, clickable_element_xpath):

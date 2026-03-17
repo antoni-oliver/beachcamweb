@@ -104,3 +104,151 @@ msgstr "Català"
 #: .\config\settings.py:131
 msgid "Spanish"
 msgstr "Castellà"
+
+# =============================================
+# Forecast component
+# =============================================
+
+msgid "forecast-title"
+msgstr "Previsió d'Ocupació Futura"
+
+msgid "forecast-3-day"
+msgstr "Previsió a 3 dies"
+
+msgid "forecast-10-day"
+msgstr "Previsió a 10 dies"
+
+msgid "forecast-15-day"
+msgstr "Previsió a 15 dies"
+
+msgid "loading-forecast"
+msgstr "Carregant previsió"
+
+msgid "forecast-unavailable"
+msgstr "Previsió no disponible"
+
+msgid "metrics-title"
+msgstr "Rendiment del Model (Validació Creuada)"
+
+msgid "loading-metrics"
+msgstr "Carregant mètriques"
+
+msgid "metrics-none"
+msgstr "No hi ha mètriques disponibles"
+
+msgid "metrics-unavailable"
+msgstr "Mètriques no disponibles"
+
+msgid "metrics-tbl-model"
+msgstr "Model"
+
+msgid "metrics-tbl-horizon"
+msgstr "Horitzó"
+
+msgid "metrics-tbl-overall-relmae"
+msgstr "relMAE Global"
+
+msgid "metrics-tbl-season-relmae"
+msgstr "relMAE Temporada"
+
+msgid "chart-occupancy"
+msgstr "Ocupació"
+
+msgid "chart-temperature"
+msgstr "Temperatura"
+
+msgid "chart-people"
+msgstr "Persones"
+
+msgid "chart-prediction"
+msgstr "Predicció"
+
+msgid "chart-actual"
+msgstr "Real"
+
+msgid "level-high"
+msgstr "ALT"
+
+msgid "level-medium"
+msgstr "MITJÀ"
+
+msgid "level-low"
+msgstr "BAIX"
+
+msgid "level-very-low"
+msgstr "MOLT BAIX"
+
+msgid "level-weekend"
+msgstr "Cap de setmana"
+
+msgid "summary-tomorrow"
+msgstr "Demà"
+
+msgid "summary-today"
+msgstr "Avui"
+
+msgid "summary-this-weekend"
+msgstr "Aquest cap de setmana"
+
+msgid "summary-next-weekend"
+msgstr "Proper cap de setmana"
+
+msgid "summary-no-data"
+msgstr "Sense dades disponibles"
+
+msgid "hindcast-title"
+msgstr "Hindcast — Predicció vs Real"
+
+msgid "hindcast-predict-from"
+msgstr "Predir des de"
+
+msgid "hindcast-days"
+msgstr "Dies"
+
+msgid "hindcast-run"
+msgstr "Executar"
+
+msgid "hindcast-pred-vs-actual"
+msgstr "Predicció vs Real"
+
+msgid "hindcast-hours"
+msgstr "hores"
+
+msgid "hindcast-select-date"
+msgstr "Selecciona una data"
+
+msgid "hindcast-fetching-prediction"
+msgstr "Obtenint predicció..."
+
+msgid "hindcast-fetching-actuals"
+msgstr "Obtenint dades reals..."
+
+msgid "hindcast-model-label"
+msgstr "Model"
+
+msgid "hindcast-last-data"
+msgstr "Últimes dades"
+
+msgid "overview"
+msgstr "Visió general"
+
+msgid "debug"
+msgstr "Depuració"
+
+msgid "fundaciobit-debug"
+msgstr "FundacioBit Depuración"
+
+msgid "forecast"
+msgstr "Previsió"
+
+msgid "hindcast"
+msgstr "Hindcast"
+
+msgid "forecast-overview"
+msgstr "Visión general de la previsión"
+
+msgid "forecast-model-report"
+msgstr "Informe del modelo de previsión"
+
+msgid "forecast-data-report"
+msgstr "Informe de datos de previsión"

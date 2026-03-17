@@ -35,6 +35,7 @@ ALLOWED_HOSTS = LOCAL_SETTINGS.ALLOWED_HOSTS
 # Application definition
 
 INSTALLED_APPS = [
+    'adminfilters',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -46,6 +47,7 @@ INSTALLED_APPS = [
     'apps.core',
     'apps.beachImage',
     'apps.api',
+    'django_crontab',
 ]
 
 MIDDLEWARE = [
@@ -156,3 +158,33 @@ CSRF_TRUSTED_ORIGINS = ['https://ocupacioplatges.uib.es', 'https://ocupacioplatg
 
 API_JWT_SECRET = LOCAL_SETTINGS.API_JWT_SECRET
 API_JWT_ALGOS = LOCAL_SETTINGS.API_JWT_ALGOS
+
+PYTORCH_ENABLE_MPS_FALLBACK = 1
+os.putenv("PYTORCH_ENABLE_MPS_FALLBACK", "1")
+
+# ── Prediction app paths (single root) ────────────────────────────────────────
+PREDICTION_DIR    = BASE_DIR / 'apps' / 'prediction'
+TFT_MODELS_DIR    = PREDICTION_DIR / 'tft_models'
+TFT_EVAL_JSON     = PREDICTION_DIR / 'model_evaluation.json'
+WEATHER_CACHE_DIR = PREDICTION_DIR / 'cache' / 'weather'
+TFT_MODEL_SETS = {
+    'lstm': BASE_DIR / 'apps/prediction/lstm_models/lstm_model_v4',
+}
+TFT_HINDCAST_CACHE_DIR = BASE_DIR / 'apps/prediction/cache/hindcast_cache'
+
+# ── Pipeline ──────────────────────────────────────────────────────────────────
+PIPELINE_MEDIA_2022_DIR = BASE_DIR / 'media_2022'
+PIPELINE_CUDA_DEVICE    = '0'
+
+cron_every_day = '0 2 * * *'  # every day at 2:00 AM
+cron_every_week = '0 2 * * 1'   # every Monday at 2:00 AM
+cron_every_month = '0 2 1 * *'    # on the 1st of every month at 2:00 AM
+
+CRONJOBS = [
+    (
+        cron_every_month,
+        'django.core.management.call_command',
+        ['run_pipeline'],
+        f'>> {BASE_DIR}/pipeline_workspace/logs/pipeline.log 2>&1'
+    ),
+]

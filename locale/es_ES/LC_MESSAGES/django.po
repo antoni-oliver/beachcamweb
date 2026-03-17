@@ -104,3 +104,150 @@ msgstr "Catalán"
 #: .\config\settings.py:131
 msgid "Spanish"
 msgstr "Castellano"
+# =============================================
+# Forecast component
+# =============================================
+
+msgid "forecast-title"
+msgstr "Previsión de Ocupación Futura"
+
+msgid "forecast-3-day"
+msgstr "Previsión a 3 días"
+
+msgid "forecast-10-day"
+msgstr "Previsión a 10 días"
+
+msgid "forecast-15-day"
+msgstr "Previsión a 15 días"
+
+msgid "loading-forecast"
+msgstr "Cargando previsión"
+
+msgid "forecast-unavailable"
+msgstr "Previsión no disponible"
+
+msgid "metrics-title"
+msgstr "Rendimiento del Modelo (Validación Cruzada)"
+
+msgid "loading-metrics"
+msgstr "Cargando métricas"
+
+msgid "metrics-none"
+msgstr "No hay métricas disponibles"
+
+msgid "metrics-unavailable"
+msgstr "Métricas no disponibles"
+
+msgid "metrics-tbl-model"
+msgstr "Modelo"
+
+msgid "metrics-tbl-horizon"
+msgstr "Horizonte"
+
+msgid "metrics-tbl-overall-relmae"
+msgstr "relMAE Global"
+
+msgid "metrics-tbl-season-relmae"
+msgstr "relMAE Temporada"
+
+msgid "chart-occupancy"
+msgstr "Ocupación"
+
+msgid "chart-temperature"
+msgstr "Temperatura"
+
+msgid "chart-people"
+msgstr "Personas"
+
+msgid "chart-prediction"
+msgstr "Predicción"
+
+msgid "chart-actual"
+msgstr "Real"
+
+msgid "level-high"
+msgstr "ALTO"
+
+msgid "level-medium"
+msgstr "MEDIO"
+
+msgid "level-low"
+msgstr "BAJO"
+
+msgid "level-very-low"
+msgstr "MUY BAJO"
+
+msgid "level-weekend"
+msgstr "Fin de semana"
+
+msgid "summary-tomorrow"
+msgstr "Mañana"
+
+msgid "summary-today"
+msgstr "Hoy"
+
+msgid "summary-this-weekend"
+msgstr "Este fin de semana"
+
+msgid "summary-next-weekend"
+msgstr "Próximo fin de semana"
+
+msgid "summary-no-data"
+msgstr "Sin datos disponibles"
+
+msgid "hindcast-title"
+msgstr "Hindcast — Predicción vs Real"
+
+msgid "hindcast-predict-from"
+msgstr "Predecir desde"
+
+msgid "hindcast-days"
+msgstr "Días"
+
+msgid "hindcast-run"
+msgstr "Ejecutar"
+
+msgid "hindcast-pred-vs-actual"
+msgstr "Predicción vs Real"
+
+msgid "hindcast-hours"
+msgstr "horas"
+
+msgid "hindcast-select-date"
+msgstr "Selecciona una fecha"
+
+msgid "hindcast-fetching-prediction"
+msgstr "Obteniendo predicción..."
+
+msgid "hindcast-fetching-actuals"
+msgstr "Obteniendo datos reales..."
+
+msgid "hindcast-model-label"
+msgstr "Modelo"
+
+msgid "hindcast-last-data"
+msgstr "Últimos datos"
+
+msgid "overview"
+msgstr "Vista general"
+
+msgid "debug"
+msgstr "Depuración"
+
+msgid "fundaciobit-debug"
+msgstr "FundacioBit Depuración"
+
+msgid "forecast"
+msgstr "Previsión"
+
+msgid "hindcast"
+msgstr "Hindcast"
+
+msgid "forecast-overview"
+msgstr "Visión general de la previsión"
+
+msgid "forecast-model-report"
+msgstr "Informe del modelo de previsión"
+
+msgid "forecast-data-report"
+msgstr "Informe de datos de previsión"
