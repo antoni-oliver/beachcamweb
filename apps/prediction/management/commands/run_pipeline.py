@@ -104,7 +104,6 @@ def step_train_data_notebook(options):
             'CSV_PATH': cfg.DATASET_CSV.name,
             'OUT_DIR': out_dir_name,
         },
-        kernel_name='beachcam',
         cwd=str(cfg.PIPELINE_DIR),
     )
 
