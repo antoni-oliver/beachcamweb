@@ -47,7 +47,7 @@ from neuralforecast import NeuralForecast
 #       ├── tft_model_10d/
 #       └── tft_model_15d/
 
-MODEL_DIR = Path('./tft_20260315_225143/tft_model_10d')   # ← SET THIS
+MODEL_DIR = Path('tft_20260315_225143/tft_model_10d')   # ← SET THIS
 
 # The horizon is read automatically from config.json inside MODEL_DIR.
 

@@ -5,14 +5,16 @@ Models: 3-day (H=36), 14-day (H=168), 30-day (H=360)
 Auto-selects model based on requested horizon.
 """
 
+import hashlib
 import json
 import logging
 import threading
-import time
 from datetime import timedelta, date
 from pathlib import Path
 
+import holidays as _holidays
 import pandas as pd
+from django.core.cache import cache
 from django.utils.timezone import make_aware
 
 from apps.prediction.models import Snapshot
@@ -52,9 +54,6 @@ def classify_occupancy(crowd_count, max_crowd_count):
     return 'VERY_LOW'
 
 # Temporal features computable from a timestamp — extend as needed
-import holidays as _holidays
-
-# Spanish holidays for the Balearic Islands — cached per year on first access
 _es_holidays_cache: dict[int, set] = {}
 
 def _es_holidays(year: int) -> set:
@@ -94,9 +93,30 @@ class TFTService:
     _instance = None
     _lock = threading.Lock()
     _predict_lock = threading.Lock()
-    _prediction_cache = {}
     _prediction_cache_lock = threading.Lock()
-    PREDICTION_TTL = 3600
+    PREDICTION_TTL = 3600  # seconds — used for Django cache key TTL
+
+    def _forecast_cache_key(self, slug, days, model_set, model_key):
+        return f'tft_forecast:{slug}:{days}:{model_set}:{model_key}'
+
+    def _hindcast_cache_path(self, slug, since, days, model_set, model_key):
+        raw = f'{slug}:{since}:{days}:{model_set}:{model_key}'
+        h = hashlib.md5(raw.encode()).hexdigest()
+        base = Path(getattr(settings, 'TFT_HINDCAST_CACHE_DIR', settings.TFT_MODELS_DIR)) / 'hindcast_cache'
+        base.mkdir(parents=True, exist_ok=True)
+        return base / f'{h}.json'
+
+    def _hindcast_read(self, path):
+        try:
+            return json.loads(path.read_text())
+        except Exception:
+            return None
+
+    def _hindcast_write(self, path, result):
+        try:
+            path.write_text(json.dumps(result))
+        except Exception:
+            pass
 
     def __new__(cls):
         with cls._lock:
@@ -474,13 +494,17 @@ class TFTService:
             raise RuntimeError(f"No TFT models loaded for set '{model_set}'")
 
         if not since:
-            cache_key = (webcam.camera_slug, days, model_set, model_key)
-            with self._prediction_cache_lock:
-                if cache_key in self._prediction_cache:
-                    cached_time, cached_result = self._prediction_cache[cache_key]
-                    if time.time() - cached_time < self.PREDICTION_TTL:
-                        logger.debug(f"Prediction cache hit: {cache_key}")
-                        return cached_result
+            cache_key = self._forecast_cache_key(webcam.camera_slug, days, model_set, model_key)
+            cached = cache.get(cache_key)
+            if cached is not None:
+                logger.debug(f'Forecast cache hit: {cache_key}')
+                return cached
+        else:
+            hc_path = self._hindcast_cache_path(webcam.camera_slug, since, days, model_set, model_key)
+            cached = self._hindcast_read(hc_path)
+            if cached is not None:
+                logger.debug(f'Hindcast cache hit: {hc_path.name}')
+                return cached
 
         m = models[model_key]
         H_model = m['horizon']                          # full model horizon for futr_df
@@ -594,8 +618,10 @@ class TFTService:
         }
 
         if not since:
-            with self._prediction_cache_lock:
-                self._prediction_cache[(webcam.camera_slug, days, model_set, model_key)] = (time.time(), result)
+            cache_key = self._forecast_cache_key(webcam.camera_slug, days, model_set, model_key)
+            cache.set(cache_key, result, self.PREDICTION_TTL)
+        else:
+            self._hindcast_write(hc_path, result)
 
         return result
 

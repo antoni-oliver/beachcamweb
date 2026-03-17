@@ -170,6 +170,7 @@ WEATHER_CACHE_DIR = PREDICTION_DIR / 'cache' / 'weather'
 TFT_MODEL_SETS = {
     'lstm': BASE_DIR / 'apps/prediction/lstm_models/lstm_model_v4',
 }
+TFT_HINDCAST_CACHE_DIR = BASE_DIR / 'apps/prediction/cache/hindcast_cache'
 
 # ── Pipeline ──────────────────────────────────────────────────────────────────
 PIPELINE_MEDIA_2022_DIR = BASE_DIR / 'media_2022'
