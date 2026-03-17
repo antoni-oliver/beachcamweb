@@ -240,3 +240,15 @@ msgstr "FundacioBit Depuración"
 
 msgid "forecast"
 msgstr "Previsió"
+
+msgid "hindcast"
+msgstr "Hindcast"
+
+msgid "forecast-overview"
+msgstr "Visión general de la previsión"
+
+msgid "forecast-model-report"
+msgstr "Informe del modelo de previsión"
+
+msgid "forecast-data-report"
+msgstr "Informe de datos de previsión"

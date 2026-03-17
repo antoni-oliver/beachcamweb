@@ -27,10 +27,13 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone as dj_tz
 import numpy as np
 
+from apps.prediction.scripts import weather_module
 from apps.webcam.models import WebCam
 from apps.prediction.models import Snapshot
 from apps.prediction.tft_service import TFTService
-from apps.prediction.weather_cache import weather_cache
+import sys as _sys
+from pathlib import Path as _Path
+from django.conf import settings as _settings
 
 SEASON_MONTHS = {4, 5, 6, 7, 8, 9}
 SUMMER_MONTHS = {7, 8}
@@ -108,7 +111,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if options['clear_weather_cache']:
-            weather_cache.clear_archive()
+            weather_module.clear_archive()
             self.stdout.write('Weather archive cache cleared.')
 
         # ── Cache path (alongside TFT_EVAL_JSON) ──────────────────────────────
@@ -167,11 +170,11 @@ class Command(BaseCommand):
             seen_coords.add((lat_r, lon_r))
             self.stdout.write(f'  ({lat_r}, {lon_r}) ...', ending=' ')
             self.stdout.flush()
-            weather_cache.prefetch(lat_r, lon_r, global_start, global_end)
+            weather_module.prefetch(lat_r, lon_r, global_start, global_end)
             self.stdout.write('done')
 
-        info = weather_cache.archive_info()
-        self.stdout.write(f'Cache: {info["entries"]} monthly chunks, {info["coords"]} coords\n')
+        info = weather_module.archive_info()
+        self.stdout.write(f'Cache: {info["disk_entries"]} monthly chunks, {info["coords"]} coords\n')
 
         # ── Load model sets ────────────────────────────────────────────────────
         loaded_sets = []

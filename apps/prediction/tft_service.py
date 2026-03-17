@@ -9,13 +9,14 @@ import json
 import logging
 import threading
 import time
-from datetime import timedelta
+from datetime import timedelta, date
 from pathlib import Path
 
 import pandas as pd
 from django.utils.timezone import make_aware
 
 from apps.prediction.models import Snapshot
+from apps.prediction.scripts import weather_module
 
 if not hasattr(pd.Series, 'is_nan'):
     pd.Series.is_nan = pd.Series.isna
@@ -27,8 +28,6 @@ if not hasattr(pd.DataFrame, 'is_null'):
     pd.DataFrame.is_null = lambda self: self.isnull().squeeze()
 from django.conf import settings
 from django.utils import timezone
-
-from apps.prediction.weather_cache import weather_cache
 
 logger = logging.getLogger(__name__)
 
@@ -53,6 +52,16 @@ def classify_occupancy(crowd_count, max_crowd_count):
     return 'VERY_LOW'
 
 # Temporal features computable from a timestamp — extend as needed
+import holidays as _holidays
+
+# Spanish holidays for the Balearic Islands — cached per year on first access
+_es_holidays_cache: dict[int, set] = {}
+
+def _es_holidays(year: int) -> set:
+    if year not in _es_holidays_cache:
+        _es_holidays_cache[year] = set(_holidays.country_holidays('ES', subdiv='IB', years=year).keys())
+    return _es_holidays_cache[year]
+
 TEMPORAL_FEATURE_BUILDERS = {
     'hour':         lambda ts: ts.hour,
     'day_of_week':  lambda ts: ts.weekday(),
@@ -61,6 +70,7 @@ TEMPORAL_FEATURE_BUILDERS = {
     'week_of_year': lambda ts: ts.isocalendar()[1],
     'is_weekend':   lambda ts: int(ts.weekday() >= 5),
     'is_summer':    lambda ts: int(ts.month in (6, 7, 8)),
+    'is_holiday':   lambda ts: int(ts.date() in _es_holidays(ts.year)),
     'quarter':      lambda ts: (ts.month - 1) // 3 + 1,
 }
 
@@ -174,12 +184,22 @@ class TFTService:
         }
 
     def load_models(self, base_dir=None, set_name='default'):
-        base_dir = Path(base_dir or getattr(settings, 'TFT_MODELS_DIR', 'tft_models'))
+        base_dir = Path(base_dir or settings.TFT_MODELS_DIR)
 
-        # Auto-discover horizon dirs — tries known patterns then glob
+        # Auto-discover horizon dirs — prefer dirs ending with _{tag}, then any containing {tag}
         def find_dir(horizon_tag):
-            for p in sorted(base_dir.glob(f'*{horizon_tag}*')):
-                if p.is_dir() and (p / 'config.json').exists():
+            suffix = f'_{horizon_tag}'
+            candidates = [
+                p for p in base_dir.iterdir()
+                if p.is_dir() and (p / 'config.json').exists()
+            ]
+            # exact suffix first (e.g. lstm_grid_model_3d, tft_model_3d)
+            for p in sorted(candidates):
+                if p.name.endswith(suffix):
+                    return p
+            # fallback: any dir containing the tag
+            for p in sorted(candidates):
+                if horizon_tag in p.name:
                     return p
             return None
 
@@ -241,10 +261,7 @@ class TFTService:
 
 
     def _load_best_models(self):
-        raw = getattr(settings, 'TFT_EVAL_JSON', 'apps/prediction/model_evaluation.json')
-        path = Path(raw)
-        if not path.is_absolute():
-            path = Path(settings.BASE_DIR) / path
+        path = Path(settings.TFT_EVAL_JSON)
         if not path.exists():
             return
         try:
@@ -256,12 +273,7 @@ class TFTService:
 
     def _auto_discover(self):
         """Scan TFT_MODELS_DIR for run subfolders containing tft_model_Xd dirs."""
-        models_dir = getattr(settings, 'TFT_MODELS_DIR', None)
-        if not models_dir:
-            return
-        models_dir = Path(models_dir)
-        if not models_dir.is_absolute():
-            models_dir = Path(settings.BASE_DIR) / models_dir
+        models_dir = Path(settings.TFT_MODELS_DIR)
         if not models_dir.exists():
             logger.warning(f"TFT_MODELS_DIR not found: {models_dir}")
             return
@@ -271,10 +283,11 @@ class TFTService:
         for candidate in sorted(models_dir.iterdir()):
             if not candidate.is_dir():
                 continue
-            # Valid run folder must contain at least one tft_model_Xd subdir with config.json
+            # Valid run folder must contain at least one *_3d/*_10d/*_15d subdir with config.json
             has_model = any(
-                (candidate / subdir / 'config.json').exists()
-                for subdir in ['tft_model_3d', 'tft_model_10d', 'tft_model_15d']
+                sub.is_dir() and (sub / 'config.json').exists()
+                for sub in candidate.iterdir()
+                if sub.name.endswith('_3d') or sub.name.endswith('_10d') or sub.name.endswith('_15d')
             )
             if not has_model:
                 continue
@@ -345,7 +358,7 @@ class TFTService:
             'relMAE_season': best.get('relMAE_season'),
         }
 
-    def predict_mixed(self, webcam, days=15, since=None):
+    def predict_mixed(self, webcam, days=15, since=None, model_set=None):
         SEGMENTS = [('3d', 1, 3), ('10d', 4, 10), ('15d', 11, 15)]
         combined = []
         seen_ts = set()
@@ -354,7 +367,10 @@ class TFTService:
             if day_from > days:
                 break
             day_to_actual = min(day_to, days)
-            set_name = self._best_set_for_horizon(horizon_key)
+            if model_set:
+                set_name = model_set
+            else:
+                set_name = self._best_set_for_horizon(horizon_key)
             if not set_name:
                 set_name = self._any_loaded_set()
             if not set_name:
@@ -432,7 +448,7 @@ class TFTService:
             available = list(self.model_sets) + list(configured) + list(self._discovered)
             raise RuntimeError(f"Model set '{model_set}' not found. Available: {available}")
 
-    def predict(self, webcam, days=3, since=None, model_set='default'):
+    def predict(self, webcam, days=3, since=None, model_set='default', model_key=None):
         # Resolve 'default' to the best real set for the requested horizon
         if model_set == 'default':
             model_key_hint = self._horizon_key_for_days(days)
@@ -453,12 +469,12 @@ class TFTService:
                 raise RuntimeError("No model sets with loaded models available.")
 
         models = self.model_sets[model_set]
-        model_key = self.select_model(days, model_set=model_set)
+        model_key = model_key if model_key and model_key in models else self.select_model(days, model_set=model_set)
         if model_key is None:
             raise RuntimeError(f"No TFT models loaded for set '{model_set}'")
 
         if not since:
-            cache_key = (webcam.camera_slug, days, model_set)
+            cache_key = (webcam.camera_slug, days, model_set, model_key)
             with self._prediction_cache_lock:
                 if cache_key in self._prediction_cache:
                     cached_time, cached_result = self._prediction_cache[cache_key]
@@ -473,6 +489,7 @@ class TFTService:
         lat = float(webcam.camera_latitude or webcam.beach.coordenadas_geograficas.split(',')[0] if webcam.beach.coordenadas_geograficas else 39.5)
         lon = float(webcam.camera_longitude or webcam.beach.coordenadas_geograficas.split(',')[1] if webcam.beach.coordenadas_geograficas else 2.6)
 
+        since_naive = None
         if since:
             since_naive = since.replace(tzinfo=None) if hasattr(since, 'tzinfo') and since.tzinfo else since
             weather_all = self._fetch_weather_for_period(lat, lon, since_naive, days, context_days=10)
@@ -484,15 +501,16 @@ class TFTService:
         #print(f"[DEBUG predict] required_om={required_om}")
         #print(f"[DEBUG predict] weather_all cols={list(weather_all.columns)}")
         missing = [c for c in required_om if c not in weather_all.columns]
-        #print(f"[DEBUG predict] missing weather cols={missing}")
-        since_date = pd.Timestamp(since_naive if since else pd.Timestamp.now()).date()
-        end_date = since_date + pd.Timedelta(days=days + 1)
-        weather_all = weather_cache.ensure_columns(
-            weather_all, lat, lon,
-            since_date - pd.Timedelta(days=10),
-            end_date.to_pydatetime().date() if hasattr(end_date, 'to_pydatetime') else end_date,
-            required_om,
-        )
+        _since_ts = pd.Timestamp(since_naive) if since_naive is not None else pd.Timestamp.now()
+        since_date = _since_ts.date() if not pd.isnull(_since_ts) else date.today()
+        end_date = since_date + timedelta(days=days + 1)
+        if missing:
+            weather_module.clear_archive()
+            weather_all = weather_module.get_for_period(
+                lat, lon,
+                since_date - timedelta(days=10),
+                end_date,
+            )
 
         context = self._build_context(webcam, m, weather_all, since=since)
 
@@ -577,7 +595,7 @@ class TFTService:
 
         if not since:
             with self._prediction_cache_lock:
-                self._prediction_cache[(webcam.camera_slug, days, model_set)] = (time.time(), result)
+                self._prediction_cache[(webcam.camera_slug, days, model_set, model_key)] = (time.time(), result)
 
         return result
 
@@ -638,15 +656,16 @@ class TFTService:
         return df
 
     def _fetch_weather_forecast(self, lat, lon, past_days=10, forecast_days=16):
-        return weather_cache._get_forecast(lat, lon, past_days=past_days, forecast_days=forecast_days)
+        return weather_module._get_forecast(lat, lon, past_days=past_days, forecast_days=forecast_days)
 
     def _fetch_weather_archive(self, lat, lon, start_date, end_date):
-        return weather_cache._get_archive(lat, lon, start_date, end_date)
+        return weather_module._get_archive(lat, lon, start_date, end_date)
 
     def _fetch_weather_for_period(self, lat, lon, since_naive, forecast_days, context_days=10):
-        since_date = pd.Timestamp(since_naive).date()
+        ts = pd.Timestamp(since_naive) if since_naive is not None else pd.Timestamp.now()
+        since_date = ts.date() if not pd.isnull(ts) else date.today()
         end_date = since_date + timedelta(days=forecast_days)
-        return weather_cache.get_for_period(lat, lon, since_date, end_date, context_days=context_days)
+        return weather_module.get_for_period(lat, lon, since_date, end_date, context_days=context_days)
 
     def _filter_daytime(self, weather_df):
         return weather_df[(weather_df['hour'] >= HOUR_MIN) & (weather_df['hour'] <= HOUR_MAX)]

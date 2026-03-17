@@ -19,7 +19,7 @@
   .db-hero .sub { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: rgba(255,255,255,0.4); }
   .db-badge { display: inline-block; background: rgba(139,92,246,0.35); border: 1px solid rgba(139,92,246,0.5); color: #c4b5fd; font-family: 'DM Mono', monospace; font-size: 0.65rem; padding: 0.1rem 0.5rem; border-radius: 3px; margin-left: 0.5rem; vertical-align: middle; }
 
-  /* Controls panel */
+
   .db-panel { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 0.9rem 1.5rem; display: flex; gap: 0.75rem; align-items: flex-end; flex-wrap: wrap; }
   .db-field { display: flex; flex-direction: column; gap: 0.25rem; }
   .db-field label { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
@@ -43,24 +43,24 @@
   .db-btn-sm { background: #f1f5f9; color: #374151; border: 1px solid #e2e8f0; font-size: 0.68rem; padding: 0.2rem 0.55rem; border-radius: 4px; cursor: pointer; }
   .db-btn-sm:hover { border-color: #8b5cf6; color: #8b5cf6; }
 
-  /* URL preview */
+
   .db-url-wrap { background: #0f172a; padding: 0.6rem 1.5rem; overflow-x: auto; }
   .db-url { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: #94a3b8; white-space: nowrap; }
   .db-url .method { color: #34d399; }
   .db-url .endpoint { color: #7dd3fc; }
   .db-url .param { color: #fbbf24; }
 
-  /* Status bar */
+
   .db-statusbar { display: flex; align-items: center; gap: 1rem; padding: 0.5rem 1.5rem; background: #fff; border-bottom: 1px solid #e2e8f0; flex-wrap: wrap; }
   .db-status-text { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: #64748b; }
   .db-status-text.ok { color: #10b981; }
   .db-status-text.err { color: #ef4444; }
   .db-pill { font-family: 'DM Mono', monospace; font-size: 0.62rem; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 3px; padding: 0.1rem 0.45rem; color: #475569; }
 
-  /* Main area */
+
   .db-main { padding: 1.25rem 1.5rem; }
 
-  /* Cards grid */
+
   .db-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(460px, 1fr)); gap: 1rem; }
   @media (max-width: 560px) { .db-cards { grid-template-columns: 1fr; } }
 
@@ -94,7 +94,7 @@
   .db-card-footer { display: flex; gap: 0.3rem; flex-wrap: wrap; padding: 0.4rem 0.75rem 0.55rem; border-top: 1px solid #f8fafc; }
   .db-day-badge { font-family: 'DM Mono', monospace; font-size: 0.57rem; padding: 0.1rem 0.42rem; border-radius: 3px; white-space: nowrap; cursor: default; }
 
-  /* Raw JSON panel */
+
   .db-raw-wrap { margin-top: 1.25rem; background: #0f172a; border-radius: 8px; overflow: hidden; border: 1px solid #1e293b; }
   .db-raw-hdr { display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0.9rem; border-bottom: 1px solid #1e293b; }
   .db-raw-hdr span { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: #64748b; }
@@ -103,7 +103,7 @@
 
   #db-status { text-align: center; padding: 3rem; color: #94a3b8; font-family: 'DM Mono', monospace; font-size: 0.78rem; }
 
-  /* Day/hour pill selectors */
+
   .db-pill-sel {
     border: 1px solid #e2e8f0; background: #f8fafc; color: #374151;
     border-radius: 4px; padding: 0.18rem 0.52rem;
@@ -119,6 +119,8 @@
   #fo-tip .tn { font-weight: 600; font-size: 0.76rem; margin-bottom: 0.1rem; }
   #fo-tip .td { color: #38bdf8; margin-bottom: 0.3rem; }
   #fo-tip .tb { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 0.6rem; margin-bottom: 0.2rem; }
+  .db-ctl-row  { display: flex; gap: 0.75rem; align-items: flex-end; flex-wrap: wrap; width: 100%; }
+  .db-pills    { display: flex; gap: 4px; flex-wrap: wrap; }
 </style>
 {% endblock %}
 
@@ -133,8 +135,8 @@
 
 <div class="db-panel">
 
-  <!-- Beach + sort row -->
-  <div style="display:flex;gap:0.75rem;align-items:flex-end;flex-wrap:wrap;width:100%">
+
+  <div class="db-ctl-row">
     <div class="db-field" style="flex:1;min-width:180px">
       <label>Beach slug (id_beach)</label>
       <input id="db-beach" class="db-input" placeholder="e.g. muro-sector-i  (blank = all)" value="" style="min-width:0;width:100%">
@@ -150,7 +152,7 @@
     <button class="db-btn db-btn-run" id="db-run">▶ Run</button>
   </div>
 
-  <!-- Day picker row -->
+
   <div class="db-field" style="width:100%">
     <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.35rem">
       <label style="margin:0">Days</label>
@@ -162,10 +164,10 @@
       <button class="db-btn-sm" id="db-preset-all">All 15 days</button>
       <button class="db-btn-sm" id="db-days-clear">Clear</button>
     </div>
-    <div id="db-day-pills" style="display:flex;gap:4px;flex-wrap:wrap"></div>
+    <div id="db-day-pills" class="db-pills" ></div>
   </div>
 
-  <!-- Hour picker row -->
+
   <div class="db-field" style="width:100%">
     <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.35rem">
       <label style="margin:0">Hours</label>
@@ -173,7 +175,7 @@
       <button class="db-btn-sm" id="db-preset-peak">Peak (11–15)</button>
       <button class="db-btn-sm" id="db-hours-clear">Clear</button>
     </div>
-    <div id="db-hour-pills" style="display:flex;gap:4px;flex-wrap:wrap"></div>
+    <div id="db-hour-pills" class="db-pills" ></div>
   </div>
 
 </div>
@@ -225,10 +227,9 @@ function dateKey(d) {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
-// ── Day + hour state ──────────────────────────────────────────────────────────
 const selectedDays  = new Set();
 const selectedHours = new Set();
-let validHours = new Set(Array.from({length:13},(_,i)=>i+8)); // 8–20
+let validHours = new Set(Array.from({length:13},(_,i)=>i+8));
 
 function getAvailableDates() {
   const dates = [];
@@ -294,15 +295,13 @@ function setHours(hours) {
   updateUrlPreview();
 }
 
-// ── Presets ───────────────────────────────────────────────────────────────────
 function getWeekend(offsetWeeks) {
   const today = new Date(); today.setHours(0,0,0,0);
-  const dow = today.getDay(); // 0=Sun
-  // Next Saturday
+  const dow = today.getDay();
   let sat = new Date(today);
   sat.setDate(today.getDate() + ((6 - dow + 7) % 7) + offsetWeeks * 7);
-  if (offsetWeeks === 0 && dow === 6) sat = today; // today is Saturday
-  if (offsetWeeks === 0 && dow === 0) sat.setDate(today.getDate() - 1); // today is Sunday, go back to Sat
+  if (offsetWeeks === 0 && dow === 6) sat = today;
+  if (offsetWeeks === 0 && dow === 0) sat.setDate(today.getDate() - 1);
   const sun = new Date(sat); sun.setDate(sat.getDate() + 1);
   return [dateKey(sat), dateKey(sun)];
 }
@@ -327,18 +326,18 @@ document.getElementById('db-preset-all').addEventListener('click', () => {
 });
 document.getElementById('db-days-clear').addEventListener('click', () => setDays([]));
 
-document.getElementById('db-preset-beach').addEventListener('click', () => setHours([8,9,10,11,12,13,14,15,16,17,18]));
+document.getElementById('db-preset-beach').addEventListener('click', () => setHours([8,9,10,11,12,13,14,15,16,17,18,19,20]));
 document.getElementById('db-preset-peak').addEventListener('click', () => setHours([11,12,13,14,15]));
 document.getElementById('db-hours-clear').addEventListener('click', () => setHours([]));
 
-// ── Build timestamp list ──────────────────────────────────────────────────────
 function buildTimestamps() {
   const ts = [];
   const days  = [...selectedDays].sort();
   const hours = [...selectedHours].sort((a,b)=>a-b);
   for (const day of days) {
     for (const h of hours) {
-      const dt = new Date(`${day}T${String(h).padStart(2,'0')}:00:00`);
+      const dt = new Date(day);
+      dt.setHours(h, 0, 0, 0);
       ts.push(Math.floor(dt.getTime() / 1000));
     }
   }
@@ -362,7 +361,6 @@ function updateUrlPreview() {
     `<span class="method">GET</span> <span class="endpoint">${path}</span>${query ? '<span class="param">?' + query + '</span>' : ''}`;
 }
 
-// ── Render cards ──────────────────────────────────────────────────────────────
 const BAR_W = 5, BAR_G = 1, DAY_G = 5, CH = 80, LBL_H = 18;
 const ns = 'http://www.w3.org/2000/svg';
 
@@ -371,7 +369,6 @@ function renderCards(beachData) {
   const container = document.getElementById('db-cards');
   container.innerHTML = '';
 
-  // Collect unique dates from the data
   const dateSet = new Set();
   for (const b of beachData)
     for (const p of b.predictions) {
@@ -379,7 +376,6 @@ function renderCards(beachData) {
       dateSet.add(dateKey(d));
     }
   const dates = [...dateSet].sort();
-  // Collect unique hours that actually have predictions
   const hourSet = new Set();
   for (const b of beachData)
     for (const p of b.predictions) {
@@ -389,8 +385,6 @@ function renderCards(beachData) {
       }
     }
   const hours = [...hourSet].sort((a,b)=>a-b);
-
-  // Update valid hours and rebuild pills showing only predictable hours
 
   buildHourPills();
 
@@ -429,7 +423,6 @@ function renderCards(beachData) {
     card.className = 'db-card';
     card.style.animationDelay = `${ri * 25}ms`;
 
-    // Header
     const hdr = document.createElement('div');
     hdr.className = 'db-card-hdr';
     hdr.innerHTML = `
@@ -442,7 +435,6 @@ function renderCards(beachData) {
     `;
     card.appendChild(hdr);
 
-    // SVG bar chart
     const chartWrap = document.createElement('div');
     chartWrap.className = 'db-card-chart';
 
@@ -452,7 +444,6 @@ function renderCards(beachData) {
     svg.setAttribute('height', CH + LBL_H);
     svg.classList.add('db-chart-svg');
 
-    // Baseline + 50% guide
     [[CH,'#e2e8f0','1',''],[CH*0.5,'#e2e8f0','0.5','3,3']].forEach(([y,stroke,sw,dash]) => {
       const l = document.createElementNS(ns, 'line');
       l.setAttribute('x1',0); l.setAttribute('y1',y); l.setAttribute('x2',totalW); l.setAttribute('y2',y);
@@ -514,7 +505,6 @@ function renderCards(beachData) {
     chartWrap.appendChild(svg);
     card.appendChild(chartWrap);
 
-    // Footer: daily peak badges
     const footer = document.createElement('div');
     footer.className = 'db-card-footer';
     dates.forEach(dateStr => {
@@ -540,7 +530,6 @@ function renderCards(beachData) {
   container.style.display = 'grid';
 }
 
-// ── Tooltips ──────────────────────────────────────────────────────────────────
 function showTip(e, slug, date, hour, rel, abs, level) {
   document.getElementById('fo-tip').innerHTML = `
     <div class="tn">${slug}</div>
@@ -559,7 +548,6 @@ function moveTip(e) {
 }
 function hideTip() { document.getElementById('fo-tip').style.display = 'none'; }
 
-// ── Run ───────────────────────────────────────────────────────────────────────
 let lastRaw = null, rawVisible = false;
 
 async function runQuery() {
@@ -619,7 +607,6 @@ async function runQuery() {
   }
 }
 
-// Raw toggle
 document.getElementById('db-toggle-raw').addEventListener('click', () => {
   rawVisible = !rawVisible;
   document.getElementById('db-raw').style.display = rawVisible ? 'block' : 'none';
@@ -637,12 +624,10 @@ document.getElementById('db-sort').addEventListener('change', () => {
   if (lastRaw && (lastRaw.data||[]).length) renderCards(lastRaw.data);
 });
 
-// Init
 buildDayPills();
 buildHourPills();
-// Default: next weekend + beach hours
 const [sat, sun] = getWeekend(0);
 setDays([sat, sun]);
-setHours([8,9,10,11,12,13,14,15,16,17,18]);
+setHours([8,9,10,11,12,13,14,15,16,17,18,19,20]);
 </script>
 {% endblock %}

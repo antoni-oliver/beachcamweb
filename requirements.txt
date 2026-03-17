@@ -2,15 +2,16 @@
 Django==5.0.1
 djangorestframework==3.16.1
 django-adminfilters
+django-crontab
 
 # Auth
 PyJWT==2.11.0
 
 # ML / Forecasting
-torch==2.3.0
-torchvision==0.18.0
-torchaudio==2.3.0
-neuralforecast==3.0.2
+torch==2.10.0
+torchvision
+torchaudio
+neuralforecast==3.1.5
 pytorch-lightning==2.6.1
 scipy==1.17.1
 
@@ -18,6 +19,8 @@ scipy==1.17.1
 numpy==1.26.4
 pandas==2.3.3
 matplotlib==3.9.0
+holidays
+seaborn
 
 # HTTP / Scraping
 requests==2.31.0
@@ -31,5 +34,9 @@ invoke==2.2.0
 paramiko==3.4.0
 
 # Utils
+scikit-learn
 Pillow==10.2.0
 termcolor==2.4.0
+papermill
+nbconvert
+ipykernel

@@ -4,6 +4,9 @@ from django.views.decorators.http import require_GET
 from datetime import datetime, timedelta
 from django.utils import timezone as tz
 from apps.prediction.models import Snapshot
+from django.conf import settings
+import json as _json
+from pathlib import Path
 
 from apps.webcam.models import WebCam
 from .tft_service import tft_service
@@ -16,6 +19,7 @@ def tft_forecast_json(request, camera_slug):
     days = int(request.GET.get('days', 3))
     days = max(1, min(days, 15))
     model_set = request.GET.get('model_set', 'default')
+    model_key = request.GET.get('model_key') or None
 
     since_str = request.GET.get('since')
     since = None
@@ -31,7 +35,11 @@ def tft_forecast_json(request, camera_slug):
         return JsonResponse({'error': 'Not found'}, status=404)
 
     try:
-        result = tft_service.predict(webcam, days=days, since=since, model_set=model_set)
+        mixed = request.GET.get('mixed')
+        if mixed:
+            result = tft_service.predict_mixed(webcam, days=days, since=since, model_set=model_set)
+        else:
+            result = tft_service.predict(webcam, days=days, since=since, model_set=model_set, model_key=model_key)
         return JsonResponse(result)
     except ValueError as e:
         return JsonResponse({'error': str(e)}, status=400)
@@ -204,10 +212,13 @@ def tft_full_forecast_json(request, beach_id=None):
 
         cam_results = []
         for cam in unique_cams:
+            mcc = float(cam.max_crowd_count or 0)
+            if mcc <= 0:
+                continue
             try:
                 res = tft_service.predict_mixed(cam, days=days, since=since)
                 res['webcam'] = cam.camera_slug
-                res['max_crowd_count'] = float(cam.max_crowd_count or 0)
+                res['max_crowd_count'] = mcc
                 cam_results.append(res)
             except Exception as e:
                 logger.warning(f"Full forecast skipped for {cam.camera_slug}: {e}")
@@ -221,6 +232,7 @@ def tft_full_forecast_json(request, beach_id=None):
         results.append({
             'beach': first.get('beach'),
             'beach_id': beach_id_key,
+            'webcam': first.get('webcam'),
             'horizon_days': first.get('horizon_days'),
             'segments': first.get('segments'),
             'predictions': merged_predictions,
@@ -233,9 +245,6 @@ def tft_full_forecast_json(request, beach_id=None):
 
 @require_GET
 def tft_eval_ranking_json(request, camera_slug):
-    from django.conf import settings
-    import json as _json
-    from pathlib import Path
 
     raw = getattr(settings, 'TFT_EVAL_JSON', None)
     if not raw:

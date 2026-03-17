@@ -10,6 +10,12 @@ from apps.webcam import utils as webcam_utils
 from apps.core.forms import WebcamFiltersForm, SnapshotFiltersUpdate, WebcamMaskPolygonForm
 from apps.core.forms import ImageUploaderForm
 from config import settings
+from django.http import HttpResponse
+from apps.prediction import pipeline_config as cfg
+from django.utils.timezone import now
+from datetime import timedelta
+
+from django.views.decorators.cache import cache_page
 
 from predictions.classes.BayesianPredictor import BayesianPredictor
 from predictions.actions.CustomerPredict import CustomerPredict
@@ -169,13 +175,14 @@ def beach_overview(request):
 def all_beaches_forecast(request):
     return render(request, 'core/all_beaches_forecast.html')
 
-
+@cache_page(60 * 60)
 def beach_history_api(request, camera_slug):
     cam = get_object_or_404(WebCam, camera_slug=camera_slug)
+    since = now() - timedelta(days=365)
 
     base_qs = (
         Snapshot.objects
-        .filter(webcam=cam, predicted_crowd_count__isnull=False)
+        .filter(webcam=cam, predicted_crowd_count__isnull=False, ts__gte=since)
         .order_by('ts')
     )
     rows = list(base_qs.values_list('ts', 'predicted_crowd_count'))
@@ -193,10 +200,17 @@ def beach_history_api(request, camera_slug):
     )
     image_url = base + latest if latest else None
 
-    return JsonResponse({'data': data, 'image_url': image_url})
-
-
+    return JsonResponse({'data': data, 'image_url': image_url, 'max_crowd_count': cam.max_crowd_count or 0})
 
 @staff_member_required
 def fundaciobit_debug(request):
     return render(request, 'core/fundaciobit_debug.html')
+
+def pipeline_report(request):
+    if not cfg.NOTEBOOK_HTML.exists():
+        return HttpResponse('<h2>No report generated yet. Run the pipeline first.</h2>', status=404)
+    return HttpResponse(cfg.NOTEBOOK_HTML.read_text(), content_type='text/html')
+
+def forecast_model_report(request):
+    cam = WebCam.objects.filter(max_crowd_count__gt=0).first()
+    return render(request, 'core/forecast_model_report.html', {'default_slug': cam.camera_slug})

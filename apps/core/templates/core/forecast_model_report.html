@@ -1,0 +1,256 @@
+{% extends 'core/parent.html' %}
+{% load i18n %}
+
+{% block title %}{% translate "forecast-model-report" %}{% endblock %}
+
+{% block content %}
+<style>
+  .fmr-chip {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 5px 11px;
+    border-radius: 999px;
+    border: 1px solid #dee2e6;
+    color: #333;
+    cursor: default;
+  }
+</style>
+<div class="container py-5" style="max-width:960px;">
+    <h2 class="mb-1">📊 {% translate "forecast-model-report" %}</h2>
+    <p class="text-muted small mb-4">Cross-validation metrics and input features for all trained model sets.</p>
+
+    <!-- ── CV Performance Tables ────────────────────────────────────── -->
+    <div id="cv-loading" class="text-center text-muted py-4 small mb-3">
+        <div class="spinner-border spinner-border-sm me-1" role="status"></div>
+        Loading evaluation data…
+    </div>
+    <div id="cv-error" class="text-danger small mb-3" style="display:none;"></div>
+
+    <div id="cv-3d" class="card mb-3" style="display:none;">
+        <div class="card-header fw-semibold">📊 3-Day Model Ranking <span class="badge bg-secondary ms-1" style="font-size:0.72rem;">3d</span></div>
+        <div class="card-body p-0"><div id="cv-table-3d" style="overflow-x:auto;"></div></div>
+        <div class="card-footer text-muted small">relMAE = relative MAE normalised by P90 capacity. ⭐ = best model set.</div>
+    </div>
+
+    <div id="cv-10d" class="card mb-3" style="display:none;">
+        <div class="card-header fw-semibold">📊 10-Day Model Ranking <span class="badge bg-secondary ms-1" style="font-size:0.72rem;">10d</span></div>
+        <div class="card-body p-0"><div id="cv-table-10d" style="overflow-x:auto;"></div></div>
+        <div class="card-footer text-muted small">relMAE = relative MAE normalised by P90 capacity. ⭐ = best model set.</div>
+    </div>
+
+    <div id="cv-15d" class="card mb-4" style="display:none;">
+        <div class="card-header fw-semibold">📊 15-Day Model Ranking <span class="badge bg-secondary ms-1" style="font-size:0.72rem;">15d</span></div>
+        <div class="card-body p-0"><div id="cv-table-15d" style="overflow-x:auto;"></div></div>
+        <div class="card-footer text-muted small">relMAE = relative MAE normalised by P90 capacity. ⭐ = best model set.</div>
+    </div>
+
+    <!-- ── Input Features ───────────────────────────────────────────── -->
+    <div class="card mb-4">
+        <div class="card-header d-flex align-items-center gap-2">
+            <span>🔍</span>
+            <span class="fw-semibold">Model Input Features</span>
+            <span class="text-muted small ms-1">— best model per horizon</span>
+        </div>
+        <div class="card-body">
+            <div id="feat-loading" class="text-center text-muted py-2 small">
+                <div class="spinner-border spinner-border-sm me-1" role="status"></div>
+                Loading…
+            </div>
+            <div id="feat-panel" style="display:none;"></div>
+            <div id="feat-error" class="text-muted small" style="display:none;">Feature info unavailable.</div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    const slug = '{{ default_slug }}';
+
+    const FEATURE_NAMES = {
+        'om_temperature_2m':          '🌡️ Temperature 2m',
+        'om_shortwave_radiation':      '☀️ Solar Radiation',
+        'om_cloud_cover_low':          '☁️ Low Cloud Cover',
+        'om_vapour_pressure_deficit':  '💧 Vapour Pressure Def.',
+        'hour':                        '🕐 Hour of Day',
+        'day_of_week':                 '📅 Day of Week',
+        'month':                       '📆 Month',
+        'is_weekend':                  '🏖️ Weekend Flag',
+        'is_summer':                   '☀️ Summer Flag',
+        'is_holiday':                  '🎉 Public Holiday',
+        'stat_mean_y':                 '📊 Beach Avg. Occupancy',
+        'stat_cv':                     '📊 Occupancy Variability',
+    };
+
+    const TEMPORAL = new Set(['hour', 'day_of_week', 'month', 'is_weekend', 'is_summer',
+        'day_of_year', 'week_of_year', 'is_holiday']);
+    const STAT = new Set(['stat_mean_y', 'stat_cv']);
+
+    function featLabel(k) {
+        return FEATURE_NAMES[k] || k.replace(/^om_/, '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    }
+
+    function chip(key, bg) {
+        const el = document.createElement('span');
+        el.className = 'fmr-chip';
+        el.style.background = bg;
+        el.title = key;
+        el.textContent = featLabel(key);
+        return el;
+    }
+
+    fetch(`/platja/${slug}/eval-ranking/`)
+        .then(r => r.json())
+        .then(data => {
+            const ranking       = data.ranking || [];
+            const bestByHorizon = data.best_by_horizon || {};
+
+            document.getElementById('cv-loading').style.display = 'none';
+
+            if (!ranking.length) {
+                document.getElementById('cv-error').textContent = 'No evaluation data available.';
+                document.getElementById('cv-error').style.display = 'block';
+                return;
+            }
+
+            function fmt(v) { return v != null ? (v * 100).toFixed(2) + '%' : '—'; }
+
+            function buildTable(hk) {
+                const rows = ranking
+                    .filter(r => r.model_key === hk)
+                    .sort((a, b) => (a.relMAE_all || 1) - (b.relMAE_all || 1));
+
+                if (!rows.length) return;
+
+                const bestSet    = bestByHorizon[hk]?.model_set;
+                const bestAll    = Math.min(...rows.map(r => r.relMAE_all || Infinity));
+                const bestSeason = Math.min(...rows.map(r => r.relMAE_season || Infinity));
+
+                let html = '<table class="table table-sm table-bordered table-hover mb-0" style="font-size:0.83rem;">';
+                html += '<thead class="table-light"><tr>';
+                html += '<th class="ps-3">Model Set</th>';
+                html += '<th>relMAE all</th><th>Summer</th><th>Season</th><th>vs best</th>';
+                html += '</tr></thead><tbody>';
+
+                rows.forEach(r => {
+                    const isBest = r.model_set === bestSet;
+                    const diff   = (r.relMAE_all != null && bestAll > 0 && !isBest)
+                        ? '+' + (((r.relMAE_all - bestAll) / bestAll) * 100).toFixed(1) + '%'
+                        : '—';
+                    html += `<tr class="${isBest ? 'table-success' : ''}">`;
+                    html += `<td class="ps-3 fw-semibold">${isBest ? '⭐ ' : ''}${r.model_set}</td>`;
+                    html += `<td style="${r.relMAE_all === bestAll ? 'color:#27ae60;font-weight:700;' : ''}">${fmt(r.relMAE_all)}</td>`;
+                    html += `<td>${fmt(r.relMAE_summer)}</td>`;
+                    html += `<td style="${r.relMAE_season === bestSeason ? 'color:#27ae60;font-weight:700;' : ''}">${fmt(r.relMAE_season)}</td>`;
+                    html += `<td class="text-muted">${diff}</td>`;
+                    html += '</tr>';
+                });
+
+                html += '</tbody></table>';
+                document.getElementById(`cv-table-${hk}`).innerHTML = html;
+                document.getElementById(`cv-${hk}`).style.display = 'block';
+            }
+
+            ['3d', '10d', '15d'].forEach(buildTable);
+            loadFeatures(bestByHorizon);
+        })
+        .catch(() => {
+            document.getElementById('cv-loading').style.display = 'none';
+            document.getElementById('cv-error').textContent = 'Could not load evaluation data.';
+            document.getElementById('cv-error').style.display = 'block';
+            document.getElementById('feat-loading').style.display = 'none';
+            document.getElementById('feat-error').style.display = 'block';
+        });
+
+    function renderFeaturesTab(hk, modelSet, futr, hist) {
+        const panel  = document.getElementById('feat-panel');
+        const isFirst = panel.children.length === 0;
+
+        const futrList = [], histList = [], tempList = [], statList = [];
+        futr.forEach(f => {
+            if (STAT.has(f))          statList.push(chip(f, '#f3f0ff'));
+            else if (TEMPORAL.has(f)) tempList.push(chip(f, '#eaf4ff'));
+            else                      futrList.push(chip(f, '#eafaf1'));
+        });
+        hist.forEach(f => {
+            if (STAT.has(f)) statList.push(chip(f, '#f3f0ff'));
+            else             histList.push(chip(f, '#fef9e7'));
+        });
+        if (!tempList.length) {
+            ['hour', 'day_of_week', 'month', 'is_weekend', 'is_summer'].forEach(f =>
+                tempList.push(chip(f, '#eaf4ff'))
+            );
+        }
+
+        function group(label, badge, badgeCls, chips) {
+            if (!chips.length) return null;
+            const wrap = document.createElement('div');
+            wrap.className = 'col-md-4';
+            const p = document.createElement('p');
+            p.className = 'fw-semibold small text-muted mb-2';
+            p.innerHTML = `${label} <span class="badge ${badgeCls} ms-1" style="font-size:0.7rem;">${badge}</span>`;
+            const div = document.createElement('div');
+            div.className = 'd-flex flex-wrap gap-1';
+            chips.forEach(c => div.appendChild(c));
+            wrap.appendChild(p);
+            wrap.appendChild(div);
+            return wrap;
+        }
+
+        const section = document.createElement('div');
+        section.className = isFirst ? '' : 'mt-4 pt-4 border-top';
+
+        const heading = document.createElement('div');
+        heading.className = 'd-flex align-items-center gap-2 mb-3';
+        heading.innerHTML = `
+            <span class="badge bg-secondary" style="font-size:0.8rem;">${hk}</span>
+            <span class="small text-muted">${modelSet}</span>
+        `;
+        section.appendChild(heading);
+
+        const row = document.createElement('div');
+        row.className = 'row g-3';
+        [
+            group('📅 Future Exogenous',    'known at forecast time',  'text-bg-success',           futrList),
+            group('📈 Historical Exogenous', 'weather, observed only',  'text-bg-warning text-dark', histList),
+            group('🕐 Temporal',             'derived, always known',   'text-bg-primary',           tempList),
+        ].forEach(g => { if (g) row.appendChild(g); });
+        section.appendChild(row);
+
+        if (statList.length) {
+            const statWrap = document.createElement('div');
+            statWrap.className = 'mt-2';
+            const p = document.createElement('p');
+            p.className = 'fw-semibold small text-muted mb-2 mt-3';
+            p.innerHTML = '📊 Static Exogenous <span class="badge bg-secondary ms-1" style="font-size:0.7rem;">per-beach constant</span>';
+            const div = document.createElement('div');
+            div.className = 'd-flex flex-wrap gap-1';
+            statList.forEach(c => div.appendChild(c));
+            statWrap.appendChild(p);
+            statWrap.appendChild(div);
+            section.appendChild(statWrap);
+        }
+
+        panel.appendChild(section);
+    }
+
+    async function loadFeatures(bestByHorizon) {
+        const horizons = [{hk: '3d', days: 3}, {hk: '10d', days: 10}, {hk: '15d', days: 15}];
+        let anyLoaded = false;
+        await Promise.all(horizons.map(async ({hk, days}) => {
+            const modelSet = bestByHorizon[hk]?.model_set;
+            if (!modelSet) return;
+            try {
+                const data = await fetch(`/platja/${slug}/forecast/?days=${days}&model_set=${modelSet}`).then(r => r.json());
+                const futr = data.futr_features || data.segment_features?.[hk]?.futr_features || [];
+                const hist = data.hist_features || data.segment_features?.[hk]?.hist_features || [];
+                if (futr.length || hist.length) { renderFeaturesTab(hk, modelSet, futr, hist); anyLoaded = true; }
+            } catch (_) {}
+        }));
+        document.getElementById('feat-loading').style.display = 'none';
+        if (anyLoaded) document.getElementById('feat-panel').style.display = 'block';
+        else           document.getElementById('feat-error').style.display = 'block';
+    }
+})();
+</script>
+{% endblock %}

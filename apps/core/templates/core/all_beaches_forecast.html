@@ -27,7 +27,6 @@
   .fo-stat .val { font-size: 1.4rem; font-weight: 700; color: #0ea5e9; line-height: 1; font-family: 'DM Mono', monospace; }
   .fo-stat .lbl { font-size: 0.63rem; color: #94a3b8; margin-top: 0.25rem; text-transform: uppercase; letter-spacing: 0.06em; }
 
-  /* Controls */
   .fo-controls { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 0.7rem 1.5rem; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
   .fo-controls label { font-size: 0.7rem; color: #64748b; font-family: 'DM Mono', monospace; white-space: nowrap; }
   .fo-btns { display: flex; gap: 0.25rem; }
@@ -35,14 +34,13 @@
   .fo-btn:hover { border-color: #0ea5e9; color: #0ea5e9; }
   .fo-btn.active { background: #0ea5e9; border-color: #0ea5e9; color: #fff; }
   .fo-sort { border: 1px solid #e2e8f0; background: #f8fafc; color: #374151; border-radius: 4px; padding: 0.2rem 0.5rem; font-size: 0.7rem; font-family: 'DM Mono', monospace; cursor: pointer; }
+  .fo-ctl-row { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
 
-  /* View switcher */
   .fo-view-switcher { display: flex; background: #f1f5f9; border-radius: 6px; padding: 2px; gap: 2px; }
   .fo-view-btn { border: none; background: transparent; color: #64748b; border-radius: 4px; padding: 0.28rem 0.85rem; font-size: 0.72rem; font-family: 'DM Mono', monospace; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
   .fo-view-btn.active { background: #fff; color: #0f172a; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-weight: 600; }
   .fo-divider { width: 1px; height: 20px; background: #e2e8f0; margin: 0 0.1rem; align-self: center; }
 
-  /* Daily heatmap */
   .fo-grid-wrap { padding: 1.25rem 1.5rem; overflow-x: auto; }
   .fo-grid { min-width: 900px; }
   .fo-date-row { display: grid; grid-template-columns: 175px repeat(15, 1fr); gap: 2px; margin-bottom: 3px; }
@@ -63,66 +61,28 @@
   .fo-pct { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: 'DM Mono', monospace; font-size: 0.57rem; font-weight: 500; color: rgba(0,0,0,0.55); pointer-events: none; }
   .fo-cell.fo-low .fo-pct, .fo-cell.fo-medium .fo-pct, .fo-cell.fo-high .fo-pct { color: rgba(255,255,255,0.92); }
 
-  /* Beach cards */
   .fo-cards-wrap { padding: 1.25rem 1.5rem; }
   .fo-cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(480px, 1fr)); gap: 1rem; }
   @media (max-width: 600px) { .fo-cards-grid { grid-template-columns: 1fr; } }
 
-  .fo-card {
-    background: #fff;
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-    opacity: 0;
-    transform: translateY(6px);
-    animation: foUp 0.25s ease forwards;
-    transition: box-shadow 0.15s, border-color 0.15s;
-  }
+  .fo-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.05); opacity: 0; transform: translateY(6px); animation: foUp 0.25s ease forwards; transition: box-shadow 0.15s, border-color 0.15s; }
   .fo-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); border-color: #cbd5e1; }
 
-  .fo-card-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.75rem 1rem 0.6rem;
-    border-bottom: 1px solid #f1f5f9;
-  }
+  .fo-card-header { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem 0.6rem; border-bottom: 1px solid #f1f5f9; }
   .fo-card-name { font-size: 0.85rem; font-weight: 700; color: #0f172a; cursor: pointer; transition: color 0.12s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .fo-card-name:hover { color: #0ea5e9; }
   .fo-card-meta { display: flex; gap: 1rem; flex-shrink: 0; margin-left: 0.75rem; }
   .fo-card-stat .v { font-family: 'DM Mono', monospace; font-size: 0.82rem; font-weight: 600; color: #374151; }
   .fo-card-stat .l { font-size: 0.58rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.04em; }
 
-  .fo-card-chart {
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding: 0.6rem 0.75rem 0.2rem;
-    scrollbar-width: thin;
-    scrollbar-color: #e2e8f0 transparent;
-  }
+  .fo-card-chart { overflow-x: auto; overflow-y: hidden; padding: 0.6rem 0.75rem 0.2rem; scrollbar-width: thin; scrollbar-color: #e2e8f0 transparent; }
   .fo-card-chart::-webkit-scrollbar { height: 4px; }
   .fo-card-chart::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 2px; }
   .fo-chart-svg { display: block; cursor: crosshair; }
 
-  .fo-card-footer {
-    display: flex;
-    gap: 0.3rem;
-    padding: 0.45rem 0.75rem 0.6rem;
-    flex-wrap: wrap;
-    border-top: 1px solid #f8fafc;
-  }
-  .fo-day-badge {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.58rem;
-    padding: 0.12rem 0.45rem;
-    border-radius: 3px;
-    color: #fff;
-    white-space: nowrap;
-    cursor: default;
-  }
+  .fo-card-footer { display: flex; gap: 0.3rem; padding: 0.45rem 0.75rem 0.6rem; flex-wrap: wrap; border-top: 1px solid #f8fafc; }
+  .fo-day-badge { font-family: 'DM Mono', monospace; font-size: 0.58rem; padding: 0.12rem 0.45rem; border-radius: 3px; color: #fff; white-space: nowrap; cursor: default; }
 
-  /* Tooltip */
   #fo-tip { position: fixed; background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 0.65rem 0.85rem; pointer-events: none; z-index: 9999; font-family: 'DM Mono', monospace; font-size: 0.7rem; color: #f1f5f9; line-height: 1.65; max-width: 210px; display: none; box-shadow: 0 8px 24px rgba(0,0,0,0.35); }
   #fo-tip .fo-tip-name { font-weight: 600; font-size: 0.76rem; margin-bottom: 0.15rem; }
   #fo-tip .fo-tip-date { color: #38bdf8; margin-bottom: 0.35rem; }
@@ -164,7 +124,7 @@
     </div>
     <div class="fo-divider"></div>
 
-    <div id="fo-daily-ctl" style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap">
+    <div id="fo-daily-ctl" class="fo-ctl-row" style="display:flex;">
       <label>Metric:</label>
       <div class="fo-btns" id="fo-metric-btns">
         <button class="fo-btn active" data-m="avg">Daily avg</button>
@@ -180,7 +140,7 @@
       </select>
     </div>
 
-    <div id="fo-cards-ctl" style="display:none;align-items:center;gap:0.6rem;flex-wrap:wrap">
+    <div id="fo-cards-ctl" class="fo-ctl-row" style="display:none;">
       <label>Sort:</label>
       <select class="fo-sort" id="fo-sort-cards">
         <option value="name">Name</option>
@@ -205,7 +165,7 @@
 
 <script>
 const FO_DAYS = 15;
-const FO_HMIN = 8, FO_HMAX = 18;
+const FO_HMIN = 8, FO_HMAX = 20;
 const FO_HOURS = Array.from({length: FO_HMAX - FO_HMIN + 1}, (_, i) => FO_HMIN + i);
 const FO_DN = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const FO_MN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -253,7 +213,6 @@ function foDayVal(map, date, mode) {
   return p ? (p.occupancy_ratio??null) : null;
 }
 
-// ── Shared summary ─────────────────────────────────────────────────────────────
 function foUpdateSummary(days) {
   let tRel=0, tN=0, pdVal=0, pdIdx=0, pbName='', pbVal=0;
   const dt = days.map(() => ({sum:0,n:0}));
@@ -274,7 +233,6 @@ function foUpdateSummary(days) {
   document.getElementById('fo-summary').style.display='flex';
 }
 
-// ── Daily heatmap ──────────────────────────────────────────────────────────────
 function foRenderDaily() {
   const days = foGetDays();
   foUpdateSummary(days);
@@ -291,7 +249,6 @@ function foRenderDaily() {
     });
   }
 
-  // Header row
   const hdr = document.createElement('div');
   hdr.className = 'fo-date-row';
   hdr.appendChild(document.createElement('div'));
@@ -333,13 +290,11 @@ function foRenderDaily() {
   document.getElementById('fo-daily-view').style.display='block';
 }
 
-// ── Beach cards with bar charts ────────────────────────────────────────────────
-// Bar chart constants
-const BAR_W = 5;    // px per bar
-const BAR_G = 1;    // gap between bars within a day
-const DAY_G = 5;    // gap between day groups
-const CH    = 80;   // chart area height
-const LBL_H = 18;  // x-axis label height
+const BAR_W = 5;
+const BAR_G = 1;
+const DAY_G = 5;
+const CH    = 80;
+const LBL_H = 18;
 
 function foRenderCards() {
   const days = foGetDays();
@@ -358,11 +313,10 @@ function foRenderCards() {
   }
 
   const ns = 'http://www.w3.org/2000/svg';
-  const dayW = FO_HOURS.length * (BAR_W + BAR_G) - BAR_G; // width of one day group
+  const dayW = FO_HOURS.length * (BAR_W + BAR_G) - BAR_G;
   const totalW = days.length * (dayW + DAY_G) - DAY_G;
 
   sorted.forEach((fc, ri) => {
-    // Header stats
     const allVals = [];
     days.forEach(d => FO_HOURS.forEach(h => {
       const p = fc._m[`${d.toISOString().substring(0,10)}T${String(h).padStart(2,'0')}`];
@@ -376,7 +330,6 @@ function foRenderCards() {
     card.className = 'fo-card';
     card.style.animationDelay = `${ri*30}ms`;
 
-    // ── Header ──────────────────────────────
     const hdr = document.createElement('div');
     hdr.className = 'fo-card-header';
     hdr.innerHTML = `
@@ -394,7 +347,6 @@ function foRenderCards() {
     `;
     card.appendChild(hdr);
 
-    // ── SVG bar chart ────────────────────────
     const chartWrap = document.createElement('div');
     chartWrap.className = 'fo-card-chart';
 
@@ -404,14 +356,12 @@ function foRenderCards() {
     svg.setAttribute('height', CH + LBL_H);
     svg.classList.add('fo-chart-svg');
 
-    // Baseline
     const base = document.createElementNS(ns,'line');
     base.setAttribute('x1',0); base.setAttribute('y1',CH);
     base.setAttribute('x2',totalW); base.setAttribute('y2',CH);
     base.setAttribute('stroke','#e2e8f0'); base.setAttribute('stroke-width','1');
     svg.appendChild(base);
 
-    // 50% guide line
     const guide = document.createElementNS(ns,'line');
     guide.setAttribute('x1',0); guide.setAttribute('y1',CH*0.5);
     guide.setAttribute('x2',totalW); guide.setAttribute('y2',CH*0.5);
@@ -423,7 +373,6 @@ function foRenderCards() {
       const we = d.getDay()===0||d.getDay()===6;
       const dx = di * (dayW + DAY_G);
 
-      // Weekend tint
       if (we) {
         const bg = document.createElementNS(ns,'rect');
         bg.setAttribute('x',dx); bg.setAttribute('y',0);
@@ -432,7 +381,6 @@ function foRenderCards() {
         svg.appendChild(bg);
       }
 
-      // Day label
       const lbl = document.createElementNS(ns,'text');
       lbl.setAttribute('x', dx + dayW/2);
       lbl.setAttribute('y', CH + LBL_H - 3);
@@ -443,7 +391,6 @@ function foRenderCards() {
       lbl.textContent = `${d.getDate()}/${d.getMonth()+1}`;
       svg.appendChild(lbl);
 
-      // Bars
       FO_HOURS.forEach((h, hi) => {
         const key = `${d.toISOString().substring(0,10)}T${String(h).padStart(2,'0')}`;
         const p   = fc._m[key];
@@ -462,7 +409,6 @@ function foRenderCards() {
         bar.setAttribute('rx','1');
         svg.appendChild(bar);
 
-        // Hover zone
         const zone = document.createElementNS(ns,'rect');
         zone.setAttribute('x', bx); zone.setAttribute('y', 0);
         zone.setAttribute('width', BAR_W); zone.setAttribute('height', CH);
@@ -477,7 +423,6 @@ function foRenderCards() {
     chartWrap.appendChild(svg);
     card.appendChild(chartWrap);
 
-    // ── Footer: daily peak badges ────────────
     const footer = document.createElement('div');
     footer.className = 'fo-card-footer';
     days.forEach(d => {
@@ -500,7 +445,6 @@ function foRenderCards() {
   document.getElementById('fo-cards-view').style.display='block';
 }
 
-// ── Tooltips ───────────────────────────────────────────────────────────────────
 function foShowDayTip(e, fc, date, rel, level) {
   const base = date.toISOString().substring(0,10);
   let peakH=null, peakV=0;
@@ -538,7 +482,6 @@ function foMoveTip(e) {
 }
 function foHideTip() { document.getElementById('fo-tip').style.display='none'; }
 
-// ── View switch ────────────────────────────────────────────────────────────────
 function foSwitchView(v) {
   foView = v;
   document.querySelectorAll('.fo-view-btn').forEach(b => b.classList.toggle('active', b.dataset.v===v));
@@ -550,7 +493,6 @@ function foSwitchView(v) {
   else foRenderCards();
 }
 
-// ── Load ───────────────────────────────────────────────────────────────────────
 async function foLoad() {
   try {
     const res = await fetch('/beach/full-forecast/?days=15');
@@ -568,7 +510,6 @@ async function foLoad() {
   }
 }
 
-// ── Listeners ──────────────────────────────────────────────────────────────────
 document.getElementById('fo-view-switcher').addEventListener('click', e => {
   const btn = e.target.closest('.fo-view-btn'); if(!btn) return;
   foSwitchView(btn.dataset.v);

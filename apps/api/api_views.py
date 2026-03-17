@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone as dt_timezone
+import zoneinfo
+_SPAIN_TZ = zoneinfo.ZoneInfo('Europe/Madrid')
 
 import jwt
 from django.conf import settings
@@ -256,13 +258,15 @@ def prediccio_futura(request: HttpRequest):
     if not cams_by_beach:
         return JsonResponse({"detail": "No cameras found for the requested beach(es)."}, status=404)
 
-    local_tz = timezone.get_current_timezone()
+    local_tz = _SPAIN_TZ
     data = []
 
     for beach_slug, cams in cams_by_beach.items():
-        # Build per-camera prediction map: {hour_key: crowd_count}
         cam_pred_maps: list[tuple[float, dict]] = []
         for cam in cams:
+            mcc = float(cam.max_crowd_count or 0)
+            if mcc <= 0:
+                continue
             try:
                 result = tft_service.predict_mixed(cam, days=MAX_DAYS_AHEAD)
             except Exception:
@@ -272,7 +276,7 @@ def prediccio_futura(request: HttpRequest):
                 for p in result.get("predictions", [])
                 if p.get("available") and p.get("crowd_count") is not None
             }
-            cam_pred_maps.append((float(cam.max_crowd_count), pred_map))
+            cam_pred_maps.append((mcc, pred_map))
 
         if not cam_pred_maps:
             continue

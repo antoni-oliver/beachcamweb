@@ -4,6 +4,11 @@ __pycache__/
 **/__pycache__/
 
 /media
+/media_2022
+cache/*
+apps/prediction/cache/*
+apps/prediction/pipeline_workspace/*
+*panel_data.csv
 /static
 
 .idea/
@@ -18,3 +23,4 @@ config/local_settings.py
 *model_evaluation.json
 *model_evaluation_cache.json
 *weather_archive_cache.pkl
+*/.ipynb_checkpoints/

@@ -63,7 +63,7 @@ class Command(BaseCommand):
         snapshots = (
             Snapshot.objects
             .select_related("webcam", "webcam__beach")
-            .exclude(predicted_crowd_count__isnull=True)
+            .exclude(predicted_crowd_count__isnull=True, filter_blurry_image=False, filter_frozen_image=False, filter_moving_camera=False)
         )
         if since:
             snapshots = snapshots.filter(ts__gte=datetime.fromisoformat(since))
