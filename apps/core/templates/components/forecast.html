@@ -1,0 +1,854 @@
+{% load i18n %}
+
+<style>
+  .fc-legend-swatch       { display:inline-block;width:12px;height:12px;border-radius:2px;vertical-align:middle; }
+  .fc-legend-swatch-wk    { display:inline-block;width:16px;height:12px;background:rgba(41,128,185,0.12);border:1px solid rgba(41,128,185,0.3);border-radius:2px;vertical-align:middle; }
+  .fc-legend-inline       { display:inline-block;width:14px;height:10px;background:rgba(41,128,185,0.15);border:1px solid rgba(41,128,185,0.4);border-radius:2px;vertical-align:middle; }
+  .fc-chart-h300          { height:300px;display:none; }
+  .fc-chart-h170          { height:170px;display:none; }
+  .fc-chart-h380          { height:380px;display:none; }
+  .fc-cmp-set-label       { font-size:0.72rem;letter-spacing:0.05em;text-transform:uppercase; }
+  .fc-cmp-field-label     { font-size:0.75rem;color:#888; }
+  .fc-model-badge         { display:inline-block;font-size:10px;font-weight:600;color:#185fa5;background:#e6f1fb;border:1px solid #b5d4f4;border-radius:3px;padding:1px 6px;margin-left:6px; }
+  .fc-perf-wrap           { display:flex;flex-wrap:wrap;gap:12px;align-items:center; }
+  .fc-perf-label          { font-size:0.78rem;font-weight:700;color:#555;white-space:nowrap; }
+  .fc-perf-card           { background:#fff;border:1px solid #dee2e6;border-radius:6px;padding:5px 10px;font-size:0.8rem; }
+  .fc-perf-card-name      { font-weight:700;color:#333;margin-bottom:3px;display:flex;align-items:center;gap:6px; }
+  .fc-perf-card-metrics   { display:flex;gap:10px; }
+  .fc-perf-metric-label   { color:#888;font-size:0.72rem; }
+  .fc-perf-metric-val     { font-weight:700; }
+  .fc-perf-best-cv        { color:#27ae60; }
+  .fc-perf-best-hc        { color:#2980b9; }
+  .fc-fmttt               { min-width:220px;max-width:260px;font-size:12px;line-height:1.5; }
+  .fc-fmttt-header        { font-weight:700;margin-bottom:6px;font-size:13px; }
+  .fc-fmttt-row           { display:flex;justify-content:space-between;margin-bottom:2px; }
+  .fc-fmttt-label         { color:#888; }
+  .fc-fmttt-section       { border-top:1px solid #e8e8e8;padding-top:6px;margin-bottom:6px; }
+  .fc-fmttt-section-title { font-size:10px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px; }
+  .fc-fmttt-feat-label    { color:#555; }
+  .fc-fmttt-feat-val      { font-weight:600;color:#333; }
+  .fc-tooltip-row         { margin-bottom:5px; }
+  .fc-tooltip-name        { display:flex;justify-content:space-between;align-items:center; }
+  .fc-tooltip-weather     { padding-left:14px;margin-top:2px; }
+  .fc-tooltip-weather-row { display:flex;justify-content:space-between;font-size:10px;color:#666; }
+  .fc-tooltip-weather-val { font-weight:600;color:#444; }
+  .fc-tooltip-actual      { border-top:1px solid #eee;padding-top:3px;display:flex;justify-content:space-between; }
+</style>
+
+<div id="forecast-section" class="mt-5">
+    <h2 class="text-center mb-4">{% translate "forecast-title" %}</h2>
+
+    <div class="mb-4">
+        <button class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1"
+                type="button" data-bs-toggle="collapse" data-bs-target="#forecast-help" aria-expanded="false">
+            <span>ℹ️</span> <span>How to use this page</span>
+            <span class="ms-1" style="font-size:0.75rem;">▼</span>
+        </button>
+        <div class="collapse mt-2" id="forecast-help">
+            <div class="card card-body small text-muted" style="font-size:0.83rem;line-height:1.6;">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <p class="fw-semibold text-dark mb-1">📅 Summary Cards (top row)</p>
+                        <p class="mb-0">Three mini-charts show a quick occupancy snapshot:
+                            <strong>Tomorrow</strong>, <strong>This Weekend</strong>, and <strong>Next Weekend</strong>.
+                            Bars are coloured by occupancy level (see legend below).
+                            The orange line is the forecast temperature.
+                            Hover over any bar to see the exact predicted crowd count and temperature for that hour.
+                        </p>
+                    </div>
+                    <div class="col-md-4">
+                        <p class="fw-semibold text-dark mb-1">📈 Forecast Charts (3 / 10 / 15 days)</p>
+                        <p class="mb-0">Detailed hourly charts at three forecast horizons.
+                            Bars show occupancy as a % of beach capacity, coloured by level.
+                            <span class="fc-legend-inline"></span> Light-blue bands mark weekends.
+                            The orange line is temperature (°C, right axis).
+                            Hover for details. Accuracy decreases at longer horizons.
+                        </p>
+                    </div>
+                    <div class="col-md-4">
+                        <p class="fw-semibold text-dark mb-1">⚗️ Model Comparison Widget</p>
+                        <p class="mb-0">Pick a past date and up to 3 model sets to run a hindcast side by side.
+                            Coloured bars show each model's predictions; the red line is actual occupancy.
+                            <strong>Click any bar</strong> to load the webcam image and density-map for that hour.
+                        </p>
+                    </div>
+                    <div class="col-12">
+                        <hr class="my-1">
+                        <p class="mb-0">📊 Looking for CV metrics, model rankings, or input features?
+                            Those have moved to the <a href="{% url 'forecast-model-report' %}" class="fw-semibold">Model Report</a> page (Forecast → Model Report).
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body pb-0">
+                    <h6 id="summary-tomorrow-title" class="text-muted text-center mb-1">{% translate "summary-tomorrow" %}</h6>
+                    <div id="summary-tomorrow-info" class="text-center small text-muted mb-1"></div>
+                    <div id="summary-tomorrow-loading" class="text-center text-muted py-3 small">
+                        <div class="spinner-border spinner-border-sm me-1" role="status"></div> ...
+                    </div>
+                    <div id="summary-tomorrow-chart" class="fc-chart-h170"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body pb-0">
+                    <h6 class="text-muted text-center mb-1">{% translate "summary-this-weekend" %}</h6>
+                    <div id="summary-weekend-info" class="text-center small text-muted mb-1"></div>
+                    <div id="summary-weekend-loading" class="text-center text-muted py-3 small">
+                        <div class="spinner-border spinner-border-sm me-1" role="status"></div> ...
+                    </div>
+                    <div id="summary-weekend-chart" class="fc-chart-h170"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body pb-0">
+                    <h6 class="text-muted text-center mb-1">{% translate "summary-next-weekend" %}</h6>
+                    <div id="summary-next-weekend-info" class="text-center small text-muted mb-1"></div>
+                    <div id="summary-next-weekend-loading" class="text-center text-muted py-3 small">
+                        <div class="spinner-border spinner-border-sm me-1" role="status"></div> ...
+                    </div>
+                    <div id="summary-next-weekend-chart" class="fc-chart-h170"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mb-3" style="font-size:0.8rem;">
+        <span class="me-3"><span class="fc-legend-swatch" style="background:#e74c3c;"></span> {% translate "level-high" %} (≥75%)</span>
+        <span class="me-3"><span class="fc-legend-swatch" style="background:#f39c12;"></span> {% translate "level-medium" %} (≥50%)</span>
+        <span class="me-3"><span class="fc-legend-swatch" style="background:#27ae60;"></span> {% translate "level-low" %} (≥25%)</span>
+        <span class="me-3"><span class="fc-legend-swatch" style="background:#3498db;"></span> {% translate "level-very-low" %} (<25%)</span>
+        <span><span class="fc-legend-swatch-wk"></span> {% translate "level-weekend" %}</span>
+    </div>
+
+    <div id="forecast-3d-wrapper" class="mb-4">
+        <h5 class="text-muted">{% translate "forecast-3-day" %}</h5>
+        <div id="forecast-3d-loading" class="text-center text-muted py-4">
+            <div class="spinner-border spinner-border-sm me-2" role="status"></div>{% translate "loading-forecast" %}...
+        </div>
+        <div id="forecast-3d" class="fc-chart-h300"></div>
+    </div>
+    <div id="forecast-10d-wrapper" class="mb-4">
+        <h5 class="text-muted">{% translate "forecast-10-day" %}</h5>
+        <div id="forecast-10d-loading" class="text-center text-muted py-4">
+            <div class="spinner-border spinner-border-sm me-2" role="status"></div>{% translate "loading-forecast" %}...
+        </div>
+        <div id="forecast-10d" class="fc-chart-h300"></div>
+    </div>
+    <div id="forecast-15d-wrapper" class="mb-4">
+        <h5 class="text-muted">{% translate "forecast-15-day" %}</h5>
+        <div id="forecast-15d-loading" class="text-center text-muted py-4">
+            <div class="spinner-border spinner-border-sm me-2" role="status"></div>{% translate "loading-forecast" %}...
+        </div>
+        <div id="forecast-15d" class="fc-chart-h300"></div>
+    </div>
+
+    <div class="mt-4 p-3 border rounded bg-light">
+        <h5 class="text-muted mb-1">⚗️ Model Comparison</h5>
+        <p class="text-muted small mb-3">Select a past date range and up to 3 model sets, then click <strong>Compare</strong>. <strong>Click any bar</strong> on the chart to view the original webcam image and prediction map for that hour.</p>
+
+        <div class="d-flex align-items-end gap-3 mb-3 flex-wrap">
+            <div>
+                <label class="form-label small mb-1">Predict from</label>
+                <input type="date" id="cmp-since" class="form-control form-control-sm" style="width:140px;">
+            </div>
+            <div>
+                <label class="form-label small mb-1">Days</label>
+                <input type="number" id="cmp-days" class="form-control form-control-sm" value="3" min="1" max="15" style="width:60px;">
+            </div>
+            <div class="ms-auto d-flex align-items-end gap-2">
+                <button id="cmp-btn" class="btn btn-sm btn-outline-secondary" onclick="runComparison()">Compare</button>
+                <span id="cmp-status" class="small text-muted align-self-center"></span>
+            </div>
+        </div>
+
+        <div class="row g-2 mb-3">
+            <div class="col-12 col-md-4">
+                <div class="border rounded bg-white p-2">
+                    <div class="fc-cmp-set-label fw-semibold text-muted mb-2">Model Set A</div>
+                    <div class="mb-2">
+                        <label class="form-label fc-cmp-field-label mb-1">Set</label>
+                        <select id="cmp-set-a" class="form-select form-select-sm w-100"><option value="default">default</option></select>
+                    </div>
+                    <div>
+                        <label class="form-label fc-cmp-field-label mb-1">Horizon</label>
+                        <select id="cmp-horizon-a" class="form-select form-select-sm w-100">
+                            <option value="mix" selected>mix (auto)</option>
+                            <option value="3d">3d model</option>
+                            <option value="10d">10d model</option>
+                            <option value="15d">15d model</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="border rounded bg-white p-2">
+                    <div class="fc-cmp-set-label fw-semibold text-muted mb-2">Model Set B</div>
+                    <div class="mb-2">
+                        <label class="form-label fc-cmp-field-label mb-1">Set</label>
+                        <select id="cmp-set-b" class="form-select form-select-sm w-100"><option value="default">default</option></select>
+                    </div>
+                    <div>
+                        <label class="form-label fc-cmp-field-label mb-1">Horizon</label>
+                        <select id="cmp-horizon-b" class="form-select form-select-sm w-100">
+                            <option value="mix" selected>mix (auto)</option>
+                            <option value="3d">3d model</option>
+                            <option value="10d">10d model</option>
+                            <option value="15d">15d model</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="border rounded bg-white p-2">
+                    <div class="fc-cmp-set-label fw-semibold text-muted mb-2">Model Set C</div>
+                    <div class="mb-2">
+                        <label class="form-label fc-cmp-field-label mb-1">Set</label>
+                        <select id="cmp-set-c" class="form-select form-select-sm w-100"><option value="">(none)</option></select>
+                    </div>
+                    <div>
+                        <label class="form-label fc-cmp-field-label mb-1">Horizon</label>
+                        <select id="cmp-horizon-c" class="form-select form-select-sm w-100">
+                            <option value="mix" selected>mix (auto)</option>
+                            <option value="3d">3d model</option>
+                            <option value="10d">10d model</option>
+                            <option value="15d">15d model</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr class="my-2">
+        <div id="cmp-eval-table" style="display:none;" class="mb-3"></div>
+        <div id="cmp-perf-summary" style="display:none;" class="mb-2 p-2 rounded"></div>
+        <div id="cmp-chart" class="fc-chart-h380"></div>
+        <div id="cmp-image-panel" style="display:none;" class="mt-3">
+            <p id="cmp-image-ts" class="small text-muted mb-2 text-center"></p>
+            <div class="d-flex gap-3 justify-content-center">
+                <div class="text-center">
+                    <p class="small text-muted mb-1">Original</p>
+                    <img id="cmp-image-original" src="" alt="Original" class="img-thumbnail" style="max-height:280px;" />
+                </div>
+                <div class="text-center">
+                    <p class="small text-muted mb-1">Prediction</p>
+                    <img id="cmp-image-prediction" src="" alt="Prediction" class="img-thumbnail" style="max-height:280px;display:none;" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const slug = '{{ cam.camera_slug }}';
+    const maxCrowd = {{ cam.max_crowd_count|default:"0" }};
+
+    const LEVEL_COLORS = {HIGH: '#e74c3c', MEDIUM: '#f39c12', LOW: '#27ae60', VERY_LOW: '#3498db'};
+
+    const i18n = {
+      occupancy:           '{% translate "chart-occupancy" %}',
+      temperature:         '{% translate "chart-temperature" %}',
+      people:              '{% translate "chart-people" %}',
+      prediction:          '{% translate "chart-prediction" %}',
+      actual:              '{% translate "chart-actual" %}',
+      levelHigh:           '{% translate "level-high" %}',
+      levelMedium:         '{% translate "level-medium" %}',
+      predVsActual:        '{% translate "hindcast-pred-vs-actual" %}',
+      forecastUnavailable: '{% translate "forecast-unavailable" %}',
+      noData:              '{% translate "summary-no-data" %}',
+      today:               '{% translate "summary-today" %}',
+      tomorrow:            '{% translate "summary-tomorrow" %}',
+    };
+
+    const FEATURE_DISPLAY_NAMES = {
+      'om_temperature_2m':            '🌡️ Temperature',
+      'om_shortwave_radiation':        '☀️ Solar Radiation',
+      'om_cloud_cover_low':            '☁️ Low Cloud Cover',
+      'om_vapour_pressure_deficit':    '💧 Vapour Pressure Def.',
+      'hour':                          '🕐 Hour of Day',
+      'day_of_week':                   '📅 Day of Week',
+      'month':                         '📆 Month',
+      'is_weekend':                    '🏖️ Weekend',
+      'is_summer':                     '☀️ Summer Season',
+      'is_holiday':                    '🎉 Public Holiday',
+      'stat_mean_y':                   '📊 Beach Avg. Occupancy',
+      'stat_cv':                       '📊 Occupancy Variability',
+      'Temperature (°C)':              '🌡️ Temperature',
+      'Solar Radiation (W/m²)':        '☀️ Solar Radiation',
+      'Low Cloud Cover (%)':           '☁️ Low Cloud Cover',
+      'Vapour Pressure Deficit (kPa)': '💧 Vapour Pressure Def.',
+      'Weekend':                       '🏖️ Weekend',
+      'Summer':                        '☀️ Summer Season',
+    };
+
+    function pad(n) { return n.toString().padStart(2, '0'); }
+    function dateLabel(d) { return pad(d.getDate()) + '/' + pad(d.getMonth() + 1); }
+    function midnight(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+    function fmtAxisLabel(val) { const d = new Date(val); return dateLabel(d) + '\n' + pad(d.getHours()) + ':00'; }
+
+    function featLabel(k) {
+      return FEATURE_DISPLAY_NAMES[k] || k.replace(/^om_/, '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    }
+
+    function featValue(k, v) {
+      if (k.includes('Temperature') || k === 'om_temperature_2m') return v + ' °C';
+      if (k.includes('Radiation')   || k === 'om_shortwave_radiation') return v + ' W/m²';
+      if (k.includes('Cloud')       || k === 'om_cloud_cover_low') return v + '%';
+      if (k.includes('Vapour')      || k === 'om_vapour_pressure_deficit') return v + ' kPa';
+      if (['Weekend', 'Summer', 'is_weekend', 'is_summer', 'is_holiday'].includes(k)) return v ? 'Yes' : 'No';
+      return v;
+    }
+
+    function fmtTooltip(params) {
+      const ts        = new Date(params[0].value[0]);
+      const dateStr   = dateLabel(ts) + '/' + ts.getFullYear() + ' ' + pad(ts.getHours()) + ':00';
+      const barParam  = params.find(p => p.seriesType === 'bar');
+      const features  = barParam?.data?.features || {};
+      const pct       = barParam ? barParam.value[1].toFixed(1) + '%' : null;
+      const tempParam = params.find(p => p.seriesType === 'line');
+      const temp      = tempParam ? tempParam.value[1].toFixed(1) + ' °C' : null;
+
+      let h = `<div class="fc-fmttt"><div class="fc-fmttt-header">${dateStr}</div>`;
+      if (pct)  h += `<div class="fc-fmttt-row"><span class="fc-fmttt-label">Occupancy</span><span style="font-weight:700;color:${barParam.color};">${pct}</span></div>`;
+      if (temp) h += `<div class="fc-fmttt-row" style="margin-bottom:8px;"><span class="fc-fmttt-label">Temperature</span><span style="font-weight:600;color:#e67e22;">${temp}</span></div>`;
+      if (Object.keys(features).length) {
+        h += `<div class="fc-fmttt-section"><div class="fc-fmttt-section-title">Input Conditions</div>`;
+        Object.entries(features).forEach(([k, v]) => {
+          h += `<div class="fc-fmttt-row"><span class="fc-fmttt-feat-label">${featLabel(k)}</span><span class="fc-fmttt-feat-val">${featValue(k, v)}</span></div>`;
+        });
+        h += `</div>`;
+      }
+      return h + `</div>`;
+    }
+
+    function classifyLevel(cc, max) {
+      if (!max || max <= 0) return 'VERY_LOW';
+      const r = cc / max;
+      return r >= 0.75 ? 'HIGH' : r >= 0.50 ? 'MEDIUM' : r >= 0.25 ? 'LOW' : 'VERY_LOW';
+    }
+
+    function buildWeekendBands(preds) {
+      const bands = [];
+      let inWk = false, wkStart = null;
+      preds.forEach(p => {
+        const ts  = new Date(p.timestamp);
+        const dow = ts.getDay();
+        if ((dow === 0 || dow === 6) && !inWk) { inWk = true; wkStart = ts; }
+        else if (dow !== 0 && dow !== 6 && inWk) { inWk = false; bands.push([{xAxis: wkStart.getTime()}, {xAxis: ts.getTime()}]); }
+      });
+      if (inWk && preds.length) bands.push([{xAxis: wkStart.getTime()}, {xAxis: new Date(preds[preds.length - 1].timestamp).getTime()}]);
+      return bands;
+    }
+
+    function findWeekendsInPredictions(predictions) {
+      const available = (predictions || []).filter(p => p.available);
+      if (!available.length) return [];
+      const daySet = new Set();
+      available.forEach(p => {
+        const d = new Date(p.timestamp);
+        daySet.add(d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()));
+      });
+      const weekends = [];
+      daySet.forEach(ds => {
+        const d = new Date(ds + 'T12:00:00');
+        if (d.getDay() !== 6) return;
+        const sun = new Date(d); sun.setDate(sun.getDate() + 1);
+        const sunStr = sun.getFullYear() + '-' + pad(sun.getMonth() + 1) + '-' + pad(sun.getDate());
+        const sat = midnight(d);
+        const mon = new Date(sat); mon.setDate(mon.getDate() + 2);
+        const sunDay = new Date(sat); sunDay.setDate(sunDay.getDate() + 1);
+        weekends.push({from: sat, to: mon, full: daySet.has(sunStr), label: dateLabel(sat) + ' – ' + dateLabel(sunDay)});
+      });
+      weekends.sort((a, b) => a.from - b.from);
+      return weekends;
+    }
+
+    function getBestDayRange(predictions) {
+      const available = (predictions || []).filter(p => p.available);
+      if (!available.length) return null;
+      const dayMap = {};
+      available.forEach(p => {
+        const ts  = new Date(p.timestamp);
+        const key = ts.getFullYear() + '-' + pad(ts.getMonth() + 1) + '-' + pad(ts.getDate());
+        if (!dayMap[key]) dayMap[key] = [];
+        dayMap[key].push(p);
+      });
+      const days = Object.keys(dayMap).sort();
+      const pick = days.length >= 2 ? days[1] : days[0];
+      const d    = new Date(pick + 'T12:00:00');
+      const from = midnight(d);
+      const to   = new Date(from); to.setDate(to.getDate() + 1);
+      return {from, to, label: dateLabel(from), title: i18n.tomorrow};
+    }
+
+    let _evalData = null;
+
+    const modelDefs = [
+      {days: 3,  fullEl: 'forecast-3d',  summaryId: 'tomorrow'},
+      {days: 10, fullEl: 'forecast-10d', summaryId: 'weekend'},
+      {days: 15, fullEl: 'forecast-15d', summaryId: 'next-weekend'},
+    ];
+
+    modelDefs.forEach(cfg => {
+      const fullLoadEl = document.getElementById(cfg.fullEl + '-loading');
+      const fullChartEl = document.getElementById(cfg.fullEl);
+      const sumLoadEl  = document.getElementById(`summary-${cfg.summaryId}-loading`);
+      const sumChartEl = document.getElementById(`summary-${cfg.summaryId}-chart`);
+      const sumInfoEl  = document.getElementById(`summary-${cfg.summaryId}-info`);
+
+      fetch(`/platja/${slug}/forecast/?days=${cfg.days}`)
+        .then(r => { if (!r.ok) throw new Error(r.statusText); return r.json(); })
+        .then(data => {
+          fullLoadEl.style.display = 'none';
+          fullChartEl.style.display = 'block';
+          renderForecast(fullChartEl, data, cfg.days, maxCrowd);
+
+          let range = null;
+          if (cfg.days === 3) {
+            range = getBestDayRange(data.predictions);
+            if (range?.title) document.getElementById('summary-tomorrow-title').textContent = range.title;
+          } else if (cfg.days === 10) {
+            const wks = findWeekendsInPredictions(data.predictions);
+            range = wks.find(w => w.full) || wks[0] || null;
+          } else {
+            const wks  = findWeekendsInPredictions(data.predictions);
+            const full = wks.filter(w => w.full);
+            if (full.length >= 2) {
+              range = full[full.length - 1];
+            } else if (full.length === 1 && wks.length >= 2) {
+              range = wks[wks.length - 1];
+              if (range.from.getTime() === full[0].from.getTime()) range = wks.length > 1 ? wks[wks.length - 2] : null;
+            } else {
+              range = wks.length ? wks[wks.length - 1] : null;
+            }
+          }
+
+          sumLoadEl.style.display = 'none';
+          if (!range) { sumInfoEl.textContent = i18n.noData; return; }
+          sumInfoEl.textContent = range.label;
+
+          const filtered = (data.predictions || []).filter(p => {
+            if (!p.available) return false;
+            const ts = new Date(p.timestamp);
+            return ts >= range.from && ts < range.to;
+          });
+          if (filtered.length) { sumChartEl.style.display = 'block'; renderMiniChart(sumChartEl, filtered); }
+          else sumInfoEl.textContent = range.label + ' — ' + i18n.noData;
+        })
+        .catch(err => {
+          fullLoadEl.innerHTML = `<span class="text-danger">${i18n.forecastUnavailable}</span>`;
+          sumLoadEl.innerHTML  = '<span class="text-muted small">—</span>';
+          console.error(`Forecast ${cfg.days}d:`, err);
+        });
+    });
+
+    function renderMiniChart(el, preds) {
+      const chart = echarts.init(el);
+      const bars = [], temps = [];
+      preds.forEach(p => {
+        const ts  = new Date(p.timestamp).getTime();
+        const lvl = p.occupancy_level || classifyLevel(p.crowd_count, maxCrowd);
+        const pct = p.occupancy_ratio != null ? p.occupancy_ratio * 100 : 0;
+        bars.push({value: [ts, pct], itemStyle: {color: LEVEL_COLORS[lvl]}});
+        if (p.temperature != null) temps.push([ts, p.temperature]);
+      });
+      chart.setOption({
+        tooltip: {
+          trigger: 'axis', textStyle: {fontSize: 11},
+          formatter(params) {
+            const ts = new Date(params[0].value[0]);
+            let h = '<b>' + dateLabel(ts) + ' ' + pad(ts.getHours()) + ':00</b><br/>';
+            params.forEach((p, i) => { h += p.marker + ' ' + (i === 0 ? p.value[1].toFixed(1) + '%' : p.value[1].toFixed(1) + ' °C') + '<br/>'; });
+            return h;
+          },
+        },
+        grid:  {left: 35, right: 30, top: 8, bottom: 22},
+        xAxis: {type: 'time', splitLine: {show: false}, axisLabel: {fontSize: 10, formatter: val => pad(new Date(val).getHours()) + 'h'}},
+        yAxis: [
+          {type: 'value', min: 0, max: 100, axisLabel: {fontSize: 9, formatter: '{value}%'}, splitLine: {lineStyle: {opacity: 0.3}}},
+          {type: 'value', show: false},
+        ],
+        series: [
+          {
+            type: 'bar', data: bars, yAxisIndex: 0, barMaxWidth: 12,
+            markLine: {silent: true, symbol: 'none', label: {show: false}, data: [
+              {yAxis: 75, lineStyle: {color: '#e74c3c', type: 'dashed', opacity: 0.4, width: 1}},
+              {yAxis: 50, lineStyle: {color: '#f39c12', type: 'dashed', opacity: 0.4, width: 1}},
+            ]},
+          },
+          {type: 'line', data: temps, yAxisIndex: 1, smooth: true, symbol: 'none', lineStyle: {color: '#e67e22', width: 1, opacity: 0.6}, itemStyle: {color: '#e67e22'}},
+        ],
+      });
+      window.addEventListener('resize', () => chart.resize());
+    }
+
+    function renderForecast(el, data, days, maxCrowd) {
+      const chart   = echarts.init(el);
+      const preds   = data.predictions || [];
+      const bars    = [], temps = [];
+      const wkBands = buildWeekendBands(preds);
+      preds.forEach(p => {
+        if (p.available) {
+          const pct = p.occupancy_ratio != null ? p.occupancy_ratio * 100 : 0;
+          bars.push({value: [new Date(p.timestamp).getTime(), pct], itemStyle: {color: LEVEL_COLORS[p.occupancy_level] || '#3498db'}, features: p.features || {}});
+        }
+        if (p.temperature != null) temps.push([new Date(p.timestamp).getTime(), p.temperature]);
+      });
+      chart.setOption({
+        tooltip: {trigger: 'axis', formatter: params => fmtTooltip(params)},
+        legend: {data: [i18n.occupancy, i18n.temperature + ' °C'], top: -5, right: 10, itemGap: 25},
+        grid:   {left: 50, right: 50, bottom: 40, top: 40},
+        xAxis:  {type: 'time', axisLabel: {formatter: fmtAxisLabel}},
+        yAxis:  [
+          {type: 'value', name: '%', min: 0, max: 100, axisLabel: {formatter: '{value}%'}},
+          {type: 'value', name: '°C', splitLine: {show: false}},
+        ],
+        series: [
+          {
+            name: i18n.occupancy, type: 'bar', data: bars, yAxisIndex: 0,
+            barMaxWidth: days <= 3 ? 12 : (days <= 14 ? 5 : 3),
+            markLine: {silent: true, data: [
+              {yAxis: 75, label: {formatter: i18n.levelHigh,   position: 'end', fontSize: 9}, lineStyle: {color: '#e74c3c', type: 'dashed', opacity: 0.5}},
+              {yAxis: 50, label: {formatter: i18n.levelMedium, position: 'end', fontSize: 9}, lineStyle: {color: '#f39c12', type: 'dashed', opacity: 0.5}},
+            ]},
+            markArea: wkBands.length ? {silent: true, itemStyle: {color: 'rgba(41,128,185,0.12)'}, data: wkBands} : undefined,
+          },
+          {name: i18n.temperature + ' °C', type: 'line', data: temps, yAxisIndex: 1, smooth: true, symbol: 'none', lineStyle: {color: '#e67e22', width: 1.5, opacity: 0.7}, itemStyle: {color: '#e67e22'}},
+        ],
+      });
+      window.addEventListener('resize', () => chart.resize());
+    }
+
+    function renderEvalComparison(modelSets, ranking) {
+      const el = document.getElementById('cmp-eval-table');
+      if (!el) return;
+      const rows = ranking.filter(r => modelSets.includes(r.model_set));
+      if (!rows.length) { el.style.display = 'none'; return; }
+      const horizons = [...new Set(rows.map(r => r.model_key))].sort();
+      function bestValFor(hk) { return Math.min(...rows.filter(r => r.model_key === hk).map(r => r.relMAE_all || Infinity)); }
+
+      let h = '<div class="d-flex align-items-start justify-content-between mb-2 gap-2 flex-wrap">';
+      h += '<p class="small fw-semibold mb-0">Cross-Validation Performance</p>';
+      h += '<span class="text-muted small" style="font-size:0.75rem;max-width:480px;">📋 <strong>CV all</strong> = relMAE across the full dataset (walk-forward CV). Lower is better.</span>';
+      h += '</div>';
+      h += '<table class="table table-sm table-bordered mb-0" style="font-size:0.82rem;"><thead class="table-light"><tr>'
+        + '<th>Model Set</th><th>Horizon</th>'
+        + '<th title="relMAE over full dataset CV windows">CV all</th>'
+        + '<th title="Difference vs best selected set for this horizon">vs best here</th>'
+        + '<th title="relMAE on summer months (Jun–Aug)">Summer</th>'
+        + '<th title="relMAE on season months (Apr–Sep)">Season</th>'
+        + '</tr></thead><tbody>';
+      horizons.forEach(hk => {
+        const hRows  = rows.filter(r => r.model_key === hk).sort((a, b) => a.relMAE_all - b.relMAE_all);
+        const bestVal = bestValFor(hk);
+        hRows.forEach(r => {
+          const isBest = r.relMAE_all === bestVal;
+          const diff   = (r.relMAE_all != null && bestVal > 0 && !isBest) ? '+' + ((r.relMAE_all - bestVal) / bestVal * 100).toFixed(1) + '%' : '—';
+          h += `<tr class="${isBest ? 'table-success' : ''}">`;
+          h += `<td>${r.model_set}</td><td>${hk}</td>`;
+          h += `<td>${r.relMAE_all    != null ? (r.relMAE_all    * 100).toFixed(2) + '%' : '—'}</td>`;
+          h += `<td class="text-muted">${diff}</td>`;
+          h += `<td>${r.relMAE_summer != null ? (r.relMAE_summer * 100).toFixed(2) + '%' : '—'}</td>`;
+          h += `<td>${r.relMAE_season != null ? (r.relMAE_season * 100).toFixed(2) + '%' : '—'}</td>`;
+          h += '</tr>';
+        });
+      });
+      h += '</tbody></table>';
+      el.innerHTML = h;
+      el.style.display = 'block';
+    }
+
+    async function showSnapshotImage(params, panelId, tsId, origId, predId) {
+      if (!params.value) return;
+      const ts    = new Date(params.value[0]);
+      const iso   = ts.toISOString().slice(0, 19);
+      const panel = document.getElementById(panelId);
+      panel.style.display = 'none';
+      try {
+        const res  = await fetch(`/platja/${slug}/snapshot-image/?ts=${encodeURIComponent(iso)}`);
+        const data = await res.json();
+        document.getElementById(tsId).textContent = iso.replace('T', ' ');
+        const orig = document.getElementById(origId);
+        const pred = document.getElementById(predId);
+        orig.src = (data.url && data.url !== 'null') ? data.url : '';
+        orig.style.display = orig.src ? '' : 'none';
+        pred.src = (data.prediction_url && data.prediction_url !== 'null') ? data.prediction_url : '';
+        pred.style.display = pred.src ? '' : 'none';
+        if (data.url || data.prediction_url) { panel.style.display = 'block'; panel.scrollIntoView({behavior: 'smooth', block: 'center'}); }
+      } catch (e) { console.error('snapshot fetch error', e); }
+    }
+
+    fetch(`/platja/${slug}/model-sets/`)
+      .then(r => r.json())
+      .then(data => {
+        const sets = data.model_sets || [];
+        ['cmp-set-a', 'cmp-set-b'].forEach(id => {
+          const sel = document.getElementById(id);
+          sel.innerHTML = '';
+          sets.forEach(s => { const o = document.createElement('option'); o.value = s; o.textContent = s; sel.appendChild(o); });
+        });
+        const selC = document.getElementById('cmp-set-c');
+        selC.innerHTML = '<option value="">(none)</option>';
+        sets.forEach(s => { const o = document.createElement('option'); o.value = s; o.textContent = s; selC.appendChild(o); });
+        const selB = document.getElementById('cmp-set-b');
+        if (selB.options.length > 1) selB.selectedIndex = 1;
+        if (selC.options.length > 2) selC.selectedIndex = 2;
+      })
+      .catch(() => {});
+
+    const cmpDd = new Date();
+    cmpDd.setDate(cmpDd.getDate() - 7);
+    document.getElementById('cmp-since').value = cmpDd.toISOString().slice(0, 10);
+
+    function updateHorizonOptions() {
+      const days = Math.min(15, Math.max(1, parseInt(document.getElementById('cmp-days').value) || 3));
+      const opts = [
+        {value: 'mix', label: 'mix (auto)'},
+        {value: '3d',  label: '3d model',  maxDays: 3},
+        {value: '10d', label: '10d model', maxDays: 10},
+        {value: '15d', label: '15d model', maxDays: 15},
+      ];
+      ['a', 'b', 'c'].forEach(id => {
+        const sel = document.getElementById(`cmp-horizon-${id}`);
+        if (!sel) return;
+        const prev = sel.value;
+        sel.innerHTML = '';
+        opts.forEach(o => {
+          if (o.maxDays !== undefined && days > o.maxDays) return;
+          const opt = document.createElement('option'); opt.value = o.value; opt.textContent = o.label;
+          if (o.value === prev) opt.selected = true;
+          sel.appendChild(opt);
+        });
+        if (!sel.value) sel.value = 'mix';
+      });
+    }
+    document.getElementById('cmp-days').addEventListener('input', updateHorizonOptions);
+    updateHorizonOptions();
+
+    window.runComparison = async function () {
+      const since    = document.getElementById('cmp-since').value;
+      const days     = Math.min(15, Math.max(1, parseInt(document.getElementById('cmp-days').value) || 3));
+      const setA     = document.getElementById('cmp-set-a').value;
+      const setB     = document.getElementById('cmp-set-b').value;
+      const setC     = document.getElementById('cmp-set-c').value;
+      const horizonA = document.getElementById('cmp-horizon-a').value;
+      const horizonB = document.getElementById('cmp-horizon-b').value;
+      const horizonC = document.getElementById('cmp-horizon-c').value;
+      const status   = document.getElementById('cmp-status');
+      const chartEl  = document.getElementById('cmp-chart');
+      const btn      = document.getElementById('cmp-btn');
+
+      if (!since) { status.textContent = 'Select a date'; return; }
+
+      function buildUrl(set, horizon) {
+        const base = `/platja/${slug}/forecast/?days=${days}&since=${since}&model_set=${set}`;
+        return horizon === 'mix' ? base + '&mixed=true' : base + `&model_key=${horizon}`;
+      }
+
+      btn.disabled = true;
+      status.textContent = 'Fetching...';
+      try {
+        const fetches = [
+          fetch(buildUrl(setA, horizonA)).then(r => r.json()),
+          fetch(buildUrl(setB, horizonB)).then(r => r.json()),
+          fetch(`/platja/${slug}/actuals/?since=${since}&days=${days}`).then(r => r.json()),
+          _evalData ? Promise.resolve(_evalData) : fetch(`/platja/${slug}/eval-ranking/`).then(r => r.ok ? r.json() : null).catch(() => null),
+        ];
+        if (setC) fetches.push(fetch(buildUrl(setC, horizonC)).then(r => r.json()));
+
+        const results             = await Promise.all(fetches);
+        const [resA, resB, resAct, evalData] = results;
+        const resC                = setC ? results[4] : null;
+
+        if (resA.error)  throw new Error(`${setA}: ${resA.error}`);
+        if (resB.error)  throw new Error(`${setB}: ${resB.error}`);
+        if (resC?.error) throw new Error(`${setC}: ${resC.error}`);
+
+        if (evalData) _evalData = evalData;
+        if (evalData?.ranking) renderEvalComparison([setA, setB, ...(setC ? [setC] : [])], evalData.ranking);
+
+        function seriesLabel(set, horizon) { return horizon === 'mix' ? `${set}(mix)` : `${set}(${horizon})`; }
+        const nameA = seriesLabel(setA, horizonA);
+        const nameB = seriesLabel(setB, horizonB);
+        const nameC = setC ? seriesLabel(setC, horizonC) : null;
+
+        status.textContent = [nameA, nameB, nameC].filter(Boolean).join(' vs ');
+        chartEl.style.display = 'block';
+        renderComparison(chartEl, resA, resB, resAct, nameA, nameB, days, resC, nameC, evalData,
+          {setA, setB, setC: setC || null, horizonA, horizonB, horizonC});
+      } catch (err) {
+        status.innerHTML = `<span class="text-danger">${err.message}</span>`;
+      } finally {
+        btn.disabled = false;
+      }
+    };
+
+    function computeRelMAE(predBars, actuals) {
+      const predMap = {};
+      predBars.forEach(p => { predMap[p.value[0]] = p.value[1]; });
+      let sum = 0, count = 0;
+      actuals.forEach(([ts, , raw]) => {
+        if (predMap[ts] !== undefined) {
+          const predRaw = maxCrowd > 0 ? (predMap[ts] / 100) * maxCrowd : 0;
+          sum += maxCrowd > 0 ? Math.abs(predRaw - raw) / maxCrowd : 0;
+          count++;
+        }
+      });
+      return count > 0 ? (sum / count * 100).toFixed(1) + '%' : '—';
+    }
+
+    function predsToBars(preds, opacity, modelSetName, responseFallback) {
+      return preds.filter(p => p.available).map(p => ({
+        value:     [new Date(p.timestamp).getTime(), p.occupancy_ratio != null ? p.occupancy_ratio * 100 : 0],
+        itemStyle: {color: LEVEL_COLORS[p.occupancy_level] || '#3498db', opacity},
+        features:  p.features || {},
+        modelSet:  p.model_set || modelSetName,
+        modelKey:  p.model_key || responseFallback?.model || null,
+      }));
+    }
+
+    function renderComparison(el, dataA, dataB, actData, nameA, nameB, days, dataC, nameC, evalData, meta) {
+      const chart      = echarts.init(el);
+      const barsA      = predsToBars(dataA.predictions || [], 0.8, nameA, dataA);
+      const barsB      = predsToBars(dataB.predictions || [], 0.8, nameB, dataB);
+      const barsC      = dataC ? predsToBars(dataC.predictions || [], 0.8, nameC, dataC) : [];
+      const actualLine = (actData.actuals || []).map(a => [
+        new Date(a.timestamp).getTime(),
+        maxCrowd > 0 ? (a.crowd_count / maxCrowd) * 100 : 0,
+        a.crowd_count,
+      ]);
+      const wkBands  = buildWeekendBands(dataA.predictions || []);
+      const maeA     = computeRelMAE(barsA, actualLine);
+      const maeB     = computeRelMAE(barsB, actualLine);
+      const maeC     = dataC ? computeRelMAE(barsC, actualLine) : null;
+      const barWidth = days <= 3 ? 8 : 3;
+
+      function overallRelMAE(rawSet, horizon, res) {
+        if (!evalData?.ranking || !rawSet) return null;
+        const hk  = horizon === 'mix' ? (res.model || '') : horizon;
+        const row = evalData.ranking.find(r => r.model_set === rawSet && r.model_key === hk);
+        return row ? row.relMAE_all : null;
+      }
+      function fmtMAE(v) { return v != null ? (v * 100).toFixed(1) + '%' : '—'; }
+
+      const oA = overallRelMAE(meta?.setA, meta?.horizonA, dataA);
+      const oB = overallRelMAE(meta?.setB, meta?.horizonB, dataB);
+      const oC = dataC ? overallRelMAE(meta?.setC, meta?.horizonC, dataC) : null;
+
+      const perfEl = document.getElementById('cmp-perf-summary');
+      if (perfEl) {
+        function actualModels(bars) {
+          const seen = [];
+          bars.forEach(b => { if (b.modelKey && !seen.includes(b.modelKey)) seen.push(b.modelKey); });
+          return seen.join(' + ');
+        }
+        const sets   = [[meta?.setA || nameA, oA, maeA, actualModels(barsA)], [meta?.setB || nameB, oB, maeB, actualModels(barsB)]];
+        if (dataC) sets.push([meta?.setC || nameC, oC, maeC, actualModels(barsC)]);
+        const bestCV = Math.min(...sets.map(s => s[1]).filter(v => v != null));
+        const bestHC = Math.min(...sets.map(s => parseFloat(s[2])).filter(v => !isNaN(v)));
+
+        let h = '<div class="fc-perf-wrap"><span class="fc-perf-label">Performance comparison:</span>';
+        sets.forEach(([name, cv, hc, modelUsed]) => {
+          const cvBest = cv != null && cv === bestCV;
+          const hcVal  = parseFloat(hc);
+          const hcBest = !isNaN(hcVal) && hcVal === bestHC;
+          h += `<div class="fc-perf-card"><div class="fc-perf-card-name"><span>${name}</span>`;
+          if (modelUsed) h += `<span class="fc-model-badge">${modelUsed}</span>`;
+          h += `</div><div class="fc-perf-card-metrics">`;
+          h += `<span title="Overall CV relMAE"><span class="fc-perf-metric-label">CV all </span><span class="fc-perf-metric-val ${cvBest ? 'fc-perf-best-cv' : ''}" style="${cvBest ? '' : 'color:#333;'}">${fmtMAE(cv)}${cvBest ? ' ⭐' : ''}</span></span>`;
+          h += `<span title="Hindcast relMAE for this date window"><span class="fc-perf-metric-label">hindcast </span><span class="fc-perf-metric-val ${hcBest ? 'fc-perf-best-hc' : ''}" style="${hcBest ? '' : 'color:#555;'}">${hc}${hcBest ? ' ⭐' : ''}</span></span>`;
+          h += `</div></div>`;
+        });
+        h += '</div>';
+        perfEl.innerHTML = h;
+        perfEl.style.display = 'block';
+      }
+
+      function segmentMarkLines(bars) {
+        const lines = [];
+        let prevKey = null;
+        bars.forEach(b => {
+          const mk = b.modelKey;
+          if (prevKey && mk !== prevKey) lines.push({xAxis: b.value[0], lineStyle: {type: 'dashed', color: '#aaa', width: 1}, label: {show: true, formatter: mk, fontSize: 9, color: '#888', position: 'insideStartTop'}});
+          prevKey = mk;
+        });
+        return lines;
+      }
+
+      const mixLines = [
+        ...(meta?.horizonA === 'mix' ? segmentMarkLines(barsA) : []),
+        ...(meta?.horizonB === 'mix' ? segmentMarkLines(barsB) : []),
+        ...(dataC && meta?.horizonC === 'mix' ? segmentMarkLines(barsC) : []),
+      ];
+
+      const seriesNames = [nameA, nameB, ...(dataC ? [nameC] : [])];
+      const series = [
+        {
+          name: nameA, type: 'bar', data: barsA, barGap: '5%', barMaxWidth: barWidth,
+          markArea: wkBands.length ? {silent: true, itemStyle: {color: 'rgba(41,128,185,0.08)'}, data: wkBands} : undefined,
+          markLine: mixLines.length ? {silent: true, symbol: 'none', data: mixLines} : undefined,
+        },
+        {name: nameB, type: 'bar', data: barsB, barMaxWidth: barWidth},
+      ];
+      if (dataC) series.push({name: nameC, type: 'bar', data: barsC, barMaxWidth: barWidth});
+      series.push({
+        name: 'Actual', type: 'line', data: actualLine,
+        lineStyle: {color: '#e74c3c', width: 2}, itemStyle: {color: '#e74c3c'},
+        symbol: 'circle', symbolSize: 4,
+      });
+
+      chart.setOption({
+        tooltip: {
+          trigger: 'axis', enterable: false,
+          formatter(params) {
+            const ts      = new Date(params[0].value[0]);
+            const dateStr = `${dateLabel(ts)}/${ts.getFullYear()} ${pad(ts.getHours())}:00`;
+            let h = `<div class="fc-tooltip"><div class="fc-tooltip-header">${dateStr}</div>`;
+            params.filter(p => p.seriesType === 'bar').forEach(p => {
+              const v       = Array.isArray(p.value) ? p.value[1] : null;
+              const mKey    = p.data?.modelKey;
+              const weather = p.data?.features || {};
+              h += `<div class="fc-tooltip-row"><div class="fc-tooltip-name">`;
+              h += `<span style="font-weight:600;">${p.marker} ${p.seriesName}</span>`;
+              if (mKey) h += `<span style="font-size:10px;font-weight:700;color:${p.color};background:${p.color}18;border:1px solid ${p.color}44;border-radius:3px;padding:1px 5px;margin-left:6px;">${mKey}</span>`;
+              h += `<span style="font-weight:700;color:${p.color};margin-left:12px;">${v != null ? v.toFixed(1) + '%' : '—'}</span></div>`;
+              if (Object.keys(weather).length) {
+                h += `<div class="fc-tooltip-weather">`;
+                Object.entries(weather).forEach(([k, val]) => {
+                  if (val == null) return;
+                  h += `<div class="fc-tooltip-weather-row"><span>${featLabel(k)}</span><span class="fc-tooltip-weather-val">${featValue(k, val)}</span></div>`;
+                });
+                h += `</div>`;
+              }
+              h += `</div>`;
+            });
+            const act = params.find(p => p.seriesType === 'line');
+            if (act) {
+              const v = Array.isArray(act.value) ? act.value[1] : act.value;
+              h += `<div class="fc-tooltip-actual"><span style="color:#e74c3c;font-weight:600;">${act.marker} Actual</span><span style="font-weight:700;color:#e74c3c;">${v != null ? v.toFixed(1) + '%' : '—'}</span></div>`;
+            }
+            return h + `</div>`;
+          },
+        },
+        // legend: {data: [...seriesNames, 'Actual'], top: 22, itemGap: 20},
+        grid:   {left: 50, right: 30, bottom: 40, top: 55},
+        xAxis:  {type: 'time', axisLabel: {formatter: fmtAxisLabel}},
+        yAxis:  {type: 'value', name: '%', min: 0, max: 100, axisLabel: {formatter: '{value}%'}},
+        series,
+      }, true);
+
+      chart.on('click', params => showSnapshotImage(params, 'cmp-image-panel', 'cmp-image-ts', 'cmp-image-original', 'cmp-image-prediction'));
+      window.addEventListener('resize', () => chart.resize());
+    }
+  });
+</script>

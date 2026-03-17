@@ -1,0 +1,633 @@
+{% extends 'core/parent.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}Debug — Fundació Bit API — prediccio_futura{% endblock %}
+
+{% block styles %}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap');
+
+  body { background: #f8fafc; }
+
+  .db-hero {
+    background: linear-gradient(135deg, #0f172a 0%, #312e81 100%);
+    color: #fff;
+    padding: 2rem 0 1.5rem;
+  }
+  .db-hero h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.15rem; }
+  .db-hero .sub { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: rgba(255,255,255,0.4); }
+  .db-badge { display: inline-block; background: rgba(139,92,246,0.35); border: 1px solid rgba(139,92,246,0.5); color: #c4b5fd; font-family: 'DM Mono', monospace; font-size: 0.65rem; padding: 0.1rem 0.5rem; border-radius: 3px; margin-left: 0.5rem; vertical-align: middle; }
+
+
+  .db-panel { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 0.9rem 1.5rem; display: flex; gap: 0.75rem; align-items: flex-end; flex-wrap: wrap; }
+  .db-field { display: flex; flex-direction: column; gap: 0.25rem; }
+  .db-field label { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
+  .db-input {
+    border: 1px solid #e2e8f0; background: #f8fafc; color: #374151;
+    border-radius: 5px; padding: 0.3rem 0.6rem;
+    font-size: 0.78rem; font-family: 'DM Mono', monospace;
+    min-width: 200px;
+    transition: border-color 0.12s;
+  }
+  .db-input:focus { outline: none; border-color: #8b5cf6; }
+  .db-select { border: 1px solid #e2e8f0; background: #f8fafc; color: #374151; border-radius: 5px; padding: 0.3rem 0.5rem; font-size: 0.75rem; font-family: 'DM Mono', monospace; cursor: pointer; }
+  .db-btn {
+    border: none; border-radius: 5px; padding: 0.35rem 1rem;
+    font-size: 0.75rem; font-family: 'DM Mono', monospace; cursor: pointer;
+    transition: all 0.12s;
+  }
+  .db-btn-run { background: #8b5cf6; color: #fff; }
+  .db-btn-run:hover { background: #7c3aed; }
+  .db-btn-run:disabled { background: #c4b5fd; cursor: default; }
+  .db-btn-sm { background: #f1f5f9; color: #374151; border: 1px solid #e2e8f0; font-size: 0.68rem; padding: 0.2rem 0.55rem; border-radius: 4px; cursor: pointer; }
+  .db-btn-sm:hover { border-color: #8b5cf6; color: #8b5cf6; }
+
+
+  .db-url-wrap { background: #0f172a; padding: 0.6rem 1.5rem; overflow-x: auto; }
+  .db-url { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: #94a3b8; white-space: nowrap; }
+  .db-url .method { color: #34d399; }
+  .db-url .endpoint { color: #7dd3fc; }
+  .db-url .param { color: #fbbf24; }
+
+
+  .db-statusbar { display: flex; align-items: center; gap: 1rem; padding: 0.5rem 1.5rem; background: #fff; border-bottom: 1px solid #e2e8f0; flex-wrap: wrap; }
+  .db-status-text { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: #64748b; }
+  .db-status-text.ok { color: #10b981; }
+  .db-status-text.err { color: #ef4444; }
+  .db-pill { font-family: 'DM Mono', monospace; font-size: 0.62rem; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 3px; padding: 0.1rem 0.45rem; color: #475569; }
+
+
+  .db-main { padding: 1.25rem 1.5rem; }
+
+
+  .db-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(460px, 1fr)); gap: 1rem; }
+  @media (max-width: 560px) { .db-cards { grid-template-columns: 1fr; } }
+
+  .db-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    opacity: 0;
+    transform: translateY(5px);
+    animation: dbUp 0.22s ease forwards;
+  }
+  @keyframes dbUp { to { opacity:1; transform:translateY(0); } }
+
+  .db-card-hdr {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.65rem 0.9rem 0.55rem;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .db-card-name { font-size: 0.82rem; font-weight: 700; color: #0f172a; font-family: 'DM Mono', monospace; }
+  .db-card-stats { display: flex; gap: 0.9rem; flex-shrink: 0; margin-left: 0.5rem; }
+  .db-card-stat .v { font-family: 'DM Mono', monospace; font-size: 0.78rem; font-weight: 600; }
+  .db-card-stat .l { font-size: 0.56rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.04em; }
+
+  .db-card-chart { overflow-x: auto; padding: 0.5rem 0.75rem 0.25rem; scrollbar-width: thin; scrollbar-color: #e2e8f0 transparent; }
+  .db-card-chart::-webkit-scrollbar { height: 4px; }
+  .db-card-chart::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 2px; }
+  .db-chart-svg { display: block; cursor: crosshair; }
+
+  .db-card-footer { display: flex; gap: 0.3rem; flex-wrap: wrap; padding: 0.4rem 0.75rem 0.55rem; border-top: 1px solid #f8fafc; }
+  .db-day-badge { font-family: 'DM Mono', monospace; font-size: 0.57rem; padding: 0.1rem 0.42rem; border-radius: 3px; white-space: nowrap; cursor: default; }
+
+
+  .db-raw-wrap { margin-top: 1.25rem; background: #0f172a; border-radius: 8px; overflow: hidden; border: 1px solid #1e293b; }
+  .db-raw-hdr { display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0.9rem; border-bottom: 1px solid #1e293b; }
+  .db-raw-hdr span { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: #64748b; }
+  .db-raw-body { padding: 0.75rem 1rem; max-height: 400px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #334155 transparent; }
+  .db-raw-body pre { margin: 0; font-family: 'DM Mono', monospace; font-size: 0.65rem; color: #94a3b8; white-space: pre-wrap; word-break: break-all; }
+
+  #db-status { text-align: center; padding: 3rem; color: #94a3b8; font-family: 'DM Mono', monospace; font-size: 0.78rem; }
+
+
+  .db-pill-sel {
+    border: 1px solid #e2e8f0; background: #f8fafc; color: #374151;
+    border-radius: 4px; padding: 0.18rem 0.52rem;
+    font-size: 0.68rem; font-family: 'DM Mono', monospace;
+    cursor: pointer; transition: all 0.1s; white-space: nowrap; user-select: none;
+  }
+  .db-pill-sel:hover { border-color: #8b5cf6; color: #8b5cf6; }
+  .db-pill-sel.active { background: #8b5cf6; border-color: #8b5cf6; color: #fff; }
+  .db-pill-sel.weekend { border-color: #7c3aed33; color: #7c3aed; }
+  .db-pill-sel.weekend.active { background: #7c3aed; border-color: #7c3aed; color: #fff; }
+
+  #fo-tip { position: fixed; background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 0.65rem 0.85rem; pointer-events: none; z-index: 9999; font-family: 'DM Mono', monospace; font-size: 0.7rem; color: #f1f5f9; line-height: 1.65; max-width: 210px; display: none; box-shadow: 0 8px 24px rgba(0,0,0,0.35); }
+  #fo-tip .tn { font-weight: 600; font-size: 0.76rem; margin-bottom: 0.1rem; }
+  #fo-tip .td { color: #38bdf8; margin-bottom: 0.3rem; }
+  #fo-tip .tb { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 0.6rem; margin-bottom: 0.2rem; }
+  .db-ctl-row  { display: flex; gap: 0.75rem; align-items: flex-end; flex-wrap: wrap; width: 100%; }
+  .db-pills    { display: flex; gap: 4px; flex-wrap: wrap; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="db-hero">
+  <div class="container">
+    <h1>prediccio_futura <span class="db-badge">debug</span></h1>
+    <div class="sub">/api/prediccio_futura/ · fundació bit external API · 15-day forecast by unix timestamps</div>
+  </div>
+</div>
+
+<div class="db-panel">
+
+
+  <div class="db-ctl-row">
+    <div class="db-field" style="flex:1;min-width:180px">
+      <label>Beach slug (id_beach)</label>
+      <input id="db-beach" class="db-input" placeholder="e.g. muro-sector-i  (blank = all)" value="" style="min-width:0;width:100%">
+    </div>
+    <div class="db-field">
+      <label>Sort</label>
+      <select id="db-sort" class="db-select">
+        <option value="name">Name</option>
+        <option value="peak">Peak ↓</option>
+        <option value="avg">Avg ↓</option>
+      </select>
+    </div>
+    <button class="db-btn db-btn-run" id="db-run">▶ Run</button>
+  </div>
+
+
+  <div class="db-field" style="width:100%">
+    <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.35rem">
+      <label style="margin:0">Days</label>
+      <button class="db-btn-sm" id="db-preset-today">Today</button>
+      <button class="db-btn-sm" id="db-preset-tomorrow">Tomorrow</button>
+      <button class="db-btn-sm" id="db-preset-weekend">This weekend</button>
+      <button class="db-btn-sm" id="db-preset-next-weekend">Next weekend</button>
+      <button class="db-btn-sm" id="db-preset-week">Next 7 days</button>
+      <button class="db-btn-sm" id="db-preset-all">All 15 days</button>
+      <button class="db-btn-sm" id="db-days-clear">Clear</button>
+    </div>
+    <div id="db-day-pills" class="db-pills" ></div>
+  </div>
+
+
+  <div class="db-field" style="width:100%">
+    <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.35rem">
+      <label style="margin:0">Hours</label>
+      <button class="db-btn-sm" id="db-preset-beach">Beach hours (8–18)</button>
+      <button class="db-btn-sm" id="db-preset-peak">Peak (11–15)</button>
+      <button class="db-btn-sm" id="db-hours-clear">Clear</button>
+    </div>
+    <div id="db-hour-pills" class="db-pills" ></div>
+  </div>
+
+</div>
+
+<div class="db-url-wrap">
+  <div class="db-url" id="db-url-preview">
+    <span class="method">GET</span> <span class="endpoint">/api/prediccio_futura/</span><span class="param">?…</span>
+  </div>
+</div>
+
+<div class="db-statusbar" id="db-statusbar" style="display:none">
+  <span class="db-status-text" id="db-status-txt">—</span>
+  <span class="db-pill" id="db-pill-beaches">—</span>
+  <span class="db-pill" id="db-pill-times">—</span>
+  <span class="db-pill" id="db-pill-ms">—</span>
+  <button class="db-btn-sm" id="db-toggle-raw">Show JSON</button>
+</div>
+
+<div class="db-main">
+  <div id="db-status">Configure above and click ▶ Run</div>
+  <div class="db-cards" id="db-cards" style="display:none"></div>
+  <div class="db-raw-wrap" id="db-raw" style="display:none">
+    <div class="db-raw-hdr">
+      <span>Raw JSON response</span>
+      <button class="db-btn-sm" id="db-copy-raw">Copy</button>
+    </div>
+    <div class="db-raw-body"><pre id="db-raw-pre"></pre></div>
+  </div>
+</div>
+
+<div id="fo-tip"></div>
+
+<script>
+const FO_COL = {high:'#ef4444', medium:'#f59e0b', low:'#0ea5e9', vlow:'#bfdbfe', null:'#e2e8f0'};
+const FO_TXT = {high:'#fff', medium:'#fff', low:'#fff', vlow:'#1e3a5f', null:'#94a3b8'};
+const FO_LBL = {high:'HIGH', medium:'MEDIUM', low:'LOW', vlow:'VERY LOW', null:'No data'};
+const FO_DN  = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const FO_MN  = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function classify(rel) {
+  if (rel == null) return 'null';
+  if (rel >= 75) return 'high';
+  if (rel >= 50) return 'medium';
+  if (rel >= 25) return 'low';
+  return 'vlow';
+}
+function pct(rel) { return rel == null ? '—' : Math.round(rel) + '%'; }
+function dateKey(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+const selectedDays  = new Set();
+const selectedHours = new Set();
+let validHours = new Set(Array.from({length:13},(_,i)=>i+8));
+
+function getAvailableDates() {
+  const dates = [];
+  const t = new Date(); t.setHours(0,0,0,0);
+  for (let i = 0; i <= 15; i++) {
+    const d = new Date(t); d.setDate(t.getDate() + i);
+    dates.push(d);
+  }
+  return dates;
+}
+
+function buildDayPills() {
+  const container = document.getElementById('db-day-pills');
+  container.innerHTML = '';
+  getAvailableDates().forEach(d => {
+    const we  = d.getDay() === 0 || d.getDay() === 6;
+    const key = dateKey(d);
+    const btn = document.createElement('button');
+    btn.className = 'db-pill-sel' + (we ? ' weekend' : '') + (selectedDays.has(key) ? ' active' : '');
+    btn.dataset.key = key;
+    const isToday = key === dateKey(new Date());
+    btn.textContent = `${FO_DN[d.getDay()]} ${d.getDate()} ${FO_MN[d.getMonth()]}${isToday ? ' (today)' : ''}`;
+    btn.addEventListener('click', () => {
+      if (selectedDays.has(key)) selectedDays.delete(key);
+      else selectedDays.add(key);
+      btn.classList.toggle('active', selectedDays.has(key));
+      updateUrlPreview();
+    });
+    container.appendChild(btn);
+  });
+}
+
+function buildHourPills() {
+  const container = document.getElementById('db-hour-pills');
+  container.innerHTML = '';
+  const hoursToShow = validHours ? [...validHours].sort((a,b)=>a-b) : Array.from({length:24},(_,i)=>i);
+  for (const h of hoursToShow) {
+    const btn = document.createElement('button');
+    btn.className = 'db-pill-sel' + (selectedHours.has(h) ? ' active' : '');
+    btn.dataset.h = h;
+    btn.textContent = `${String(h).padStart(2,'0')}:00`;
+    btn.addEventListener('click', () => {
+      if (selectedHours.has(h)) selectedHours.delete(h);
+      else selectedHours.add(h);
+      btn.classList.toggle('active', selectedHours.has(h));
+      updateUrlPreview();
+    });
+    container.appendChild(btn);
+  }
+}
+
+function setDays(keys) {
+  selectedDays.clear();
+  keys.forEach(k => selectedDays.add(k));
+  buildDayPills();
+  updateUrlPreview();
+}
+
+function setHours(hours) {
+  selectedHours.clear();
+  hours.forEach(h => selectedHours.add(h));
+  buildHourPills();
+  updateUrlPreview();
+}
+
+function getWeekend(offsetWeeks) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const dow = today.getDay();
+  let sat = new Date(today);
+  sat.setDate(today.getDate() + ((6 - dow + 7) % 7) + offsetWeeks * 7);
+  if (offsetWeeks === 0 && dow === 6) sat = today;
+  if (offsetWeeks === 0 && dow === 0) sat.setDate(today.getDate() - 1);
+  const sun = new Date(sat); sun.setDate(sat.getDate() + 1);
+  return [dateKey(sat), dateKey(sun)];
+}
+
+document.getElementById('db-preset-today').addEventListener('click', () => {
+  setDays([dateKey(new Date())]);
+});
+document.getElementById('db-preset-tomorrow').addEventListener('click', () => {
+  const t = new Date(); t.setDate(t.getDate()+1);
+  setDays([dateKey(t)]);
+});
+document.getElementById('db-preset-weekend').addEventListener('click', () => setDays(getWeekend(0)));
+document.getElementById('db-preset-next-weekend').addEventListener('click', () => setDays(getWeekend(1)));
+document.getElementById('db-preset-week').addEventListener('click', () => {
+  const t = new Date(); t.setHours(0,0,0,0);
+  const keys = [];
+  for (let i = 1; i <= 7; i++) { const d = new Date(t); d.setDate(t.getDate()+i); keys.push(dateKey(d)); }
+  setDays(keys);
+});
+document.getElementById('db-preset-all').addEventListener('click', () => {
+  setDays(getAvailableDates().map(dateKey));
+});
+document.getElementById('db-days-clear').addEventListener('click', () => setDays([]));
+
+document.getElementById('db-preset-beach').addEventListener('click', () => setHours([8,9,10,11,12,13,14,15,16,17,18,19,20]));
+document.getElementById('db-preset-peak').addEventListener('click', () => setHours([11,12,13,14,15]));
+document.getElementById('db-hours-clear').addEventListener('click', () => setHours([]));
+
+function buildTimestamps() {
+  const ts = [];
+  const days  = [...selectedDays].sort();
+  const hours = [...selectedHours].sort((a,b)=>a-b);
+  for (const day of days) {
+    for (const h of hours) {
+      const dt = new Date(day);
+      dt.setHours(h, 0, 0, 0);
+      ts.push(Math.floor(dt.getTime() / 1000));
+    }
+  }
+  return ts;
+}
+
+function buildUrl(beach, timestamps) {
+  const params = new URLSearchParams();
+  if (beach) params.append('id_beach', beach);
+  timestamps.forEach(t => params.append('prediction_time', t));
+  return '/api/prediccio_futura/?' + params.toString();
+}
+
+function updateUrlPreview() {
+  const beach = document.getElementById('db-beach').value.trim();
+  const ts    = buildTimestamps();
+  const url   = buildUrl(beach, ts);
+  const short = url.length > 130 ? url.substring(0, 130) + `… (${ts.length} timestamps)` : url;
+  const [path, query] = short.split('?');
+  document.getElementById('db-url-preview').innerHTML =
+    `<span class="method">GET</span> <span class="endpoint">${path}</span>${query ? '<span class="param">?' + query + '</span>' : ''}`;
+}
+
+const BAR_W = 5, BAR_G = 1, DAY_G = 5, CH = 80, LBL_H = 18;
+const ns = 'http://www.w3.org/2000/svg';
+
+function renderCards(beachData) {
+  const sort = document.getElementById('db-sort').value;
+  const container = document.getElementById('db-cards');
+  container.innerHTML = '';
+
+  const dateSet = new Set();
+  for (const b of beachData)
+    for (const p of b.predictions) {
+      const d = new Date(p.timestamp_prediction_forecast * 1000);
+      dateSet.add(dateKey(d));
+    }
+  const dates = [...dateSet].sort();
+  const hourSet = new Set();
+  for (const b of beachData)
+    for (const p of b.predictions) {
+      if (p.estimation_relative != null) {
+        const d = new Date(p.timestamp_prediction_forecast * 1000);
+        hourSet.add(d.getHours());
+      }
+    }
+  const hours = [...hourSet].sort((a,b)=>a-b);
+
+  buildHourPills();
+
+  function buildMap(beach) {
+    const m = {};
+    for (const p of beach.predictions) {
+      const dt  = new Date(p.timestamp_prediction_forecast * 1000);
+      const key = `${dateKey(dt)}T${String(dt.getHours()).padStart(2,'0')}`;
+      m[key] = { rel: p.estimation_relative, abs: p.estimation_absolute };
+    }
+    return m;
+  }
+
+  let sorted = beachData.map(b => ({ ...b, _m: buildMap(b) }));
+  if (sort === 'name') sorted.sort((a,b) => a.playa_slug.localeCompare(b.playa_slug));
+  else {
+    sorted.sort((a,b) => {
+      const sc = x => {
+        const v = Object.values(x._m).map(p=>p.rel).filter(v=>v!=null);
+        return v.length ? (sort==='peak' ? Math.max(...v) : v.reduce((a,b)=>a+b)/v.length) : 0;
+      };
+      return sc(b) - sc(a);
+    });
+  }
+
+  const dayW   = hours.length * (BAR_W + BAR_G) - BAR_G;
+  const totalW = dates.length * (dayW + DAY_G) - DAY_G;
+
+  sorted.forEach((beach, ri) => {
+    const allRels = Object.values(beach._m).map(p=>p.rel).filter(v=>v!=null);
+    const avgVal  = allRels.length ? allRels.reduce((a,b)=>a+b)/allRels.length : null;
+    const peakVal = allRels.length ? Math.max(...allRels) : null;
+    const peakLvl = classify(peakVal);
+
+    const card = document.createElement('div');
+    card.className = 'db-card';
+    card.style.animationDelay = `${ri * 25}ms`;
+
+    const hdr = document.createElement('div');
+    hdr.className = 'db-card-hdr';
+    hdr.innerHTML = `
+      <div class="db-card-name">${beach.playa_slug}</div>
+      <div class="db-card-stats">
+        <div class="db-card-stat"><div class="v">${avgVal!=null?pct(avgVal):'—'}</div><div class="l">avg</div></div>
+        <div class="db-card-stat"><div class="v" style="color:${FO_COL[peakLvl]}">${peakVal!=null?pct(peakVal):'—'}</div><div class="l">peak</div></div>
+        <div class="db-card-stat"><div class="v">${beach.predictions.length}</div><div class="l">pts</div></div>
+      </div>
+    `;
+    card.appendChild(hdr);
+
+    const chartWrap = document.createElement('div');
+    chartWrap.className = 'db-card-chart';
+
+    const svg = document.createElementNS(ns, 'svg');
+    svg.setAttribute('viewBox', `0 0 ${totalW} ${CH + LBL_H}`);
+    svg.setAttribute('width', totalW);
+    svg.setAttribute('height', CH + LBL_H);
+    svg.classList.add('db-chart-svg');
+
+    [[CH,'#e2e8f0','1',''],[CH*0.5,'#e2e8f0','0.5','3,3']].forEach(([y,stroke,sw,dash]) => {
+      const l = document.createElementNS(ns, 'line');
+      l.setAttribute('x1',0); l.setAttribute('y1',y); l.setAttribute('x2',totalW); l.setAttribute('y2',y);
+      l.setAttribute('stroke',stroke); l.setAttribute('stroke-width',sw);
+      if (dash) l.setAttribute('stroke-dasharray', dash);
+      svg.appendChild(l);
+    });
+
+    dates.forEach((dateStr, di) => {
+      const d  = new Date(dateStr + 'T12:00:00');
+      const we = d.getDay()===0 || d.getDay()===6;
+      const dx = di * (dayW + DAY_G);
+
+      if (we) {
+        const bg = document.createElementNS(ns,'rect');
+        bg.setAttribute('x',dx); bg.setAttribute('y',0);
+        bg.setAttribute('width',dayW); bg.setAttribute('height',CH);
+        bg.setAttribute('fill','rgba(124,58,237,0.05)');
+        svg.appendChild(bg);
+      }
+
+      const lbl = document.createElementNS(ns,'text');
+      lbl.setAttribute('x', dx + dayW/2);
+      lbl.setAttribute('y', CH + LBL_H - 3);
+      lbl.setAttribute('text-anchor','middle');
+      lbl.setAttribute('font-family','DM Mono, monospace');
+      lbl.setAttribute('font-size','7');
+      lbl.setAttribute('fill', we ? '#7c3aed' : '#94a3b8');
+      lbl.textContent = `${d.getDate()}/${d.getMonth()+1}`;
+      svg.appendChild(lbl);
+
+      hours.forEach((h, hi) => {
+        const key   = `${dateStr}T${String(h).padStart(2,'0')}`;
+        const entry = beach._m[key];
+        const rel   = entry ? entry.rel : null;
+        const abs   = entry ? entry.abs : null;
+        const level = classify(rel);
+        const barH  = rel != null ? Math.max(2, Math.round((rel / 100) * CH)) : 2;
+        const bx    = dx + hi * (BAR_W + BAR_G);
+
+        const bar = document.createElementNS(ns,'rect');
+        bar.setAttribute('x', bx); bar.setAttribute('y', CH - barH);
+        bar.setAttribute('width', BAR_W); bar.setAttribute('height', barH);
+        bar.setAttribute('fill', rel != null ? FO_COL[level] : '#e8edf2');
+        bar.setAttribute('rx','1');
+        svg.appendChild(bar);
+
+        const zone = document.createElementNS(ns,'rect');
+        zone.setAttribute('x',bx); zone.setAttribute('y',0);
+        zone.setAttribute('width',BAR_W); zone.setAttribute('height',CH);
+        zone.setAttribute('fill','transparent');
+        zone.addEventListener('mouseenter', e => showTip(e, beach.playa_slug, d, h, rel, abs, level));
+        zone.addEventListener('mousemove', moveTip);
+        zone.addEventListener('mouseleave', hideTip);
+        svg.appendChild(zone);
+      });
+    });
+
+    chartWrap.appendChild(svg);
+    card.appendChild(chartWrap);
+
+    const footer = document.createElement('div');
+    footer.className = 'db-card-footer';
+    dates.forEach(dateStr => {
+      const d = new Date(dateStr + 'T12:00:00');
+      let peak = null;
+      hours.forEach(h => {
+        const entry = beach._m[`${dateStr}T${String(h).padStart(2,'0')}`];
+        if (entry && entry.rel != null && (peak==null || entry.rel > peak)) peak = entry.rel;
+      });
+      if (peak == null) return;
+      const level = classify(peak);
+      const span = document.createElement('span');
+      span.className = 'db-day-badge';
+      span.style.background = FO_COL[level]; span.style.color = FO_TXT[level];
+      span.title = `${FO_DN[d.getDay()]} ${d.getDate()} ${FO_MN[d.getMonth()]} — peak ${pct(peak)}`;
+      span.textContent = `${d.getDate()}/${d.getMonth()+1} ${pct(peak)}`;
+      footer.appendChild(span);
+    });
+    card.appendChild(footer);
+    container.appendChild(card);
+  });
+
+  container.style.display = 'grid';
+}
+
+function showTip(e, slug, date, hour, rel, abs, level) {
+  document.getElementById('fo-tip').innerHTML = `
+    <div class="tn">${slug}</div>
+    <div class="td">${FO_DN[date.getDay()]} ${date.getDate()} ${FO_MN[date.getMonth()]} · ${hour}:00</div>
+    <span class="tb" style="background:${FO_COL[level]};color:${FO_TXT[level]}">${FO_LBL[level]}</span>
+    ${rel!=null?`<div>${pct(rel)} relative</div>`:'<div style="color:#64748b">No data</div>'}
+    ${abs!=null?`<div style="color:#94a3b8">${abs.toFixed(1)} abs</div>`:''}
+  `;
+  document.getElementById('fo-tip').style.display = 'block';
+  moveTip(e);
+}
+function moveTip(e) {
+  const tip = document.getElementById('fo-tip');
+  tip.style.left = Math.min(e.clientX+14, window.innerWidth-220)+'px';
+  tip.style.top  = Math.max(e.clientY-10, 10)+'px';
+}
+function hideTip() { document.getElementById('fo-tip').style.display = 'none'; }
+
+let lastRaw = null, rawVisible = false;
+
+async function runQuery() {
+  const beach = document.getElementById('db-beach').value.trim();
+  const ts    = buildTimestamps();
+
+  if (!selectedDays.size)  { alert('Select at least one day.'); return; }
+  if (!selectedHours.size) { alert('Select at least one hour.'); return; }
+
+  const url = buildUrl(beach, ts);
+
+  document.getElementById('db-run').disabled = true;
+  document.getElementById('db-run').textContent = '…';
+  document.getElementById('db-status').textContent = 'Fetching…';
+  document.getElementById('db-status').style.display = 'block';
+  document.getElementById('db-cards').style.display = 'none';
+
+  const t0 = performance.now();
+  try {
+    const res  = await fetch(url);
+    const ms   = Math.round(performance.now() - t0);
+    const data = await res.json();
+    lastRaw = data;
+    document.getElementById('db-raw-pre').textContent = JSON.stringify(data, null, 2);
+
+    if (!res.ok) {
+      document.getElementById('db-status-txt').textContent = `Error ${res.status}: ${data.detail||'unknown'}`;
+      document.getElementById('db-status-txt').className = 'db-status-text err';
+      document.getElementById('db-statusbar').style.display = 'flex';
+      document.getElementById('db-status').style.display = 'none';
+      return;
+    }
+
+    const beaches = data.data || [];
+    document.getElementById('db-status-txt').textContent = '200 OK';
+    document.getElementById('db-status-txt').className   = 'db-status-text ok';
+    document.getElementById('db-pill-beaches').textContent = `${beaches.length} beach${beaches.length!==1?'es':''}`;
+    document.getElementById('db-pill-times').textContent   = `${ts.length} timestamps`;
+    document.getElementById('db-pill-ms').textContent      = `${ms}ms`;
+    document.getElementById('db-statusbar').style.display  = 'flex';
+    document.getElementById('db-status').style.display     = 'none';
+
+    if (!beaches.length) {
+      document.getElementById('db-status').textContent = 'No data returned.';
+      document.getElementById('db-status').style.display = 'block';
+      return;
+    }
+    renderCards(beaches);
+  } catch(err) {
+    document.getElementById('db-status-txt').textContent = 'Network error: ' + err.message;
+    document.getElementById('db-status-txt').className   = 'db-status-text err';
+    document.getElementById('db-statusbar').style.display = 'flex';
+    document.getElementById('db-status').style.display    = 'none';
+  } finally {
+    document.getElementById('db-run').disabled = false;
+    document.getElementById('db-run').textContent = '▶ Run';
+  }
+}
+
+document.getElementById('db-toggle-raw').addEventListener('click', () => {
+  rawVisible = !rawVisible;
+  document.getElementById('db-raw').style.display = rawVisible ? 'block' : 'none';
+  document.getElementById('db-toggle-raw').textContent = rawVisible ? 'Hide JSON' : 'Show JSON';
+});
+document.getElementById('db-copy-raw').addEventListener('click', () => {
+  navigator.clipboard.writeText(JSON.stringify(lastRaw, null, 2));
+  document.getElementById('db-copy-raw').textContent = 'Copied!';
+  setTimeout(() => document.getElementById('db-copy-raw').textContent = 'Copy', 1500);
+});
+
+document.getElementById('db-beach').addEventListener('input', updateUrlPreview);
+document.getElementById('db-run').addEventListener('click', runQuery);
+document.getElementById('db-sort').addEventListener('change', () => {
+  if (lastRaw && (lastRaw.data||[]).length) renderCards(lastRaw.data);
+});
+
+buildDayPills();
+buildHourPills();
+const [sat, sun] = getWeekend(0);
+setDays([sat, sun]);
+setHours([8,9,10,11,12,13,14,15,16,17,18,19,20]);
+</script>
+{% endblock %}
