@@ -23,4 +23,4 @@ config/local_settings.py
 *model_evaluation.json
 *model_evaluation_cache.json
 *weather_archive_cache.pkl
-*/.ipynb_checkpoints/
+**/.ipynb_checkpoints/
