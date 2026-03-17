@@ -16,9 +16,9 @@ pytorch-lightning==2.6.1
 scipy==1.17.1
 
 # Data
-numpy==1.26.4
-pandas==2.3.3
-matplotlib==3.9.0
+numpy
+pandas
+matplotlib
 holidays
 seaborn
 
@@ -35,8 +35,10 @@ paramiko==3.4.0
 
 # Utils
 scikit-learn
-Pillow==10.2.0
+Pillow
 termcolor==2.4.0
 papermill
 nbconvert
 ipykernel
+
+blinker==1.7.0
