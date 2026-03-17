@@ -131,6 +131,10 @@ def build_panel(cache, django, futr_exog, hist_exog, season_months=None):
         parts.append(d)
 
     df = pd.concat(parts, ignore_index=True)
+    before_nan = len(df)
+    df = df.dropna(subset=['y'])
+    if len(df) < before_nan:
+        log(f"Dropped {before_nan - len(df):,} rows with NaN y")
     df['hour'] = df['ds'].dt.hour
     df['day_of_week'] = df['ds'].dt.dayofweek
     df['month'] = df['ds'].dt.month
