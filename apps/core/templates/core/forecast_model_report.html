@@ -237,19 +237,25 @@
     async function loadFeatures(bestByHorizon) {
         const horizons = [{hk: '3d', days: 3}, {hk: '10d', days: 10}, {hk: '15d', days: 15}];
         let anyLoaded = false;
-        await Promise.all(horizons.map(async ({hk, days}) => {
+
+        for (const {hk, days} of horizons) {
             const modelSet = bestByHorizon[hk]?.model_set;
-            if (!modelSet) return;
+            if (!modelSet) continue;
+
             try {
                 const data = await fetch(`/platja/${slug}/forecast/?days=${days}&model_set=${modelSet}`).then(r => r.json());
                 const futr = data.futr_features || data.segment_features?.[hk]?.futr_features || [];
                 const hist = data.hist_features || data.segment_features?.[hk]?.hist_features || [];
-                if (futr.length || hist.length) { renderFeaturesTab(hk, modelSet, futr, hist); anyLoaded = true; }
+
+                if (futr.length || hist.length) {
+                    renderFeaturesTab(hk, modelSet, futr, hist);
+                    anyLoaded = true;
+                }
             } catch (_) {}
-        }));
+        }
         document.getElementById('feat-loading').style.display = 'none';
         if (anyLoaded) document.getElementById('feat-panel').style.display = 'block';
-        else           document.getElementById('feat-error').style.display = 'block';
+        else document.getElementById('feat-error').style.display = 'block';
     }
 })();
 </script>
