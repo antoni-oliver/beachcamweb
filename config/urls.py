@@ -23,6 +23,6 @@ from apps.core import core_views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("api/", include("apps.api.urls")),
-    path('', include('apps.core.core_urls')),
+    path('', include('apps.core.urls')),
     path('api/beach/', include('apps.beachImage.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
