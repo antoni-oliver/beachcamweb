@@ -13,10 +13,18 @@ from predictions.classes.bayesian_stuff.vgg import vgg19
 from predictions.interfaces.PredictorInterface import PredictorInterface
 
 
+def _detect_device() -> str:
+    if torch.cuda.is_available():
+        return "cuda"
+    elif torch.backends.mps.is_available():
+        return "mps"
+    return "cpu"
+
+
 class BayesianPredictor(PredictorInterface):
     transformer = None
     model = None
-    device = "cpu"
+    device = _detect_device()
     weigth_path = "./predictions/classes/bayesian_stuff/best_model.pth"
     alpha_channel = 75
     density_map_intensity = 250
@@ -25,8 +33,7 @@ class BayesianPredictor(PredictorInterface):
         self.transformer = transforms.Compose([
                 transforms.ToTensor(),
                 transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-            ])    
-    
+            ])
     def predict(self, image_path: str, mask_paths = []) -> PredictionDTO:
         self.prepareModel()
         inputs = self.processImage(image_path)
@@ -50,7 +57,7 @@ class BayesianPredictor(PredictorInterface):
         self.model = vgg19()
         device = torch.device(self.device)
         self.model.to(device)
-        self.model.load_state_dict(torch.load(os.path.abspath(self.weigth_path), device))
+        self.model.load_state_dict(torch.load(os.path.abspath(self.weigth_path), device), strict=False)
 
     def processImage(self, image_path: str):
         img = Image.open(image_path).convert('RGB')
