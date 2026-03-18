@@ -121,11 +121,16 @@ def step_train_data_notebook(options):
 
     # Symlink clean_datasets → latest output
     symlink = cfg.CLEAN_DATASETS_DIR
-    if symlink.is_symlink():
-        symlink.unlink()
-    elif symlink.exists():
-        shutil.rmtree(symlink)
-    symlink.symlink_to(clean_dir)
+    if symlink.exists() or symlink.is_symlink():
+       if symlink.is_symlink():
+           symlink.unlink()
+       else:
+           shutil.rmtree(symlink)
+
+    if os.name == 'nt':  # Windows
+       shutil.copytree(clean_dir, symlink, dirs_exist_ok=True)
+    else:  # Unix-like
+       symlink.symlink_to(clean_dir)
 
     _log(f'Clean datasets at {clean_dir}', 'train_data_notebook')
     _log(f'HTML report at {cfg.NOTEBOOK_HTML}', 'train_data_notebook')
