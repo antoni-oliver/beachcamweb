@@ -8,16 +8,16 @@ django-crontab
 PyJWT==2.11.0
 
 # ML / Forecasting
-torch==2.10.0
-torchvision
-torchaudio
+torch --index-url https://download.pytorch.org/whl/cu121
+torchvision --index-url https://download.pytorch.org/whl/cu121
+torchaudio --index-url https://download.pytorch.org/whl/cu121
 neuralforecast==3.1.5
 pytorch-lightning==2.6.1
 scipy==1.17.1
 
 # Data
-numpy
-pandas
+numpy==1.26.4
+pandas==2.3.3
 matplotlib
 holidays
 seaborn
