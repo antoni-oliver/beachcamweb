@@ -22,41 +22,104 @@ ssl._create_default_https_context = ssl._create_unverified_context  # To downloa
 
 predictors = [BayesianPredictor()]
 
-
 def main():
-    for beachcam in WebCam.objects.all():
+    def _log(level: str, message: str, **context):
+        ts = timezone.now().isoformat()
+        ctx = " ".join(f"{k}={v}" for k, v in context.items())
+        print(f"[{ts}] [{level}] {message}" + (f" | {ctx}" if ctx else ""))
 
-        print(f"Processing webcam {beachcam.beach.beach_name} - {beachcam.camera_slug} ({beachcam.pk}).")
+    total_webcams = WebCam.objects.count()
+    _log("INFO", "Starting download and process run", webcams=total_webcams, predictors=len(predictors))
+
+    for index, beachcam in enumerate(WebCam.objects.all(), start=1):
+        _log(
+            "INFO",
+            "Processing webcam",
+            index=f"{index}/{total_webcams}",
+            webcam_id=beachcam.pk,
+            beach=beachcam.beach.beach_name,
+            camera_slug=beachcam.camera_slug,
+        )
+
         snapshot = beachcam.create_snapshot()
         if not snapshot:
-            print("  Snapshot failed.")
+            _log("ERROR", "Snapshot creation failed", webcam_id=beachcam.pk)
             continue
-        print('  Snapshot created.')
-        
+
+        _log(
+            "INFO",
+            "Snapshot created",
+            webcam_id=beachcam.pk,
+            snapshot_ts=snapshot.ts.isoformat() if snapshot.ts else "None",
+            has_mask=bool(snapshot.mask_sand_and_water),
+            image_path=snapshot.webcam_image.path if snapshot.webcam_image else "None",
+        )
+
         for predictor in predictors:
+            predictor_name = predictor.__class__.__name__
             try:
                 if snapshot.mask_sand_and_water:
                     mask_paths = [snapshot.mask_sand_and_water.path]
                 else:
                     mask_paths = []
 
+                _log(
+                    "DEBUG",
+                    "Starting prediction",
+                    webcam_id=beachcam.pk,
+                    predictor=predictor_name,
+                    masks=len(mask_paths),
+                )
+
                 predictionDTO = predictor.predict(snapshot.webcam_image.path, mask_paths)
-                print('  Prediction done.')
+                _log(
+                    "INFO",
+                    "Prediction completed",
+                    webcam_id=beachcam.pk,
+                    predictor=predictor_name,
+                    crowd_count=predictionDTO.crowd_count,
+                    prediction_bytes=len(predictionDTO.img_predict_content),
+                )
+
                 snapshot.predicted_crowd_count = predictionDTO.crowd_count
-                prediction_image_path = beachcam.relative_filepath(timestamp=snapshot.ts, subfolder='img/predictions/', extension='.jpg')
-                with open(os.path.join(settings.MEDIA_ROOT, prediction_image_path), 'wb') as f:
+                prediction_image_path = beachcam.relative_filepath(
+                    timestamp=snapshot.ts,
+                    subfolder="img/predictions/",
+                    extension=".jpg",
+                )
+                absolute_prediction_path = os.path.join(settings.MEDIA_ROOT, prediction_image_path)
+                os.makedirs(os.path.dirname(absolute_prediction_path), exist_ok=True)
+
+                with open(absolute_prediction_path, "wb") as f:
                     f.write(predictionDTO.img_predict_content)
+
                 snapshot.predicted_image.name = prediction_image_path
                 snapshot.save()
+
+                previous_max = beachcam.max_crowd_count
                 beachcam.max_crowd_count = max(beachcam.max_crowd_count, predictionDTO.crowd_count)
                 beachcam.save()
-                print('  Prediction saved.')
-            except Exception as e:
-                # Handle any exception
-                print(f"download_and_process.py an error ocurred: {e}")
-                # raise e
-                # TODO: make it NOT available.
 
+                _log(
+                    "INFO",
+                    "Prediction saved",
+                    webcam_id=beachcam.pk,
+                    predictor=predictor_name,
+                    predicted_image=prediction_image_path,
+                    max_crowd_before=previous_max,
+                    max_crowd_after=beachcam.max_crowd_count,
+                )
+            except Exception as e:
+                _log(
+                    "ERROR",
+                    "Prediction pipeline failed",
+                    webcam_id=beachcam.pk,
+                    predictor=predictor_name,
+                    error_type=type(e).__name__,
+                    error=str(e),
+                )
+                import traceback
+                print(traceback.format_exc())
     # print(f"Deleting old data.")
     # # Delete the outdated images of the file system from outdated predictions
     # for outdated_pred in Snapshot.objects.filter(ts__lte=timezone.now() - timedelta(days=1)):
