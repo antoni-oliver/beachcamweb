@@ -179,6 +179,7 @@ PIPELINE_CUDA_DEVICE    = '0'
 cron_every_day = '0 2 * * *'  # every day at 2:00 AM
 cron_every_week = '0 2 * * 1'   # every Monday at 2:00 AM
 cron_every_month = '0 2 1 * *'    # on the 1st of every month at 2:00 AM
+cron_every_thirty_minutes = '*/30 * * * *'  # every 30 minutes
 
 CRONJOBS = [
     (
@@ -186,5 +187,12 @@ CRONJOBS = [
         'django.core.management.call_command',
         ['run_pipeline'],
         f'>> {BASE_DIR}/pipeline_workspace/logs/pipeline.log 2>&1'
+    ),
+    (
+        cron_every_thirty_minutes,
+        'download_and_process.main',
+        [],
+        {},
+        f'>> {BASE_DIR}/logs/download.log 2>&1'
     ),
 ]
