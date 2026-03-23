@@ -189,7 +189,7 @@ def beach_history_api(request, camera_slug):
 
     data = [[ts.isoformat(), round(float(count))] for ts, count in rows]
 
-    latest =  Snapshot.objects.filter(webcam=cam, predicted_image__isnull=False).exclude(predicted_image='').order_by('-ts').first()
+    latest =  cam.last_prediction()
     image_url = latest.predicted_image.url if latest else None
 
     return JsonResponse({'data': data, 'image_url': image_url, 'max_crowd_count': cam.max_crowd_count or 0})

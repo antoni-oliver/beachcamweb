@@ -68,7 +68,7 @@ class WebCam(models.Model):
         super(WebCam, self).save(*args, **kwargs)
 
     def last_prediction(self):
-        return self.snapshots.exclude(predicted_crowd_count__isnull=True).order_by('-ts').first()
+        return self.snapshots.exclude(predicted_crowd_count__isnull=True).exclude(predicted_image='').order_by('-ts').first()
 
     def history(self):
         from apps.prediction.models import Snapshot
