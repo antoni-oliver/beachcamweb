@@ -8,6 +8,6 @@ import download_and_process
 class Command(BaseCommand):
     def handle(self, *args, **options):
         scheduler = BlockingScheduler()
-        scheduler.add_job(download_and_process.main, CronTrigger(minute='*/30'), next_run_time=datetime.now())
+        scheduler.add_job(download_and_process.main, CronTrigger(hour=1), next_run_time=datetime.now())
         scheduler.add_job(lambda: call_command('run_pipeline'), CronTrigger(month=1, hour=2, minute=0))
         scheduler.start()
