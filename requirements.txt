@@ -2,8 +2,8 @@
 Django==5.0.1
 djangorestframework==3.16.1
 django-adminfilters
-django-crontab
 django-apscheduler
+waitress==3.0.2
 
 # Auth
 PyJWT==2.11.0
