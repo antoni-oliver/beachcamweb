@@ -5,9 +5,16 @@ from apscheduler.triggers.cron import CronTrigger
 from datetime import datetime
 import download_and_process
 
+
+def _warm_forecast_cache():
+    from apps.prediction.tft_service import tft_service
+    tft_service.warm_forecast_cache()
+
+
 class Command(BaseCommand):
     def handle(self, *args, **options):
         scheduler = BlockingScheduler()
         scheduler.add_job(download_and_process.main, CronTrigger(minute=0), next_run_time=datetime.now())
+        scheduler.add_job(_warm_forecast_cache, CronTrigger(minute=30))
         scheduler.add_job(lambda: call_command('run_pipeline'), CronTrigger(month=1, hour=1, minute=0))
         scheduler.start()

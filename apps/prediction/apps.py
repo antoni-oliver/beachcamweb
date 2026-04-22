@@ -27,7 +27,8 @@ class PredictionConfig(AppConfig):
                 for name, base_dir in tft_service._discovered.items():
                     if name not in tft_service.model_sets:
                         tft_service.load_models(base_dir=base_dir, set_name=name)
-                logger.info("TFT warmup complete.")
+                logger.info("TFT models loaded.")
+                tft_service.warm_forecast_cache()
             except Exception:
                 logger.exception("TFT warmup failed.")
 

@@ -378,6 +378,19 @@ class TFTService:
             'relMAE_season': best.get('relMAE_season'),
         }
 
+    def warm_forecast_cache(self, days=15):
+        from apps.webcam.models import WebCam
+        cams = WebCam.objects.select_related('beach').filter(max_crowd_count__gt=0)
+        total = cams.count()
+        ok = 0
+        for cam in cams:
+            try:
+                self.predict_mixed(cam, days=days)
+                ok += 1
+            except Exception:
+                logger.exception(f"Cache warm failed for {cam.camera_slug}")
+        logger.info(f"Forecast cache warmed: {ok}/{total} cameras.")
+
     def predict_mixed(self, webcam, days=15, since=None, model_set=None):
         SEGMENTS = [('3d', 1, 3), ('10d', 4, 10), ('15d', 11, 15)]
         combined = []
