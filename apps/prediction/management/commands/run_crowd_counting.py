@@ -111,6 +111,7 @@ class Command(BaseCommand):
 
         if options['force_cpu']:
             os.environ['FORCE_CPU_BATCH'] = '1'
+            print(f"Enable Force CPU")
 
         predictor = crowd_module._registry.get_active()
         predictor.load()

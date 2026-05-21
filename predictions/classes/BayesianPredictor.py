@@ -73,7 +73,7 @@ class BayesianPredictor(PredictorInterface):
                 continue
             mask_image = Image.open(mask_path).convert('L')
             mask_image = mask_image.resize((density_map.shape[1], density_map.shape[0]), Image.BILINEAR)
-            np_mask = np.array(mask_image) < 128 #dark areas -> 1
+            np_mask = np.array(mask_image) >= 128 #dark areas -> 1
             combined_mask = combined_mask + np_mask
         
         combined_mask[combined_mask > 0] = 1
