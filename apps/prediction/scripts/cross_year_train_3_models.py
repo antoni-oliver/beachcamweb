@@ -363,7 +363,10 @@ def _nf_split_train(train_df: pd.DataFrame, horizon: int) -> tuple[pd.DataFrame,
 
 
 _HIDDEN_SIZES = [32, 64, 96, 128, 192, 256, 384, 512]
-_HEAD_POOL = [1, 2, 4, 8, 12, 16, 24, 32]
+# Common divisors of every entry in _HIDDEN_SIZES — sampled as a flat dimension
+# so n_head shows up as a single axis in the Optuna dashboard hyperparameter
+# importance chart. Trade-off: 12 and 24 are dropped (they don't divide 32/64/128/256).
+_HEAD_POOL = [1, 2, 4, 8, 16, 32]
 _SCALERS = ["robust", "standard", "minmax"]
 
 
@@ -380,9 +383,10 @@ def _nf_objective(trial, model_name, horizon, train_df, val_df, static_df,
         "early_stop_patience": trial.suggest_int("early_stop_patience", 20, 50),
     }
     if model_name == "tft":
-        valid_heads = [n for n in _HEAD_POOL if hp["hidden_size"] % n == 0] or [1]
-        hp["n_head"] = trial.suggest_categorical(
-            f"n_head_hs{hp['hidden_size']}", valid_heads)
+        # Flat single-axis n_head from common divisors of every hidden_size.
+        # This keeps n_head visible in the dashboard's parameter-importance plot
+        # (instead of being split across n_head_hs64 / n_head_hs128 / ...).
+        hp["n_head"] = trial.suggest_categorical("n_head", _HEAD_POOL)
         hp["attn_dropout"] = trial.suggest_float("attn_dropout", 0.0, 0.3)
     else:
         hp["encoder_n_layers"] = trial.suggest_int("encoder_n_layers", 1, 4)
@@ -620,8 +624,10 @@ def run_xgb(label: str, horizon: int, train_df: pd.DataFrame,
     X_te = test_feat[feat_cols].values
     y_te = test_feat["y_target"].values
 
-    # 90/10 split within train for HP search
-    cut = int(len(X_tr) * 0.9)
+    # 90/10 split within train for HP search — keep unique_id so we can score
+    # with relmae_per_beach (same metric as TFT/LSTM) instead of raw MAE.
+    cut = int(len(train_feat) * 0.9)
+    val_uid = train_feat["unique_id"].values[cut:]
     X_a, X_b = X_tr[:cut], X_tr[cut:]
     y_a, y_b = y_tr[:cut], y_tr[cut:]
 
@@ -641,7 +647,13 @@ def run_xgb(label: str, horizon: int, train_df: pd.DataFrame,
         m = XGBRegressor(**hp, tree_method="hist", n_jobs=-1,
                           random_state=SEED, verbosity=0)
         m.fit(X_a, y_a, verbose=False)
-        return float(np.mean(np.abs(m.predict(X_b) - y_b)))
+        pred = m.predict(X_b).clip(0, None)
+        # Same metric as TFT/LSTM objective: P90-normalised relMAE per beach.
+        val_pred_df = pd.DataFrame({
+            "unique_id": val_uid, "y_true": y_b, "y_pred": pred,
+        })
+        rel, _ = relmae_per_beach(val_pred_df, capacity)
+        return float(rel) if not np.isnan(rel) else 1e6
 
     study_name = _study_name("xgb", label)
     study = optuna.create_study(
@@ -651,7 +663,7 @@ def run_xgb(label: str, horizon: int, train_df: pd.DataFrame,
     )
     study.optimize(objective, n_trials=trials, show_progress_bar=False)
     best_hp = study.best_params
-    log(f"[xgb] best inner MAE={study.best_value:.4f}  hp={best_hp}")
+    log(f"[xgb] best inner relMAE={study.best_value:.4f}  hp={best_hp}")
 
     final = XGBRegressor(**best_hp, tree_method="hist", n_jobs=-1,
                           random_state=SEED, verbosity=0)
