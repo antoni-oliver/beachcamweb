@@ -2,35 +2,54 @@
 """
 Cross-Year Training — 2022 train, 2025 summer test, all three model families.
 
-Replicates the regime of the existing `tft_train_2022_validate_2025_summer`
-model set but extended to TFT + LSTM + XGB so the three families can be
-compared on identical splits.
+FAIRNESS PROTOCOL (this is a TFM methodology requirement — every invariant
+below MUST hold for every model and dataset compared by this script):
 
-Protocol:
-    Train data: cache_2022_clean.csv (all 2022 rows, daytime 8-20)
-    Test data:  django_2025_clean.csv (Jun-Aug 2025, daytime 8-20)
-    For each horizon (3d=36h, 10d=120h, 15d=180h):
-        TFT  → fit on 2022, hindcast each Monday issuance in test window
-        LSTM → same as TFT
-        XGB  → shifted-feature Castelle, train on 2022 features, predict on 2025
+    1. Same dataset → same train/test split.
+       TFT, LSTM and XGB all see the *same* cache_2022 panel as training data
+       and the *same* django_2025 daytime window as test data, on the same
+       beaches (the intersection of unique_ids that appear in both eras).
+    2. Same horizon set (3d, 10d, 15d daytime hours).
+    3. Same Optuna search budget (n trials per model × horizon, default 50).
+    4. Same metric: P90-normalised relMAE on daytime rows.
+    5. Same normalisation, same primary significance test (Diebold-Mariano).
+    6. Same seed (SEED = 42) for the Optuna sampler and the model init.
 
-Output structure:
-    cross_year_<timestamp>/
-        results/           — checkpoints, summary CSVs
-        tft_3d/  tft_10d/  tft_15d/        — TFT model artifacts
-        lstm_3d/ lstm_10d/ lstm_15d/        — LSTM model artifacts
-        xgb_3d/  xgb_10d/  xgb_15d/        — XGB model artifacts
-        ranking.csv ranking.md             — headline comparison
+The invariants for each run are written to results/protocol.json so the
+methodology is auditable after the fact. The same script can be pointed at
+multiple datasets (--data-dirs) and runs the entire protocol independently
+on each, then emits a combined cross-dataset ranking.
 
-Each NF model dir contains config.json + nf_model/ + static_features.csv so
-`tft_service` auto-discovers it (set the run dir under tft_models/).
+Output structure (per dataset):
+    <out-root>/<prefix>_<dataset_tag>_<timestamp>/
+        results/
+            protocol.json     — fairness invariants snapshot
+            summary.csv       — per (model, horizon) metrics
+            ranking.csv .md   — sorted ranking
+        tft_3d/ tft_10d/ tft_15d/      — TFT artifacts (nf_model/ + config + per_beach)
+        lstm_3d/ lstm_10d/ lstm_15d/   — LSTM artifacts (idem)
+    <apps/prediction>/xgb_models/<prefix>_<dataset_tag>_<timestamp>/
+        xgb_3d/ xgb_10d/ xgb_15d/      — XGB artifacts (model.joblib + config + per_beach)
+    <apps/prediction>/cross_year_results/<timestamp>/
+        combined_ranking.csv .md       — cross-dataset combined ranking
+
+Each NF model dir is tft_service-compatible (config.json + nf_model/ +
+static_features.csv) and is auto-discovered.
 
 Usage:
+    # default — both datasets if available, all models, all horizons, 50 trials
     python scripts/cross_year_train_3_models.py
-    python scripts/cross_year_train_3_models.py --models tft lstm
-    python scripts/cross_year_train_3_models.py --horizons 3d
-    python scripts/cross_year_train_3_models.py --trials 50
-    python scripts/cross_year_train_3_models.py --test-start 2025-06-01 --test-end 2025-08-31
+
+    # one dataset, smaller budget
+    python scripts/cross_year_train_3_models.py \\
+        --data-dirs pipeline_workspace/clean_datasets_210526 \\
+        --models tft lstm xgb --horizons 3d 10d 15d --trials 30
+
+    # both datasets explicit (new auto-pipeline + super-clean backup)
+    python scripts/cross_year_train_3_models.py \\
+        --data-dirs pipeline_workspace/clean_datasets_210526 \\
+                    pipeline_workspace/clean_dataset_backup \\
+        --trials 50
 """
 from __future__ import annotations
 
@@ -70,9 +89,11 @@ DEFAULT_HIST = ["om_cloud_cover_low", "om_shortwave_radiation",
                 "om_vapour_pressure_deficit"]
 SELECTED_FUTR = TEMPORAL_FUTR + FUTR_WEATHER
 
-INPUT_SIZE = 48
-NF_TRIAL_MAX_STEPS = 200      # quick training during HP search
-NF_FINAL_MAX_STEPS = 500      # full training for the best HP
+INPUT_SIZE = 48                   # default; can be overridden per trial
+NF_TRIAL_MAX_STEPS = 400          # mid training during HP search (A6000 budget)
+NF_FINAL_MAX_STEPS = 1500         # full training for the best HP
+INPUT_SIZE_POOL = [48, 72, 96, 120]   # daytime-hour context windows
+BATCH_SIZE_POOL = [16, 32, 64, 128]    # A6000 has 48 GiB; 128 fits TFT@h=180
 
 _OPTUNA_STORAGE_URL: str | None = None
 _OPTUNA_RUN_TAG: str = ""
@@ -237,34 +258,60 @@ def relmae_per_beach(pred: pd.DataFrame, capacity: dict) -> tuple[float, pd.Data
 
 # ── NeuralForecast models (TFT / LSTM) ──────────────────────────────────────
 
+_NF_TRAINER_KWARGS = {
+    # Force single-GPU. Lightning otherwise picks up all visible CUDA devices
+    # and tries DDP, which crashes when NVML is broken on the host.
+    "devices": 1,
+    "num_nodes": 1,
+    "enable_model_summary": False,
+    "enable_progress_bar": False,
+    "logger": False,
+}
+
+
+def _valid_n_heads(hidden_size: int, choices=(1, 2, 4, 8)) -> list[int]:
+    """Return n_head choices that divide hidden_size (TFT asserts h % n == 0)."""
+    return [n for n in choices if hidden_size % n == 0] or [1]
+
+
 def _build_nf_model(model_name: str, horizon: int, hp: dict,
                     futr: list[str], hist: list[str], max_steps: int):
     from neuralforecast.losses.pytorch import MAE
+    input_size = int(hp.get("input_size", INPUT_SIZE))
     if model_name == "tft":
         from neuralforecast.models import TFT
+        # Safety: if a stale Optuna trial bypasses the divisibility constraint,
+        # snap n_head to the nearest valid divisor of hidden_size.
+        hs, nh = int(hp["hidden_size"]), int(hp["n_head"])
+        if hs % nh != 0:
+            nh = max([n for n in _valid_n_heads(hs) if n <= nh] or [1])
         return TFT(
-            h=horizon, input_size=INPUT_SIZE,
-            hidden_size=hp["hidden_size"], n_head=hp["n_head"],
+            h=horizon, input_size=input_size,
+            hidden_size=hs, n_head=nh,
             learning_rate=hp["lr"], batch_size=hp.get("batch_size", 32),
-            max_steps=max_steps, early_stop_patience_steps=30,
-            scaler_type="minmax", loss=MAE(),
+            max_steps=max_steps,
+            early_stop_patience_steps=hp.get("early_stop_patience", 30),
+            scaler_type=hp.get("scaler", "minmax"), loss=MAE(),
             futr_exog_list=futr, hist_exog_list=hist, stat_exog_list=STAT_EXOG,
-            dropout=hp["dropout"], attn_dropout=hp["dropout"],
+            dropout=hp["dropout"], attn_dropout=hp.get("attn_dropout", hp["dropout"]),
             val_check_steps=50, random_seed=SEED, start_padding_enabled=True,
+            **_NF_TRAINER_KWARGS,
         ), "TFT"
     from neuralforecast.models import LSTM
     return LSTM(
-        h=horizon, input_size=INPUT_SIZE,
+        h=horizon, input_size=input_size,
         encoder_n_layers=hp.get("encoder_n_layers", 2),
         encoder_hidden_size=hp["hidden_size"],
-        decoder_hidden_size=hp["hidden_size"],
+        decoder_hidden_size=hp.get("decoder_hidden_size", hp["hidden_size"]),
         decoder_layers=hp.get("decoder_layers", 2),
         encoder_dropout=hp["dropout"],
         learning_rate=hp["lr"], batch_size=hp.get("batch_size", 32),
-        max_steps=max_steps, early_stop_patience_steps=30,
-        scaler_type="minmax", loss=MAE(),
+        max_steps=max_steps,
+        early_stop_patience_steps=hp.get("early_stop_patience", 30),
+        scaler_type=hp.get("scaler", "minmax"), loss=MAE(),
         futr_exog_list=futr, hist_exog_list=hist, stat_exog_list=STAT_EXOG,
         val_check_steps=50, random_seed=SEED, start_padding_enabled=True,
+        **_NF_TRAINER_KWARGS,
     ), "LSTM"
 
 
@@ -315,20 +362,34 @@ def _nf_split_train(train_df: pd.DataFrame, horizon: int) -> tuple[pd.DataFrame,
             pd.concat(inner_val, ignore_index=True))
 
 
+_HIDDEN_SIZES = [32, 64, 96, 128, 192, 256, 384, 512]
+_HEAD_POOL = [1, 2, 4, 8, 12, 16, 24, 32]
+_SCALERS = ["robust", "standard", "minmax"]
+
+
 def _nf_objective(trial, model_name, horizon, train_df, val_df, static_df,
                   futr, hist, capacity):
     from neuralforecast import NeuralForecast
     hp = {
-        "hidden_size": trial.suggest_categorical("hidden_size", [32, 64, 128]),
-        "dropout":     trial.suggest_float("dropout", 0.0, 0.3),
-        "lr":          trial.suggest_float("lr", 1e-4, 1e-2, log=True),
-        "batch_size":  trial.suggest_categorical("batch_size", [16, 32, 64]),
+        "hidden_size": trial.suggest_categorical("hidden_size", _HIDDEN_SIZES),
+        "dropout":     trial.suggest_float("dropout", 0.0, 0.5),
+        "lr":          trial.suggest_float("lr", 1e-5, 1e-2, log=True),
+        "batch_size":  trial.suggest_categorical("batch_size", BATCH_SIZE_POOL),
+        "input_size":  trial.suggest_categorical("input_size", INPUT_SIZE_POOL),
+        "scaler":      trial.suggest_categorical("scaler", _SCALERS),
+        "early_stop_patience": trial.suggest_int("early_stop_patience", 20, 50),
     }
     if model_name == "tft":
-        hp["n_head"] = trial.suggest_categorical("n_head", [2, 3, 4, 5, 6, 7, 8, 9, 10])
+        valid_heads = [n for n in _HEAD_POOL if hp["hidden_size"] % n == 0] or [1]
+        hp["n_head"] = trial.suggest_categorical(
+            f"n_head_hs{hp['hidden_size']}", valid_heads)
+        hp["attn_dropout"] = trial.suggest_float("attn_dropout", 0.0, 0.3)
     else:
-        hp["encoder_n_layers"] = trial.suggest_int("encoder_n_layers", 1, 3)
-        hp["decoder_layers"]   = trial.suggest_int("decoder_layers", 1, 3)
+        hp["encoder_n_layers"] = trial.suggest_int("encoder_n_layers", 1, 4)
+        hp["decoder_layers"]   = trial.suggest_int("decoder_layers", 1, 4)
+        # Allow asymmetric encoder/decoder widths (LSTM-specific)
+        hp["decoder_hidden_size"] = trial.suggest_categorical(
+            "decoder_hidden_size", _HIDDEN_SIZES)
     model, col = _build_nf_model(model_name, horizon, hp, futr, hist, NF_TRIAL_MAX_STEPS)
     nf = NeuralForecast(models=[model], freq=1)
     train_cols = ["unique_id", "ds", "y"] + list(dict.fromkeys(futr + hist))
@@ -566,14 +627,16 @@ def run_xgb(label: str, horizon: int, train_df: pd.DataFrame,
 
     def objective(trial):
         hp = {
-            "n_estimators":     trial.suggest_int("n_estimators", 100, 1000, step=50),
-            "max_depth":        trial.suggest_int("max_depth", 3, 12),
-            "learning_rate":    trial.suggest_float("learning_rate", 1e-3, 0.3, log=True),
-            "subsample":        trial.suggest_float("subsample", 0.5, 1.0),
-            "colsample_bytree": trial.suggest_float("colsample_bytree", 0.5, 1.0),
-            "min_child_weight": trial.suggest_int("min_child_weight", 1, 10),
-            "reg_alpha":        trial.suggest_float("reg_alpha", 1e-4, 1.0, log=True),
-            "reg_lambda":       trial.suggest_float("reg_lambda", 1e-4, 1.0, log=True),
+            "n_estimators":     trial.suggest_int("n_estimators", 100, 2000, step=50),
+            "max_depth":        trial.suggest_int("max_depth", 3, 15),
+            "learning_rate":    trial.suggest_float("learning_rate", 1e-3, 0.5, log=True),
+            "subsample":        trial.suggest_float("subsample", 0.4, 1.0),
+            "colsample_bytree": trial.suggest_float("colsample_bytree", 0.4, 1.0),
+            "colsample_bylevel":trial.suggest_float("colsample_bylevel", 0.4, 1.0),
+            "min_child_weight": trial.suggest_int("min_child_weight", 1, 20),
+            "gamma":            trial.suggest_float("gamma", 1e-4, 1.0, log=True),
+            "reg_alpha":        trial.suggest_float("reg_alpha", 1e-4, 10.0, log=True),
+            "reg_lambda":       trial.suggest_float("reg_lambda", 1e-4, 10.0, log=True),
         }
         m = XGBRegressor(**hp, tree_method="hist", n_jobs=-1,
                           random_state=SEED, verbosity=0)
@@ -644,15 +707,23 @@ def run_xgb(label: str, horizon: int, train_df: pd.DataFrame,
 
 def parse_args():
     p = argparse.ArgumentParser(description="Cross-Year Training — 2022 train, 2025 test")
-    p.add_argument("--data-dir", default="pipeline_workspace/clean_datasets_210526")
+    # Backwards-compatible single dir; new --data-dirs accepts many.
+    p.add_argument("--data-dir", default=None,
+                    help="Single data dir (alias of --data-dirs with one entry).")
+    p.add_argument("--data-dirs", nargs="+", default=None,
+                    help="One or more data dirs to train and validate against. "
+                          "Each dir produces its own run with the SAME fairness "
+                          "protocol (same models, horizons, HP budget, validation "
+                          "window). Default: pipeline_workspace/clean_datasets_210526 "
+                          "+ pipeline_workspace/clean_dataset_backup if both exist.")
     p.add_argument("--models", nargs="*", default=["tft", "lstm", "xgb"],
                     choices=["tft", "lstm", "xgb"])
     p.add_argument("--horizons", nargs="*", default=list(TARGET_HORIZONS),
                     choices=list(TARGET_HORIZONS))
     p.add_argument("--test-start", default="2025-06-01")
     p.add_argument("--test-end",   default="2025-08-31")
-    p.add_argument("--trials", type=int, default=30,
-                    help="Optuna trials for XGB (default 30)")
+    p.add_argument("--trials", type=int, default=50,
+                    help="Optuna trials per (model, horizon). Default 50.")
     p.add_argument("--prefix", default="cross_year",
                     help="Run directory prefix (default: cross_year)")
     p.add_argument("--out-root", default=None,
@@ -663,6 +734,33 @@ def parse_args():
                     help="Optuna storage URL (default: sqlite at apps/prediction/optuna/cross_year.db). "
                           "Use optuna-dashboard <url> to visualize.")
     return p.parse_args()
+
+
+def _resolve_dataset_list(args) -> list[Path]:
+    """Combine --data-dir + --data-dirs into a deduplicated list of existing dirs."""
+    candidates: list[str] = []
+    if args.data_dirs:
+        candidates.extend(args.data_dirs)
+    if args.data_dir:
+        candidates.append(args.data_dir)
+    if not candidates:
+        candidates = ["pipeline_workspace/clean_datasets_210526",
+                       "pipeline_workspace/clean_dataset_backup"]
+    resolved: list[Path] = []
+    seen: set[str] = set()
+    for c in candidates:
+        p = _resolve_data_dir(c)
+        if p.exists() and str(p) not in seen:
+            resolved.append(p)
+            seen.add(str(p))
+    if not resolved:
+        sys.exit(f"[fatal] no data dirs found among: {candidates}")
+    return resolved
+
+
+def _dataset_tag(dataset_path: Path) -> str:
+    """Short tag for the dataset folder, used in run-name + study-name."""
+    return dataset_path.name.replace("clean_datasets_", "").replace("clean_dataset_", "")
 
 
 def _resolve_data_dir(p: str) -> Path:
@@ -676,21 +774,61 @@ def _resolve_data_dir(p: str) -> Path:
     return (here / pp).resolve()
 
 
-def main():
-    args = parse_args()
-    data_dir = _resolve_data_dir(args.data_dir)
-    if not data_dir.exists():
-        sys.exit(f"[fatal] data dir not found: {data_dir}")
+def _write_protocol_json(path: Path, args, data_dir: Path, dataset_tag: str,
+                          train_df, test_df, capacity: dict, storage_url: str,
+                          set_name: str):
+    """Record the fairness invariants for this run, as an audit trail.
 
-    # Default out_root = apps/prediction/tft_models (so tft_service picks up TFT+LSTM)
-    here = Path(__file__).resolve().parent.parent  # apps/prediction
-    nf_root = Path(args.out_root) if args.out_root else here / "tft_models"
-    xgb_root = here / "xgb_models"
-    nf_root.mkdir(parents=True, exist_ok=True)
-    xgb_root.mkdir(parents=True, exist_ok=True)
+    Every model family inside this run was trained and evaluated under the
+    *same* protocol — same dataset, same beach overlap, same train/test rows,
+    same horizons, same Optuna budget. This file makes that explicit so the
+    methodology is reviewable.
+    """
+    invariants = {
+        "set_name": set_name,
+        "dataset_tag": dataset_tag,
+        "dataset_path": str(data_dir),
+        "models": args.models,
+        "horizons": args.horizons,
+        "horizon_hours": {k: TARGET_HORIZONS[k] for k in args.horizons},
+        "regime": "train on cache_2022 (full year, daytime 8-20); "
+                   "test on django_2025 window",
+        "test_window": {"start": args.test_start, "end": args.test_end},
+        "n_train_rows": int(len(train_df)),
+        "n_test_rows": int(len(test_df)),
+        "n_beaches": int(train_df["unique_id"].nunique()),
+        "beaches": sorted(train_df["unique_id"].unique().tolist()),
+        "capacity_p90_per_beach": {k: float(v) for k, v in capacity.items()},
+        "normalisation": "P90 per series (daytime only)",
+        "seed": SEED,
+        "input_size_default": INPUT_SIZE,
+        "input_size_search_pool": INPUT_SIZE_POOL,
+        "batch_size_search_pool": BATCH_SIZE_POOL,
+        "hidden_size_search_pool": _HIDDEN_SIZES,
+        "n_head_search_pool": _HEAD_POOL,
+        "scaler_search_pool": _SCALERS,
+        "lr_search_range": [1e-5, 1e-2],
+        "dropout_search_range": [0.0, 0.5],
+        "optuna_trials_per_model_horizon": args.trials,
+        "nf_trial_max_steps": NF_TRIAL_MAX_STEPS,
+        "nf_final_max_steps": NF_FINAL_MAX_STEPS,
+        "optuna_storage": storage_url,
+        "primary_significance_test": "Diebold-Mariano (Wilcoxon as sanity check)",
+        "started_at": datetime.now().isoformat(),
+    }
+    path.write_text(json.dumps(invariants, indent=2))
 
+
+def run_one_dataset(args, data_dir: Path, here: Path, nf_root: Path,
+                     xgb_root: Path) -> tuple[pd.DataFrame, Path]:
+    """Train + validate all (model, horizon) combos on a single dataset.
+
+    The fairness invariants for this run are written to protocol.json.
+    Returns (summary_df, nf_run_dir).
+    """
+    dataset_tag = _dataset_tag(data_dir)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    set_name = f"{args.prefix}_{timestamp}"
+    set_name = f"{args.prefix}_{dataset_tag}_{timestamp}"
     nf_run = nf_root / set_name
     xgb_run = xgb_root / set_name
     nf_run.mkdir(parents=True, exist_ok=True)
@@ -698,8 +836,9 @@ def main():
     results_dir = nf_run / "results"
     results_dir.mkdir(parents=True, exist_ok=True)
 
-    # Optuna storage — shared SQLite db so all studies (TFT/LSTM/XGB × 3 horizons)
-    # show up in optuna-dashboard. Persistent across runs (load_if_exists=True).
+    # Optuna storage: same DB across datasets; study name carries dataset_tag
+    # so dashboard shows one study per (dataset, model, horizon) — every cell
+    # of the comparison gets its own searchable history.
     if args.storage_url:
         global _OPTUNA_STORAGE_URL, _OPTUNA_RUN_TAG
         _OPTUNA_STORAGE_URL = args.storage_url
@@ -709,14 +848,16 @@ def main():
         db_path = here / "optuna" / "cross_year.db"
         storage_url = _set_optuna_storage(db_path, set_name)
 
-    log("Cross-Year Training — 2022 train, 2025 test, all model families")
-    log(f"Data dir: {data_dir}")
-    log(f"Models:   {args.models}")
-    log(f"Horizons: {args.horizons}")
-    log(f"Test:     {args.test_start} → {args.test_end}")
-    log(f"NF set:   {nf_run}")
-    log(f"XGB set:  {xgb_run}")
-    log(f"Optuna:   {storage_url}  (dashboard: optuna-dashboard {storage_url})")
+    log("=" * 72)
+    log(f"DATASET RUN — {dataset_tag}")
+    log("=" * 72)
+    log(f"Data dir:  {data_dir}")
+    log(f"Models:    {args.models}    Horizons: {args.horizons}")
+    log(f"Test:      {args.test_start} → {args.test_end}")
+    log(f"Trials:    {args.trials} per (model, horizon)")
+    log(f"NF set:    {nf_run}")
+    log(f"XGB set:   {xgb_run}")
+    log(f"Optuna:    {storage_url}")
 
     cache_df, django_df = load_csvs(data_dir)
     train_df, test_df, static_df = build_panels(
@@ -725,12 +866,21 @@ def main():
     log(f"Train rows: {len(train_df):,}  Test rows: {len(test_df):,}  "
         f"Beaches: {train_df['unique_id'].nunique()}")
 
+    # Fairness audit: same train/test split, same beach overlap, same HP budget
+    # applies to ALL models below. Recorded so methodology is reviewable.
+    _write_protocol_json(results_dir / "protocol.json", args, data_dir,
+                          dataset_tag, train_df, test_df, capacity,
+                          storage_url, set_name)
+    log(f"Protocol:  {results_dir/'protocol.json'}")
+    log("Fairness: same dataset, same beach overlap, same train/test rows, "
+        f"same Optuna trials ({args.trials}) for every (model, horizon).")
+
     summary = []
     for label in args.horizons:
         horizon = TARGET_HORIZONS[label]
-        log("=" * 70)
-        log(f"=== HORIZON {label} (H={horizon}) ===")
-        log("=" * 70)
+        log("-" * 70)
+        log(f"--- HORIZON {label} (H={horizon}) on {dataset_tag} ---")
+        log("-" * 70)
 
         for m in args.models:
             t0 = time.time()
@@ -743,34 +893,95 @@ def main():
                                       static_df, capacity, nf_run, args.trials)
                 if r:
                     r["elapsed_s"] = round(time.time() - t0, 1)
+                    r["dataset"] = dataset_tag
                     summary.append(r)
             except Exception as e:
-                log(f"[{m}/{label}] FAILED: {e}", "ERROR")
+                log(f"[{m}/{label}] FAILED on {dataset_tag}: {e}", "ERROR")
                 traceback.print_exc()
 
     if not summary:
-        log("No successful runs", "ERROR")
-        return
+        log(f"No successful runs on {dataset_tag}", "ERROR")
+        return pd.DataFrame(), nf_run
 
     summary_df = pd.DataFrame(summary)
     summary_df.to_csv(results_dir / "summary.csv", index=False)
     ranking = summary_df.sort_values(["horizon", "relMAE_summer"]).reset_index(drop=True)
     ranking.to_csv(results_dir / "ranking.csv", index=False)
 
-    log("\n" + "=" * 72)
-    log("CROSS-YEAR RANKING (sorted by horizon, then summer relMAE)")
-    log("=" * 72)
-    print(ranking.to_string(index=False))
-
-    md = ["# Cross-year ranking", "",
-          f"- Train: cache_2022 (full year, daytime 8-20)",
-          f"- Test:  django_2025 {args.test_start} → {args.test_end}",
+    md = ["# Cross-year ranking — " + dataset_tag, "",
+          "## Fairness protocol",
+          "- Same dataset for all three model families.",
+          "- Same beach overlap (train 2022 ∩ test 2025 summer).",
+          "- Same train rows, same test rows.",
+          f"- Same Optuna budget: {args.trials} trials per (model, horizon).",
+          "- Same validation window: " + args.test_start + " → " + args.test_end + ".",
+          "- Same metric: P90-normalised relMAE on daytime hours.",
+          "",
+          "## Cells",
+          f"- Train: cache_2022 (full year, daytime 8-20) — {len(train_df):,} rows",
+          f"- Test:  django_2025 {args.test_start} → {args.test_end} — {len(test_df):,} rows",
           f"- Beaches: {train_df['unique_id'].nunique()}",
-          f"- Normalisation: P90 per series (daytime)",
           "",
           ranking.to_markdown(index=False, floatfmt=".4f")]
     (results_dir / "ranking.md").write_text("\n".join(md))
-    log(f"Outputs:\n  NF set:  {nf_run}\n  XGB set: {xgb_run}\n  Ranking: {results_dir/'ranking.csv'}")
+    log(f"Outputs:\n  NF set:  {nf_run}\n  XGB set: {xgb_run}\n  "
+        f"Protocol: {results_dir/'protocol.json'}")
+    return summary_df, nf_run
+
+
+def main():
+    args = parse_args()
+    datasets = _resolve_dataset_list(args)
+
+    # Default out_root = apps/prediction/tft_models (so tft_service picks up TFT+LSTM)
+    here = Path(__file__).resolve().parent.parent
+    nf_root = Path(args.out_root) if args.out_root else here / "tft_models"
+    xgb_root = here / "xgb_models"
+    nf_root.mkdir(parents=True, exist_ok=True)
+    xgb_root.mkdir(parents=True, exist_ok=True)
+
+    log("Cross-Year Training — 2022 train, 2025 test, three model families")
+    log(f"Datasets ({len(datasets)}): {[d.name for d in datasets]}")
+    log(f"Models:   {args.models}")
+    log(f"Horizons: {args.horizons}")
+    log(f"Test:     {args.test_start} → {args.test_end}")
+    log(f"Trials:   {args.trials} per (model, horizon)")
+    log("Fairness invariants across the entire run:")
+    log("  * Identical model list, horizons, optuna budget on every dataset.")
+    log("  * Per dataset: identical train/test split for TFT, LSTM and XGB.")
+    log("  * Identical normalisation (P90 per series) and metric (relMAE).")
+
+    all_summaries: list[pd.DataFrame] = []
+    run_dirs: list[Path] = []
+    for data_dir in datasets:
+        df, run_dir = run_one_dataset(args, data_dir, here, nf_root, xgb_root)
+        if not df.empty:
+            all_summaries.append(df)
+            run_dirs.append(run_dir)
+
+    if not all_summaries:
+        log("No successful runs on any dataset", "ERROR")
+        return
+
+    # Combined cross-dataset comparison
+    combined = pd.concat(all_summaries, ignore_index=True)
+    combined_sorted = combined.sort_values(["horizon", "dataset", "relMAE_summer"]) \
+                                .reset_index(drop=True)
+    cross_dir = here / "cross_year_results" / datetime.now().strftime("%Y%m%d_%H%M%S")
+    cross_dir.mkdir(parents=True, exist_ok=True)
+    combined_sorted.to_csv(cross_dir / "combined_ranking.csv", index=False)
+    md = ["# Cross-dataset ranking", "",
+          "All cells trained and validated under the same protocol "
+          "(see each run's protocol.json for the invariants).",
+          "",
+          combined_sorted.to_markdown(index=False, floatfmt=".4f")]
+    (cross_dir / "combined_ranking.md").write_text("\n".join(md))
+
+    log("\n" + "=" * 72)
+    log("CROSS-DATASET RANKING (horizon, then dataset, then summer relMAE)")
+    log("=" * 72)
+    print(combined_sorted.to_string(index=False))
+    log(f"Combined output: {cross_dir/'combined_ranking.csv'}")
 
 
 if __name__ == "__main__":
