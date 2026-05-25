@@ -16,6 +16,11 @@ Usage:
     python manage.py evaluate_model_sets --clear-weather-cache
 """
 
+import os
+os.environ.setdefault('OMP_NUM_THREADS', '1')
+os.environ.setdefault('MKL_NUM_THREADS', '1')
+os.environ.setdefault('KMP_DUPLICATE_LIB_OK', 'TRUE')
+
 import csv
 import json
 from collections import defaultdict

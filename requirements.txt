@@ -15,6 +15,7 @@ torchaudio --index-url https://download.pytorch.org/whl/cu121
 neuralforecast==3.1.5
 pytorch-lightning==2.6.1
 scipy==1.17.1
+statsmodels
 
 # Data
 numpy==1.26.4

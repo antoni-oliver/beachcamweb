@@ -1,0 +1,39 @@
+{
+  "model_type": "LSTM",
+  "horizon": 120,
+  "horizon_days": 10,
+  "hours_per_day": 12,
+  "input_size": 48,
+  "futr_exog": [
+    "hour",
+    "day_of_week",
+    "month",
+    "is_weekend",
+    "is_summer",
+    "om_temperature_2m",
+    "om_apparent_temperature",
+    "om_cloud_cover"
+  ],
+  "hist_exog": [
+    "om_cloud_cover_low",
+    "om_shortwave_radiation",
+    "om_vapour_pressure_deficit"
+  ],
+  "stat_exog": [
+    "stat_mean_y",
+    "stat_cv"
+  ],
+  "hp": {
+    "hidden_size": 64,
+    "dropout": 0.04020071374370038,
+    "lr": 0.0027382876429614825,
+    "batch_size": 32,
+    "encoder_n_layers": 1,
+    "decoder_layers": 3
+  },
+  "optuna_study": "cross_year_20260524_110811__lstm__10d",
+  "regime": "cross_year_train_2022",
+  "season_relMAE": 0.7007439160110949,
+  "overall_relMAE": 0.7007439160110949,
+  "trained_at": "2026-05-24T12:43:37.615993"
+}

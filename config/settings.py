@@ -165,6 +165,7 @@ os.putenv("PYTORCH_ENABLE_MPS_FALLBACK", "1")
 # ── Prediction app paths (single root) ────────────────────────────────────────
 PREDICTION_DIR    = BASE_DIR / 'apps' / 'prediction'
 TFT_MODELS_DIR    = PREDICTION_DIR / 'tft_models'
+XGB_MODELS_DIR    = PREDICTION_DIR / 'xgb_models'
 TFT_EVAL_JSON     = PREDICTION_DIR / 'model_evaluation.json'
 WEATHER_CACHE_DIR = PREDICTION_DIR / 'cache' / 'weather'
 TFT_MODEL_SETS = {

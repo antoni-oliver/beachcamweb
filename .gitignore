@@ -28,3 +28,4 @@ config/local_settings.py
 **/.ipynb_checkpoints/
 
 development_db.sqlite3
+**/lightning_logs/
