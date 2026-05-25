@@ -372,6 +372,7 @@ _SCALERS = ["robust", "standard", "minmax"]
 
 def _nf_objective(trial, model_name, horizon, train_df, val_df, static_df,
                   futr, hist, capacity):
+    import optuna
     from neuralforecast import NeuralForecast
     hp = {
         "hidden_size": trial.suggest_categorical("hidden_size", _HIDDEN_SIZES),
@@ -401,12 +402,14 @@ def _nf_objective(trial, model_name, horizon, train_df, val_df, static_df,
         nf.fit(df=train_df[train_cols], static_df=static_df, val_size=horizon)
     except Exception as e:
         log(f"  [trial fail] {e}", "WARN")
-        return 1e6
+        raise optuna.TrialPruned(f"fit failed: {e}")
     pred = _nf_predict_per_beach(nf, col, horizon, futr, hist, train_df, val_df, static_df)
     if pred.empty:
-        return 1e6
+        raise optuna.TrialPruned("empty predictions on inner-val")
     rel, _ = relmae_per_beach(pred, capacity)
-    return float(rel) if not np.isnan(rel) else 1e6
+    if np.isnan(rel):
+        raise optuna.TrialPruned("nan relMAE")
+    return float(rel)
 
 
 def _nf_train_predict(model_name: str, horizon: int, train_df: pd.DataFrame,
@@ -646,14 +649,20 @@ def run_xgb(label: str, horizon: int, train_df: pd.DataFrame,
         }
         m = XGBRegressor(**hp, tree_method="hist", n_jobs=-1,
                           random_state=SEED, verbosity=0)
-        m.fit(X_a, y_a, verbose=False)
+        try:
+            m.fit(X_a, y_a, verbose=False)
+        except Exception as e:
+            log(f"  [trial fail] {e}", "WARN")
+            raise optuna.TrialPruned(f"xgb fit failed: {e}")
         pred = m.predict(X_b).clip(0, None)
         # Same metric as TFT/LSTM objective: P90-normalised relMAE per beach.
         val_pred_df = pd.DataFrame({
             "unique_id": val_uid, "y_true": y_b, "y_pred": pred,
         })
         rel, _ = relmae_per_beach(val_pred_df, capacity)
-        return float(rel) if not np.isnan(rel) else 1e6
+        if np.isnan(rel):
+            raise optuna.TrialPruned("nan relMAE")
+        return float(rel)
 
     study_name = _study_name("xgb", label)
     study = optuna.create_study(
