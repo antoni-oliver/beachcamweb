@@ -90,10 +90,11 @@ DEFAULT_HIST = ["om_cloud_cover_low", "om_shortwave_radiation",
 SELECTED_FUTR = TEMPORAL_FUTR + FUTR_WEATHER
 
 INPUT_SIZE = 48                   # default; can be overridden per trial
-NF_TRIAL_MAX_STEPS = 400          # mid training during HP search (A6000 budget)
+NF_TRIAL_MAX_STEPS = 500          # enough training for HP behavior analysis, not just ranking
 NF_FINAL_MAX_STEPS = 1500         # full training for the best HP
 INPUT_SIZE_POOL = [48, 72, 96, 120]   # daytime-hour context windows
 BATCH_SIZE_POOL = [16, 32, 64, 128]    # A6000 has 48 GiB; 128 fits TFT@h=180
+OPTUNA_STARTUP_TRIALS = 30        # random trials before TPE kicks in — broader search-space coverage
 
 _OPTUNA_STORAGE_URL: str | None = None
 _OPTUNA_RUN_TAG: str = ""
@@ -533,7 +534,7 @@ def run_nf_model(model_name: str, label: str, horizon: int,
     study = optuna.create_study(
         study_name=study_name, storage=_OPTUNA_STORAGE_URL,
         direction="minimize", load_if_exists=True,
-        sampler=optuna.samplers.TPESampler(seed=SEED),
+        sampler=optuna.samplers.TPESampler(seed=SEED, n_startup_trials=OPTUNA_STARTUP_TRIALS),
     )
     study.optimize(
         lambda t: _nf_objective(t, model_name, horizon, inner_train, inner_val,
@@ -668,7 +669,7 @@ def run_xgb(label: str, horizon: int, train_df: pd.DataFrame,
     study = optuna.create_study(
         study_name=study_name, storage=_OPTUNA_STORAGE_URL,
         direction="minimize", load_if_exists=True,
-        sampler=optuna.samplers.TPESampler(seed=SEED),
+        sampler=optuna.samplers.TPESampler(seed=SEED, n_startup_trials=OPTUNA_STARTUP_TRIALS),
     )
     study.optimize(objective, n_trials=trials, show_progress_bar=False)
     best_hp = study.best_params
