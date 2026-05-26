@@ -276,7 +276,8 @@ def _valid_n_heads(hidden_size: int, choices=(1, 2, 4, 8)) -> list[int]:
 
 
 def _build_nf_model(model_name: str, horizon: int, hp: dict,
-                    futr: list[str], hist: list[str], max_steps: int):
+                    futr: list[str], hist: list[str], max_steps: int,
+                    seed: int = SEED):
     from neuralforecast.losses.pytorch import MAE
     input_size = int(hp.get("input_size", INPUT_SIZE))
     if model_name == "tft":
@@ -295,7 +296,7 @@ def _build_nf_model(model_name: str, horizon: int, hp: dict,
             scaler_type=hp.get("scaler", "minmax"), loss=MAE(),
             futr_exog_list=futr, hist_exog_list=hist, stat_exog_list=STAT_EXOG,
             dropout=hp["dropout"], attn_dropout=hp.get("attn_dropout", hp["dropout"]),
-            val_check_steps=50, random_seed=SEED, start_padding_enabled=True,
+            val_check_steps=50, random_seed=seed, start_padding_enabled=True,
             **_NF_TRAINER_KWARGS,
         ), "TFT"
     from neuralforecast.models import LSTM
@@ -311,7 +312,7 @@ def _build_nf_model(model_name: str, horizon: int, hp: dict,
         early_stop_patience_steps=hp.get("early_stop_patience", 30),
         scaler_type=hp.get("scaler", "minmax"), loss=MAE(),
         futr_exog_list=futr, hist_exog_list=hist, stat_exog_list=STAT_EXOG,
-        val_check_steps=50, random_seed=SEED, start_padding_enabled=True,
+        val_check_steps=50, random_seed=seed, start_padding_enabled=True,
         **_NF_TRAINER_KWARGS,
     ), "LSTM"
 
@@ -513,14 +514,42 @@ def save_nf_artifacts(nf_save_path: Path, horizon: int, futr: list[str],
     static_df.to_csv(nf_save_path / "static_features.csv", index=False)
 
 
+def _train_eval_nf_seed(model_name, horizon, best_hp, futr, hist,
+                         train_df, test_df, static_df, capacity, seed):
+    """Refit + test one NF model with a given seed. Returns (nf, pred_df, metrics)."""
+    from neuralforecast import NeuralForecast
+    model, col = _build_nf_model(model_name, horizon, best_hp, futr, hist,
+                                  NF_FINAL_MAX_STEPS, seed=seed)
+    nf = NeuralForecast(models=[model], freq=1)
+    train_cols = ["unique_id", "ds", "y"] + list(dict.fromkeys(futr + hist))
+    nf.fit(df=train_df[train_cols], static_df=static_df, val_size=horizon)
+    pred_df = _nf_predict_per_beach(nf, col, horizon, futr, hist, train_df,
+                                     test_df, static_df)
+    if pred_df.empty:
+        return nf, pred_df, None
+    overall_rel, _ = relmae_per_beach(pred_df, capacity)
+    pred_df["month"] = pd.to_datetime(pred_df["ds_real"]).dt.month
+    season_rel = relmae_per_beach(pred_df[pred_df["month"].isin(SEASON_MONTHS)],
+                                    capacity)[0]
+    summer_rel = relmae_per_beach(pred_df[pred_df["month"].isin(SUMMER_MONTHS)],
+                                    capacity)[0]
+    mae = float(mean_absolute_error(pred_df["y_true"], pred_df["y_pred"]))
+    return nf, pred_df, {
+        "seed": int(seed),
+        "relMAE_overall": float(overall_rel) if not np.isnan(overall_rel) else None,
+        "relMAE_season":  float(season_rel)  if not np.isnan(season_rel)  else None,
+        "relMAE_summer":  float(summer_rel)  if not np.isnan(summer_rel)  else None,
+        "MAE": mae, "n_rows": int(len(pred_df)),
+    }
+
+
 def run_nf_model(model_name: str, label: str, horizon: int,
                   train_df: pd.DataFrame, test_df: pd.DataFrame,
                   static_df: pd.DataFrame, capacity: dict, run_dir: Path,
-                  trials: int) -> dict | None:
+                  trials: int, multi_seed: int = 1) -> dict | None:
     import optuna
-    from neuralforecast import NeuralForecast
     optuna.logging.set_verbosity(optuna.logging.WARNING)
-    log(f"[{model_name}] H={horizon} ({label})  trials={trials}")
+    log(f"[{model_name}] H={horizon} ({label})  trials={trials}  multi_seed={multi_seed}")
 
     futr = [c for c in SELECTED_FUTR if c in train_df.columns]
     hist = [c for c in DEFAULT_HIST if c in train_df.columns]
@@ -544,42 +573,55 @@ def run_nf_model(model_name: str, label: str, horizon: int,
     best_hp = study.best_params
     log(f"[{model_name}] best inner relMAE={study.best_value:.4f}  hp={best_hp}")
 
-    # Refit on full train with best HP, full max_steps, then predict on test
-    model, col = _build_nf_model(model_name, horizon, best_hp, futr, hist,
-                                  NF_FINAL_MAX_STEPS)
-    nf = NeuralForecast(models=[model], freq=1)
-    train_cols = ["unique_id", "ds", "y"] + list(dict.fromkeys(futr + hist))
-    nf.fit(df=train_df[train_cols], static_df=static_df, val_size=horizon)
-
-    pred_df = _nf_predict_per_beach(nf, col, horizon, futr, hist, train_df,
-                                     test_df, static_df)
-    if pred_df.empty:
-        log(f"[{model_name}] no predictions produced", "ERROR")
+    # Refit on full train with best HP, full max_steps, predict on test — main seed.
+    nf, pred_df, m = _train_eval_nf_seed(model_name, horizon, best_hp, futr, hist,
+                                          train_df, test_df, static_df, capacity, SEED)
+    if m is None:
+        log(f"[{model_name}] no predictions produced (main seed)", "ERROR")
         return None
+    overall_rel, season_rel, summer_rel = m["relMAE_overall"], m["relMAE_season"], m["relMAE_summer"]
+    log(f"[{model_name}] [seed={SEED}] overall={overall_rel:.4f}  season={season_rel:.4f}  "
+        f"summer={summer_rel:.4f}  MAE={m['MAE']:.1f}  n={m['n_rows']}")
 
-    overall_rel, pb = relmae_per_beach(pred_df, capacity)
-    pred_df["month"] = pd.to_datetime(pred_df["ds_real"]).dt.month
-    season_rel = relmae_per_beach(pred_df[pred_df["month"].isin(SEASON_MONTHS)],
-                                    capacity)[0]
-    summer_rel = relmae_per_beach(pred_df[pred_df["month"].isin(SUMMER_MONTHS)],
-                                    capacity)[0]
-    mae = float(mean_absolute_error(pred_df["y_true"], pred_df["y_pred"]))
-    log(f"[{model_name}] overall={overall_rel:.4f}  season={season_rel:.4f}  "
-        f"summer={summer_rel:.4f}  MAE={mae:.1f}  n={len(pred_df)}")
-
+    # Save artifacts for the main (SEED) run only.
     model_dir = run_dir / f"{model_name}_{label}"
     nf.save(str(model_dir / "nf_model"), overwrite=True, save_dataset=False)
     save_nf_artifacts(model_dir, horizon, futr, hist, static_df,
                        "TFT" if model_name == "tft" else "LSTM",
                        season_rel, overall_rel, best_hp, study_name)
+    pb = relmae_per_beach(pred_df, capacity)[1]
     pred_df.to_csv(model_dir / "cv_predictions.csv", index=False)
     pb.to_csv(model_dir / "per_beach.csv", index=False)
     pd.DataFrame([{**t.params, "value": t.value, "state": str(t.state)}
                    for t in study.trials]).to_csv(
         model_dir / "optuna_trials.csv", index=False)
-    return {"model": model_name, "horizon": label, "n_rows": len(pred_df),
+
+    # Multi-seed stability: refit (N-1) more times with different seeds, save metrics only.
+    seed_rows = [m]
+    if multi_seed > 1:
+        extra_seeds = [SEED + i for i in range(1, multi_seed)]
+        log(f"[{model_name}] multi-seed stability: refitting with seeds {extra_seeds}")
+        for s in extra_seeds:
+            _, _, m_s = _train_eval_nf_seed(model_name, horizon, best_hp, futr, hist,
+                                              train_df, test_df, static_df, capacity, s)
+            if m_s is None:
+                log(f"[{model_name}] [seed={s}] FAILED", "WARN")
+                continue
+            log(f"[{model_name}] [seed={s}] overall={m_s['relMAE_overall']:.4f}  "
+                f"season={m_s['relMAE_season']:.4f}  summer={m_s['relMAE_summer']:.4f}")
+            seed_rows.append(m_s)
+        seed_df = pd.DataFrame(seed_rows)
+        seed_df.to_csv(model_dir / "multi_seed.csv", index=False)
+        summary = {col: (float(seed_df[col].mean()), float(seed_df[col].std()))
+                   for col in ["relMAE_overall", "relMAE_season", "relMAE_summer"]}
+        log(f"[{model_name}] stability summary (mean ± std across {len(seed_df)} seeds):")
+        for col, (mu, sigma) in summary.items():
+            log(f"    {col}: {mu:.4f} ± {sigma:.4f}")
+
+    return {"model": model_name, "horizon": label, "n_rows": m["n_rows"],
              "relMAE_overall": overall_rel, "relMAE_season": season_rel,
-             "relMAE_summer": summer_rel, "MAE": mae}
+             "relMAE_summer": summer_rel, "MAE": m["MAE"],
+             "n_seeds": len(seed_rows)}
 
 
 # ── XGBoost ─────────────────────────────────────────────────────────────────
@@ -609,8 +651,8 @@ def build_xgb_features(df: pd.DataFrame, horizon: int) -> pd.DataFrame:
 
 def run_xgb(label: str, horizon: int, train_df: pd.DataFrame,
              test_df: pd.DataFrame, capacity: dict, run_dir: Path,
-             trials: int) -> dict | None:
-    log(f"[xgb] H={horizon} ({label})  trials={trials}")
+             trials: int, multi_seed: int = 1) -> dict | None:
+    log(f"[xgb] H={horizon} ({label})  trials={trials}  multi_seed={multi_seed}")
     import optuna
     from xgboost import XGBRegressor
     optuna.logging.set_verbosity(optuna.logging.WARNING)
@@ -720,9 +762,53 @@ def run_xgb(label: str, horizon: int, train_df: pd.DataFrame,
                    for t in study.trials]).to_csv(
         model_dir / "optuna_trials.csv", index=False)
 
+    # Multi-seed stability: refit (N-1) more times with different random_state.
+    seed_rows = [{
+        "seed": int(SEED),
+        "relMAE_overall": float(overall_rel) if not np.isnan(overall_rel) else None,
+        "relMAE_season":  float(season_rel)  if not np.isnan(season_rel)  else None,
+        "relMAE_summer":  float(summer_rel)  if not np.isnan(summer_rel)  else None,
+        "MAE": mae, "n_rows": int(len(pred_df)),
+    }]
+    if multi_seed > 1:
+        extra_seeds = [SEED + i for i in range(1, multi_seed)]
+        log(f"[xgb] multi-seed stability: refitting with seeds {extra_seeds}")
+        for s in extra_seeds:
+            try:
+                m_s = XGBRegressor(**best_hp, tree_method="hist", n_jobs=-1,
+                                    random_state=s, verbosity=0)
+                m_s.fit(X_tr, y_tr, verbose=False)
+                pred_s = m_s.predict(X_te).clip(0, None)
+            except Exception as e:
+                log(f"[xgb] [seed={s}] FAILED: {e}", "WARN")
+                continue
+            pred_df_s = pd.DataFrame({
+                "unique_id": test_feat["unique_id"].values,
+                "ds_real":   test_feat["ds_target"].values,
+                "y_pred":    pred_s, "y_true": y_te,
+            })
+            ov, _ = relmae_per_beach(pred_df_s, capacity)
+            pred_df_s["month"] = pd.to_datetime(pred_df_s["ds_real"]).dt.month
+            se = relmae_per_beach(pred_df_s[pred_df_s["month"].isin(SEASON_MONTHS)], capacity)[0]
+            su = relmae_per_beach(pred_df_s[pred_df_s["month"].isin(SUMMER_MONTHS)], capacity)[0]
+            mae_s = float(mean_absolute_error(pred_df_s["y_true"], pred_df_s["y_pred"]))
+            log(f"[xgb] [seed={s}] overall={ov:.4f}  season={se:.4f}  summer={su:.4f}")
+            seed_rows.append({"seed": int(s),
+                              "relMAE_overall": float(ov) if not np.isnan(ov) else None,
+                              "relMAE_season":  float(se) if not np.isnan(se) else None,
+                              "relMAE_summer":  float(su) if not np.isnan(su) else None,
+                              "MAE": mae_s, "n_rows": int(len(pred_df_s))})
+        seed_df = pd.DataFrame(seed_rows)
+        seed_df.to_csv(model_dir / "multi_seed.csv", index=False)
+        log(f"[xgb] stability summary (mean ± std across {len(seed_df)} seeds):")
+        for col in ["relMAE_overall", "relMAE_season", "relMAE_summer"]:
+            mu, sigma = float(seed_df[col].mean()), float(seed_df[col].std())
+            log(f"    {col}: {mu:.4f} ± {sigma:.4f}")
+
     return {"model": "xgb", "horizon": label, "n_rows": len(pred_df),
              "relMAE_overall": overall_rel, "relMAE_season": season_rel,
-             "relMAE_summer": summer_rel, "MAE": mae}
+             "relMAE_summer": summer_rel, "MAE": mae,
+             "n_seeds": len(seed_rows)}
 
 
 # ── Main ────────────────────────────────────────────────────────────────────
@@ -746,6 +832,10 @@ def parse_args():
     p.add_argument("--test-end",   default="2025-08-31")
     p.add_argument("--trials", type=int, default=50,
                     help="Optuna trials per (model, horizon). Default 50.")
+    p.add_argument("--multi-seed", type=int, default=1, dest="multi_seed",
+                    help="Refit best HP with N seeds for stability check. "
+                          "Default 1 (only main seed). Recommended 5 for thesis. "
+                          "Saves multi_seed.csv per (model, horizon).")
     p.add_argument("--prefix", default="cross_year",
                     help="Run directory prefix (default: cross_year)")
     p.add_argument("--out-root", default=None,
@@ -832,6 +922,9 @@ def _write_protocol_json(path: Path, args, data_dir: Path, dataset_tag: str,
         "lr_search_range": [1e-5, 1e-2],
         "dropout_search_range": [0.0, 0.5],
         "optuna_trials_per_model_horizon": args.trials,
+        "optuna_startup_trials": OPTUNA_STARTUP_TRIALS,
+        "multi_seed": args.multi_seed,
+        "multi_seed_values": [SEED + i for i in range(args.multi_seed)],
         "nf_trial_max_steps": NF_TRIAL_MAX_STEPS,
         "nf_final_max_steps": NF_FINAL_MAX_STEPS,
         "optuna_storage": storage_url,
@@ -909,10 +1002,11 @@ def run_one_dataset(args, data_dir: Path, here: Path, nf_root: Path,
             try:
                 if m == "xgb":
                     r = run_xgb(label, horizon, train_df, test_df, capacity,
-                                 xgb_run, args.trials)
+                                 xgb_run, args.trials, multi_seed=args.multi_seed)
                 else:
                     r = run_nf_model(m, label, horizon, train_df, test_df,
-                                      static_df, capacity, nf_run, args.trials)
+                                      static_df, capacity, nf_run, args.trials,
+                                      multi_seed=args.multi_seed)
                 if r:
                     r["elapsed_s"] = round(time.time() - t0, 1)
                     r["dataset"] = dataset_tag
@@ -968,6 +1062,9 @@ def main():
     log(f"Horizons: {args.horizons}")
     log(f"Test:     {args.test_start} → {args.test_end}")
     log(f"Trials:   {args.trials} per (model, horizon)")
+    if args.multi_seed > 1:
+        log(f"Multi-seed: {args.multi_seed} seeds = "
+            f"{[SEED + i for i in range(args.multi_seed)]} (stability check)")
     log("Fairness invariants across the entire run:")
     log("  * Identical model list, horizons, optuna budget on every dataset.")
     log("  * Per dataset: identical train/test split for TFT, LSTM and XGB.")
