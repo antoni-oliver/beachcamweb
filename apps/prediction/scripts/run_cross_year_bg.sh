@@ -31,7 +31,10 @@ fi
 export CUDA_VISIBLE_DEVICES="$GPU"
 
 cd "$REPO_ROOT"
-nohup python3 "$TRAIN" "${ARGS[@]}" > "$LOG" 2>&1 &
+# setsid detaches from the controlling tty AND creates a new session, so the
+# process survives SSH logout even when systemd-logind has KillUserProcesses=yes.
+# Stronger than plain nohup which only ignores SIGHUP.
+setsid nohup python3 "$TRAIN" "${ARGS[@]}" > "$LOG" 2>&1 < /dev/null &
 PID=$!
 echo "$PID" > "$PIDFILE"
 disown
