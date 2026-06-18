@@ -35,7 +35,7 @@ from django.utils import timezone
 logger = logging.getLogger(__name__)
 
 HOURS_PER_DAY = 12
-HOUR_MIN, HOUR_MAX = 8, 19
+HOUR_MIN, HOUR_MAX = 8, 20   # daytime window standardised to 8-20 (incl. the 20:00 bin), matching the dataset + research pipeline
 
 OCCUPANCY_THRESHOLDS = [
     (0.75, 'HIGH'),
@@ -376,7 +376,13 @@ class TFTService:
                     continue
                 name = candidate.name
                 if name in configured or name in self._discovered:
-                    continue
+                    # An XGB set sharing a TFT set's name (same run, two model
+                    # families) is kept under an `xgb_` prefix so both are servable.
+                    if kind == 'xgb' and f"xgb_{name}" not in self._discovered \
+                            and f"xgb_{name}" not in configured:
+                        name = f"xgb_{name}"
+                    else:
+                        continue
                 self._discovered[name] = candidate
                 self._set_kind[name] = kind
                 logger.info(f"Auto-discovered {kind} set: {name}")
@@ -712,7 +718,7 @@ class TFTService:
     def _predict_xgb(self, webcam, days, since=None, model_set=None, model_key=None):
         """Castelle-style XGB prediction: each of the H rows of feature history
         produces one prediction at offset H ahead, filling the daytime window
-        last_real+1 .. last_real+H (daytime hours 8-19 only)."""
+        last_real+1 .. last_real+H (daytime hours 8-20 only)."""
         models = self.model_sets[model_set]
         model_key = model_key if model_key and model_key in models else self.select_model(days, model_set=model_set)
         if not model_key or model_key not in models:

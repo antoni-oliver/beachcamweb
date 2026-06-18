@@ -72,6 +72,8 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import mean_absolute_error, r2_score
 
+from crowd_outliers import cap_outliers, series_p90_thresholds  # canonical P90 cap
+
 warnings.filterwarnings("ignore")
 
 SEED = 42
@@ -92,8 +94,11 @@ SELECTED_FUTR = TEMPORAL_FUTR + FUTR_WEATHER
 INPUT_SIZE = 48                   # default; can be overridden per trial
 NF_TRIAL_MAX_STEPS = 500          # enough training for HP behavior analysis, not just ranking
 NF_FINAL_MAX_STEPS = 1500         # full training for the best HP
-INPUT_SIZE_POOL = [48, 72, 96, 120]   # daytime-hour context windows
-BATCH_SIZE_POOL = [16, 32, 64, 128]    # A6000 has 48 GiB; 128 fits TFT@h=180
+# Stage-2 search (capped data): stage-1 pool was [48,72,96,120] and the optimum
+# pinned at the LOWER edge (48) for ~all models/horizons, so stage 2 extends the
+# window DOWNWARD (12/24/36 daytime hrs = 1-3 days) and drops 96/120 (never best).
+INPUT_SIZE_POOL = [12, 24, 36, 48, 72]   # daytime-hour context windows
+BATCH_SIZE_POOL = [32, 64]               # stage-1 optimum was 64; trimmed from [16..128]
 OPTUNA_STARTUP_TRIALS = 30        # random trials before TPE kicks in — broader search-space coverage
 
 _OPTUNA_STORAGE_URL: str | None = None
@@ -174,6 +179,11 @@ def load_csvs(data_dir: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
 
     log(f"Cache 2022:  {len(cache):,} rows, {cache['unique_id'].nunique()} beaches")
     log(f"Django 2025: {len(django):,} rows, {django['unique_id'].nunique()} beaches")
+
+    # Per-series P90 outlier cap on real y, shared ceiling across both eras.
+    _thr = series_p90_thresholds(pd.concat([cache, django], ignore_index=True))
+    cache, _ = cap_outliers(cache.copy(), thresholds=_thr)
+    django, _ = cap_outliers(django.copy(), thresholds=_thr)
     return cache, django
 
 
@@ -188,8 +198,15 @@ def _calendar(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def build_panels(cache: pd.DataFrame, django: pd.DataFrame,
-                  test_start: str, test_end: str):
-    """Train = full 2022 cache; Test = django window. Daytime 8-20 on both."""
+                  test_start: str, test_end: str, regime: str = "cross_year"):
+    """Build (train, test, static_df). Daytime 8-20; cumcount ds (gap-safe).
+
+    regime="cross_year" (Comparison 1): train = full 2022 cache; test = django
+        window. Cross-era generalisation — the prediction context is a year old.
+    regime="all_data" (Comparison-2 servable model): train = 2022 cache + django
+        rows strictly BEFORE the test window (2025 spring → recent in-distribution
+        context); test = django window. This is the deployable model for run_a2
+        S2/S3."""
     train = _calendar(cache.copy())
     train = train.loc[train["hour"].between(8, 20)].dropna(subset=["y"]).copy()
     train["original_id"] = train["unique_id"]
@@ -203,6 +220,18 @@ def build_panels(cache: pd.DataFrame, django: pd.DataFrame,
     test["original_id"] = test["unique_id"]
     test["unique_id"] = test["unique_id"].astype(str)
     test["period"] = "django_2025"
+
+    if regime == "all_data":
+        # Operational: also train on django rows BEFORE the test window (recent,
+        # in-distribution context) — no leakage (strictly < test_start).
+        dj = _calendar(django.copy())
+        pre = dj.loc[(dj["ds"] < test_start) & (dj["hour"].between(8, 20))] \
+                .dropna(subset=["y"]).copy()
+        pre["original_id"] = pre["unique_id"]
+        pre["unique_id"] = pre["unique_id"].astype(str)
+        pre["period"] = "django_pre"
+        train = pd.concat([train, pre], ignore_index=True)
+        log(f"[all_data] train = cache_2022 + django<{test_start}: {len(train):,} rows")
 
     # Intersect by unique_id so each test beach has training context
     overlap = sorted(set(train["unique_id"]) & set(test["unique_id"]))
@@ -364,11 +393,11 @@ def _nf_split_train(train_df: pd.DataFrame, horizon: int) -> tuple[pd.DataFrame,
             pd.concat(inner_val, ignore_index=True))
 
 
-_HIDDEN_SIZES = [32, 64, 96, 128, 192, 256, 384, 512]
+_HIDDEN_SIZES = [32, 64, 96, 128, 192, 256]   # stage-2: 384/512 never best, dropped
 # Common divisors of every entry in _HIDDEN_SIZES — sampled as a flat dimension
 # so n_head shows up as a single axis in the Optuna dashboard hyperparameter
 # importance chart. Trade-off: 12 and 24 are dropped (they don't divide 32/64/128/256).
-_HEAD_POOL = [1, 2, 4, 8, 16, 32]
+_HEAD_POOL = [1, 2, 4]                 # stage-2: best heads were 1/2/4; 8+ never best
 _SCALERS = ["robust", "standard", "minmax"]
 
 
@@ -383,14 +412,14 @@ def _nf_objective(trial, model_name, horizon, train_df, val_df, static_df,
         "batch_size":  trial.suggest_categorical("batch_size", BATCH_SIZE_POOL),
         "input_size":  trial.suggest_categorical("input_size", INPUT_SIZE_POOL),
         "scaler":      trial.suggest_categorical("scaler", _SCALERS),
-        "early_stop_patience": trial.suggest_int("early_stop_patience", 20, 50),
+        "early_stop_patience": trial.suggest_int("early_stop_patience", 30, 45),
     }
     if model_name == "tft":
         # Flat single-axis n_head from common divisors of every hidden_size.
         # This keeps n_head visible in the dashboard's parameter-importance plot
         # (instead of being split across n_head_hs64 / n_head_hs128 / ...).
         hp["n_head"] = trial.suggest_categorical("n_head", _HEAD_POOL)
-        hp["attn_dropout"] = trial.suggest_float("attn_dropout", 0.0, 0.3)
+        hp["attn_dropout"] = trial.suggest_float("attn_dropout", 0.1, 0.3)  # stage-2: best ~0.24-0.27, interior
     else:
         hp["encoder_n_layers"] = trial.suggest_int("encoder_n_layers", 1, 4)
         hp["decoder_layers"]   = trial.suggest_int("decoder_layers", 1, 4)
@@ -826,6 +855,12 @@ def parse_args():
                           "+ pipeline_workspace/clean_dataset_backup if both exist.")
     p.add_argument("--models", nargs="*", default=["tft", "lstm", "xgb"],
                     choices=["tft", "lstm", "xgb"])
+    p.add_argument("--regime", choices=["cross_year", "all_data"], default="cross_year",
+                    help="cross_year = train 2022 -> test django (Comparison 1). "
+                         "all_data = train 2022 + django-before-window -> test window "
+                         "(operational, in-distribution; the servable model for run_a2 "
+                         "S2/S3 / Comparison 2). Canonical thesis NUMBERS come from "
+                         "retrain_3models_validated.py; this script's eval is informational.")
     p.add_argument("--horizons", nargs="*", default=list(TARGET_HORIZONS),
                     choices=list(TARGET_HORIZONS))
     p.add_argument("--test-start", default="2025-06-01")
@@ -976,7 +1011,9 @@ def run_one_dataset(args, data_dir: Path, here: Path, nf_root: Path,
 
     cache_df, django_df = load_csvs(data_dir)
     train_df, test_df, static_df = build_panels(
-        cache_df, django_df, args.test_start, args.test_end)
+        cache_df, django_df, args.test_start, args.test_end, regime=args.regime)
+    log(f"Regime:    {args.regime}  (eval here is informational — canonical numbers "
+        f"come from retrain_3models_validated.py; see PROJECT_METHODOLOGY §16.6)")
     capacity = compute_capacity(train_df)
     log(f"Train rows: {len(train_df):,}  Test rows: {len(test_df):,}  "
         f"Beaches: {train_df['unique_id'].nunique()}")

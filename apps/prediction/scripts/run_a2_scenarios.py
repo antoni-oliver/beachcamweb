@@ -56,6 +56,7 @@ from run_a3_dm_wilcoxon import (  # noqa: E402
     attach_ground_truth,
     issuance_dates,
 )
+from crowd_outliers import cap_outliers  # noqa: E402  canonical per-series P90 cap
 
 
 HOURS_PER_DAY = 12
@@ -238,6 +239,9 @@ def main():
     ap.add_argument("--output_dir", default="a2_results")
     ap.add_argument("--normalisation", choices=["p90", "mean"], default="p90",
                     help="relMAE denominator: P90 (canonical, default) or mean (legacy).")
+    ap.add_argument("--cap-k", dest="cap_k", type=float, default=1.5,
+                    help="Cap real y_true above k*P90 per camera before scoring "
+                         "(outlier removal; 0 disables). Predictions never capped.")
     args = ap.parse_args()
 
     out = Path(args.output_dir)
@@ -266,6 +270,12 @@ def main():
         return
 
     combined = pd.concat(all_predictions, ignore_index=True)
+
+    if args.cap_k and args.cap_k > 0:   # cap the REAL y_true only (per camera); never predictions
+        combined["unique_id"] = combined["webcam_slug"]
+        cap_outliers(combined, y_col="y_true", k=args.cap_k)
+        combined.drop(columns=["unique_id"], inplace=True)
+
     combined.to_csv(out / "a2_predictions_all.csv", index=False)
 
     print("\n[info] computing relMAE table …")

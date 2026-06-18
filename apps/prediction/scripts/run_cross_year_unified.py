@@ -69,6 +69,8 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import r2_score
 
+from crowd_outliers import cap_outliers  # canonical per-series P90 outlier cap
+
 warnings.filterwarnings("ignore")
 
 # ─── Django setup — resolves models roots from settings, regardless of cwd ──
@@ -201,6 +203,8 @@ def load_panel(panel_csv: Path) -> pd.DataFrame:
     df["month"] = df["ds"].dt.month
     df["is_weekend"] = df["day_of_week"].isin([5, 6]).astype(int)
     df["is_daytime"] = df["hour"].between(8, 20).astype(int)
+
+    df, _ = cap_outliers(df)          # per-series P90 outlier cap on the real y
 
     print(f"[info] panel: {len(df):,} rows ({int(df['is_daytime'].sum()):,} daytime), "
           f"{df['unique_id'].nunique()} series, "

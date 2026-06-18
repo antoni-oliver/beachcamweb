@@ -41,6 +41,8 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import mean_absolute_error, r2_score
 
+from crowd_outliers import cap_outliers  # canonical per-series P90 outlier cap
+
 warnings.filterwarnings('ignore')
 
 SEED = 42
@@ -140,6 +142,7 @@ def build_panel(cache, django, futr_exog, hist_exog, season_months=None):
     df = df.dropna(subset=['y'])
     if len(df) < before_nan:
         log(f"Dropped {before_nan - len(df):,} rows with NaN y")
+    df, _ = cap_outliers(df)          # per-series P90 outlier cap on the real y
     df['hour'] = df['ds'].dt.hour
     df['day_of_week'] = df['ds'].dt.dayofweek
     df['month'] = df['ds'].dt.month
