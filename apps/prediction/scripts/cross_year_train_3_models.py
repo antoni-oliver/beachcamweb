@@ -94,12 +94,12 @@ SELECTED_FUTR = TEMPORAL_FUTR + FUTR_WEATHER
 INPUT_SIZE = 48                   # default; can be overridden per trial
 NF_TRIAL_MAX_STEPS = 500          # enough training for HP behavior analysis, not just ranking
 NF_FINAL_MAX_STEPS = 1500         # full training for the best HP
-# Stage-2 search (capped data): stage-1 pool was [48,72,96,120] and the optimum
-# pinned at the LOWER edge (48) for ~all models/horizons, so stage 2 extends the
-# window DOWNWARD (12/24/36 daytime hrs = 1-3 days) and drops 96/120 (never best).
-INPUT_SIZE_POOL = [12, 24, 36, 48, 72]   # daytime-hour context windows
-BATCH_SIZE_POOL = [32, 64]               # stage-1 optimum was 64; trimmed from [16..128]
-OPTUNA_STARTUP_TRIALS = 30        # random trials before TPE kicks in — broader search-space coverage
+# Unified search space for the final thesis run: the full union of every range
+# explored across the earlier coarse and fine passes. Nothing is pruned from
+# prior results, so all models are optimised over the same pre-specified space.
+INPUT_SIZE_POOL = [12, 24, 36, 48, 72, 96, 120]   # daytime-hour context windows (1-10 days)
+BATCH_SIZE_POOL = [16, 32, 64, 128]
+OPTUNA_STARTUP_TRIALS = 40        # random trials before TPE kicks in, broader coverage for the larger space
 
 _OPTUNA_STORAGE_URL: str | None = None
 _OPTUNA_RUN_TAG: str = ""
@@ -348,15 +348,15 @@ def _build_nf_model(model_name: str, horizon: int, hp: dict,
 
 def _nf_predict_per_beach(nf, col: str, horizon: int, futr: list[str], hist: list[str],
                           context_df: pd.DataFrame, target_df: pd.DataFrame,
-                          static_df: pd.DataFrame) -> pd.DataFrame:
-    """Per-beach hindcast: context_df tail → futr_df = target_df head."""
+                          static_df: pd.DataFrame, input_size: int = INPUT_SIZE) -> pd.DataFrame:
+    """Per-beach hindcast: context_df tail (input_size rows) -> futr_df = target_df head."""
     train_cols = ["unique_id", "ds", "y"] + list(dict.fromkeys(futr + hist))
     preds = []
     for uid, beach_ctx in context_df.groupby("unique_id"):
         beach_tgt = target_df[target_df["unique_id"] == uid].head(horizon)
         if len(beach_tgt) < horizon:
             continue
-        ctx = beach_ctx.tail(INPUT_SIZE)[train_cols].copy()
+        ctx = beach_ctx.tail(input_size)[train_cols].copy()
         ctx_max_ds = int(ctx["ds"].max())
         futr_df = beach_tgt[["unique_id"] + futr].copy()
         futr_df["ds"] = list(range(ctx_max_ds + 1, ctx_max_ds + 1 + len(futr_df)))
@@ -380,24 +380,30 @@ def _nf_predict_per_beach(nf, col: str, horizon: int, futr: list[str], hist: lis
 
 
 def _nf_split_train(train_df: pd.DataFrame, horizon: int) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Hold out the last `horizon` rows of each beach as inner-val."""
+    """Hold out the last `horizon` rows of each beach as inner-val target.
+
+    inner_train ends right before the held-out window, so its tail is a clean,
+    non-overlapping context for any input_size in INPUT_SIZE_POOL. inner_val is
+    the true continuation, so the inner objective is a genuine forecast metric.
+    """
+    ctx_window = max(INPUT_SIZE_POOL)
     inner_train, inner_val = [], []
     for uid, g in train_df.groupby("unique_id"):
-        if len(g) < INPUT_SIZE + horizon + 5:
+        if len(g) < ctx_window + horizon + 5:
             continue
         inner_train.append(g.iloc[:-horizon].copy())
-        inner_val.append(g.iloc[-(INPUT_SIZE + horizon):].copy())
+        inner_val.append(g.iloc[-horizon:].copy())
     if not inner_train:
         return train_df, train_df.tail(0)
     return (pd.concat(inner_train, ignore_index=True),
             pd.concat(inner_val, ignore_index=True))
 
 
-_HIDDEN_SIZES = [32, 64, 96, 128, 192, 256]   # stage-2: 384/512 never best, dropped
-# Common divisors of every entry in _HIDDEN_SIZES — sampled as a flat dimension
-# so n_head shows up as a single axis in the Optuna dashboard hyperparameter
-# importance chart. Trade-off: 12 and 24 are dropped (they don't divide 32/64/128/256).
-_HEAD_POOL = [1, 2, 4]                 # stage-2: best heads were 1/2/4; 8+ never best
+_HIDDEN_SIZES = [32, 64, 96, 128, 192, 256, 384, 512]   # full union, nothing pruned
+# n_head is sampled as a flat dimension from the common divisors of every entry
+# in _HIDDEN_SIZES, so it stays a single axis in the Optuna dashboard. The safety
+# snap in _build_nf_model fixes any stale trial that breaks divisibility.
+_HEAD_POOL = [1, 2, 4, 8]
 _SCALERS = ["robust", "standard", "minmax"]
 
 
@@ -419,7 +425,7 @@ def _nf_objective(trial, model_name, horizon, train_df, val_df, static_df,
         # This keeps n_head visible in the dashboard's parameter-importance plot
         # (instead of being split across n_head_hs64 / n_head_hs128 / ...).
         hp["n_head"] = trial.suggest_categorical("n_head", _HEAD_POOL)
-        hp["attn_dropout"] = trial.suggest_float("attn_dropout", 0.1, 0.3)  # stage-2: best ~0.24-0.27, interior
+        hp["attn_dropout"] = trial.suggest_float("attn_dropout", 0.0, 0.5)
     else:
         hp["encoder_n_layers"] = trial.suggest_int("encoder_n_layers", 1, 4)
         hp["decoder_layers"]   = trial.suggest_int("decoder_layers", 1, 4)
@@ -434,87 +440,14 @@ def _nf_objective(trial, model_name, horizon, train_df, val_df, static_df,
     except Exception as e:
         log(f"  [trial fail] {e}", "WARN")
         raise optuna.TrialPruned(f"fit failed: {e}")
-    pred = _nf_predict_per_beach(nf, col, horizon, futr, hist, train_df, val_df, static_df)
+    pred = _nf_predict_per_beach(nf, col, horizon, futr, hist, train_df, val_df,
+                                 static_df, input_size=int(hp["input_size"]))
     if pred.empty:
         raise optuna.TrialPruned("empty predictions on inner-val")
     rel, _ = relmae_per_beach(pred, capacity)
     if np.isnan(rel):
         raise optuna.TrialPruned("nan relMAE")
     return float(rel)
-
-
-def _nf_train_predict(model_name: str, horizon: int, train_df: pd.DataFrame,
-                      test_df: pd.DataFrame, static_df: pd.DataFrame,
-                      futr: list[str], hist: list[str]) -> pd.DataFrame:
-    from neuralforecast import NeuralForecast
-    from neuralforecast.losses.pytorch import MAE
-
-    if model_name == "tft":
-        from neuralforecast.models import TFT as ModelCls
-        model = ModelCls(
-            h=horizon, input_size=INPUT_SIZE,
-            hidden_size=FIXED_HP["hidden_size"], n_head=FIXED_HP["n_head"],
-            learning_rate=FIXED_HP["lr"], batch_size=32, max_steps=500,
-            early_stop_patience_steps=30, scaler_type="minmax", loss=MAE(),
-            futr_exog_list=futr or None, hist_exog_list=hist or None,
-            stat_exog_list=STAT_EXOG,
-            dropout=FIXED_HP["dropout"], attn_dropout=FIXED_HP["dropout"],
-            val_check_steps=50, random_seed=SEED, start_padding_enabled=True,
-        )
-        col = "TFT"
-    else:
-        from neuralforecast.models import LSTM as ModelCls
-        model = ModelCls(
-            h=horizon, input_size=INPUT_SIZE,
-            encoder_n_layers=2,
-            encoder_hidden_size=FIXED_HP["hidden_size"],
-            decoder_hidden_size=FIXED_HP["hidden_size"],
-            decoder_layers=2,
-            encoder_dropout=FIXED_HP["dropout"],
-            learning_rate=FIXED_HP["lr"], batch_size=32, max_steps=500,
-            early_stop_patience_steps=30, scaler_type="minmax", loss=MAE(),
-            futr_exog_list=futr or None, hist_exog_list=hist or None,
-            stat_exog_list=STAT_EXOG,
-            val_check_steps=50, random_seed=SEED, start_padding_enabled=True,
-        )
-        col = "LSTM"
-
-    nf = NeuralForecast(models=[model], freq=1)
-    train_cols = ["unique_id", "ds", "y"] + list(dict.fromkeys(futr + hist))
-    nf.fit(df=train_df[train_cols], static_df=static_df, val_size=horizon)
-
-    # For each beach, predict the first `horizon` test rows using the tail of
-    # train as context — train and test share the cumcount-integer index per
-    # series, so feeding df=train_tail + futr_df=test_head works.
-    preds = []
-    for uid, beach_train in train_df.groupby("unique_id"):
-        beach_test = test_df[test_df["unique_id"] == uid].head(horizon)
-        if len(beach_test) < horizon:
-            continue
-        ctx = beach_train.tail(INPUT_SIZE)[train_cols]
-        # NF expects test ds to continue from train ds; remap test ds onto the
-        # train timeline by appending input_size + 1..h.
-        ctx_max_ds = int(ctx["ds"].max())
-        futr_df = beach_test[["unique_id", "ds"] + futr].copy()
-        futr_df["ds"] = list(range(ctx_max_ds + 1, ctx_max_ds + 1 + len(futr_df)))
-        try:
-            out = nf.predict(df=ctx, futr_df=futr_df, static_df=static_df)
-        except Exception as e:
-            log(f"  [warn] predict failed for {uid}: {e}", "WARN")
-            continue
-        if col not in out.columns:
-            cands = [c for c in out.columns if c not in {"unique_id", "ds"}]
-            if not cands:
-                continue
-            out = out.rename(columns={cands[0]: col})
-        out = out[["unique_id", col]].reset_index(drop=True)
-        out["y_pred"] = out[col].clip(lower=0)
-        out["y_true"] = beach_test["y"].values[: len(out)]
-        out["ds_real"] = beach_test["ds_real"].values[: len(out)]
-        preds.append(out[["unique_id", "ds_real", "y_pred", "y_true"]])
-
-    return pd.concat(preds, ignore_index=True) if preds else pd.DataFrame(
-        columns=["unique_id", "ds_real", "y_pred", "y_true"])
 
 
 def save_nf_artifacts(nf_save_path: Path, horizon: int, futr: list[str],
@@ -527,7 +460,7 @@ def save_nf_artifacts(nf_save_path: Path, horizon: int, futr: list[str],
         "horizon":      int(horizon),
         "horizon_days": int(horizon // HOURS_PER_DAY),
         "hours_per_day": HOURS_PER_DAY,
-        "input_size":   INPUT_SIZE,
+        "input_size":   int(best_hp.get("input_size", INPUT_SIZE)),
         "futr_exog":    futr,
         "hist_exog":    hist,
         "stat_exog":    STAT_EXOG,
@@ -553,7 +486,8 @@ def _train_eval_nf_seed(model_name, horizon, best_hp, futr, hist,
     train_cols = ["unique_id", "ds", "y"] + list(dict.fromkeys(futr + hist))
     nf.fit(df=train_df[train_cols], static_df=static_df, val_size=horizon)
     pred_df = _nf_predict_per_beach(nf, col, horizon, futr, hist, train_df,
-                                     test_df, static_df)
+                                     test_df, static_df,
+                                     input_size=int(best_hp.get("input_size", INPUT_SIZE)))
     if pred_df.empty:
         return nf, pred_df, None
     overall_rel, _ = relmae_per_beach(pred_df, capacity)
@@ -865,8 +799,8 @@ def parse_args():
                     choices=list(TARGET_HORIZONS))
     p.add_argument("--test-start", default="2025-06-01")
     p.add_argument("--test-end",   default="2025-08-31")
-    p.add_argument("--trials", type=int, default=50,
-                    help="Optuna trials per (model, horizon). Default 50.")
+    p.add_argument("--trials", type=int, default=100,
+                    help="Optuna trials per (model, horizon). Default 100 for the full search space.")
     p.add_argument("--multi-seed", type=int, default=1, dest="multi_seed",
                     help="Refit best HP with N seeds for stability check. "
                           "Default 1 (only main seed). Recommended 5 for thesis. "
