@@ -270,6 +270,10 @@ class Command(BaseCommand):
                     slug = cam.camera_slug
                     if slug not in cam_by_day:
                         continue
+                    # OPERATIONAL lens: normalise by max_crowd_count (the deployment
+                    # capacity), NOT the statistical per-series P90 of actual counts used
+                    # for the cross-family headline. These numbers answer "which deployed
+                    # snapshot to serve", and must not be presented as that headline.
                     max_crowd = cam.max_crowd_count
                     by_day = cam_by_day[slug]
                     first_snap = cam_first_snapshot.get(slug)

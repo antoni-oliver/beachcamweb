@@ -1,8 +1,8 @@
 """
 TFT Prediction Service — loads 3 pre-trained models and serves predictions.
 
-Models: 3-day (H=36), 14-day (H=168), 30-day (H=360)
-Auto-selects model based on requested horizon.
+Models: 3-day (H=36), 10-day (H=120), 15-day (H=180), on the 12 daytime
+hours/day frame (8:00-20:00). Auto-selects model based on requested horizon.
 """
 
 import hashlib

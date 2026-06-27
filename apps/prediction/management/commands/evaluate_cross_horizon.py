@@ -214,6 +214,8 @@ class Command(BaseCommand):
                             window_start += stride
                             continue
 
+                        # OPERATIONAL lens: crowd_count / max_crowd_count (deployment
+                        # capacity), NOT the statistical per-series-P90 headline denominator.
                         pred_map = {
                             p['timestamp'][:16]: p['crowd_count'] / max_crowd
                             for p in pred.get('predictions', [])

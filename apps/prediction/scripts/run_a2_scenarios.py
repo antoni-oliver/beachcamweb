@@ -177,10 +177,14 @@ def compute_relmae_table(df: pd.DataFrame, capacity_lookup: dict,
     - summer: rows whose ds-month ∈ {6, 7, 8}
 
     Normalisation modes:
-      - "p90"  : per-camera P90 from WebCam.max_crowd_count (canonical, matches
-                 operational classification thresholds and production CV). Rows
-                 whose webcam lacks P90 fall back to P90 computed on-the-fly
-                 from y_true (NEVER to mean).
+      - "p90"  : per-camera WebCam.max_crowd_count --- the OPERATIONAL capacity
+                 (P90 of the PREDICTED count over full history), matching the
+                 four-level classification thresholds and the production CV.
+                 This is the operational lens, NOT the statistical per-series P90
+                 of ACTUAL daytime counts used for the cross-family headline; the
+                 two must never be mixed in one table. Cameras lacking
+                 max_crowd_count are DROPPED (not back-filled with an actual-count
+                 P90), so one table uses exactly one denominator.
       - "mean" : per-camera mean of y_true (legacy/debug). All cameras included.
     """
     df = df.dropna(subset=["y_true", "y_pred"]).copy()
@@ -193,12 +197,13 @@ def compute_relmae_table(df: pd.DataFrame, capacity_lookup: dict,
         df["capacity"] = df["webcam_slug"].map(capacity_lookup)
         missing = df["capacity"].isna() | (df["capacity"] <= 0)
         if missing.any():
-            fallback_p90 = df.loc[missing].groupby("webcam_slug")["y_true"].transform(
-                lambda s: s.quantile(0.9))
+            # Drop cameras without an operational max_crowd_count instead of
+            # back-filling with an actual-count P90: mixing the operational and
+            # statistical denominators in one table is the error the thesis flags.
             n_miss = df.loc[missing, "webcam_slug"].nunique()
-            print(f"[info] {n_miss} webcam(s) lack Django max_crowd_count; "
-                  f"using P90 from y_true for {missing.sum()} rows")
-            df.loc[missing, "capacity"] = fallback_p90
+            print(f"[info] dropping {n_miss} webcam(s) without Django max_crowd_count "
+                  f"({int(missing.sum())} rows) to keep one operational denominator")
+            df = df[~missing].copy()
     else:
         df["capacity"] = df.groupby("webcam_slug")["y_true"].transform("mean")
 
