@@ -185,6 +185,8 @@ def compute_rel_mae(cv_df, capacity_dict):
         p90 = max(capacity_dict.get(uid, float(sub['y'].quantile(0.9))), 1)
         results.append({'unique_id': uid, 'P90': p90, 'MAE': mae, 'RMSE': rmse, 'R2': r2, 'relMAE': mae / p90})
     rdf = pd.DataFrame(results)
+    if rdf.empty:                       # empty CV (no series scored) -> worst score, never picked, no KeyError
+        return float('inf'), rdf
     return rdf['relMAE'].mean(), rdf
 
 
