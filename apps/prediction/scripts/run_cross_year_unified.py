@@ -2,6 +2,14 @@
 """
 Unified cross-year training & ranking — TFT, LSTM, XGBoost side-by-side.
 
+DEPRECATED — DO NOT USE FOR THE CROSS-FAMILY HEADLINE. This script builds the
+panel on the continuous freq="h" night-padded frame (so H=180 = 7.5 calendar
+days, not the 15 daytime days the product serves), runs the Castelle h-step
+isolated-point XGB (cannot share forecast origins), scores families on unmatched
+rows, and runs no Diebold--Mariano test. Use retrain_daytime.py in this dir
+instead — the canonical daytime comparator (per-series-P90 relMAE, recursive XGB,
+matched rows, DM). Kept only for historical reference.
+
 Goal
 ====
 Reproduce the exact same training and evaluation protocol across three model
