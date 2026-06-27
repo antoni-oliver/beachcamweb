@@ -11,9 +11,12 @@ Phases:
     Phase 0 (optional): Horizon limit analysis (12h→168h)
     Per horizon (3d, 10d, 15d):
         Phase 1: Hist feature selection (backward elimination, keep 3)
-        Phase 3: Dropout sweep (futr weather fixed: temperature, apparent_temp, cloud_cover)
+        Phase 3: Focused Optuna search over the high-importance HPs
+                 (hidden_size, lr, dropout, scaler_type); futr weather fixed
+                 (temperature, apparent_temp, cloud_cover)
         Phase 4: Deploy model
-    Fixed: hidden_size=64, n_head=4, lr=0.001, input_size=48
+    Searched (fANOVA high-importance): hidden_size, lr, dropout, scaler_type
+    Fixed (fANOVA low-importance): n_head=4, input_size=48, batch_size=32
 
 Output structure:
     <prefix>_<timestamp>/
@@ -49,6 +52,7 @@ import warnings
 from datetime import datetime
 
 import numpy as np
+import optuna
 import pandas as pd
 from sklearn.metrics import mean_absolute_error, r2_score
 
@@ -215,7 +219,7 @@ def _worker_main(work_dir):
         learning_rate=kw.get('lr', 1e-3), batch_size=32,
         max_steps=kw.get('max_steps', 500) if not os.environ.get('TFT_LIGHT') else min(kw.get('max_steps', 500), 50),
         early_stop_patience_steps=20 if mode == 'cv' else 30,
-        scaler_type='minmax', loss=MAE(),
+        scaler_type=kw.get('scaler_type', 'minmax'), loss=MAE(),
         futr_exog_list=futr if futr else None,
         hist_exog_list=hist if hist else None,
         stat_exog_list=STAT_EXOG,
@@ -484,45 +488,72 @@ def phase2(panel_df, static_df, futr, hist, horizon, results_dir, cuda_device=''
     return best
 
 
-# ── Phase 3: HP Optimization (per horizon) ─��────────────────────────────────
+# ── Phase 3: HP Optimization (per horizon) ──────────────────────────────────
 
-FIXED_HP = {'hidden_size': 64, 'n_head': 4, 'lr': 0.001}
+# Per the thesis fANOVA, hidden_size / lr / dropout / scaler_type are the
+# high-importance axes, so Phase 3 SEARCHES them. n_head, input_size and
+# batch_size are low-importance, so they are FIXED at the values below. The
+# cross-year campaign relocated the optima, hence the wider search ranges.
+FIXED_HP = {'n_head': 4}  # input_size=48 and batch_size=32 are fixed in the worker
 TEMPORAL_FUTR = ['hour', 'day_of_week', 'month', 'is_weekend', 'is_summer']
 FUTR_WEATHER = ['om_temperature_2m', 'om_apparent_temperature', 'om_cloud_cover']
 SELECTED_FUTR = TEMPORAL_FUTR + FUTR_WEATHER
 DROPOUT_VALUES = [0.0, 0.02, 0.05, 0.08, 0.1, 0.15, 0.2, 0.25, 0.3]
+HIDDEN_SIZE_VALUES = [64, 96, 128, 192, 256]
+SCALER_VALUES = ['minmax', 'standard', 'robust']
+LR_RANGE = (4e-5, 2e-3)
+N_TRIALS = 30
+N_TRIALS_LIGHT = 3
 
 
 def phase3(panel_df, static_df, futr_available, hist, best_input, horizon, results_dir, cuda_device=''):
-    log(f"PHASE 3: Dropout Sweep (H={horizon})")
-    log(f"  Fixed HP: {FIXED_HP}")
+    log(f"PHASE 3: Focused Optuna HP Search (H={horizon})")
+    log(f"  Fixed HP: {FIXED_HP} (n_head fixed; input_size=48, batch_size=32 fixed in worker)")
+    log(f"  Searched: hidden_size, lr, dropout, scaler_type")
     log(f"  Fixed futr: {SELECTED_FUTR}")
 
     futr = [f for f in SELECTED_FUTR if f in futr_available]
     log(f"  Available futr: {futr}")
 
-    dropout_log = []
-    best_dropout_rel = float('inf')
-    best_dropout = 0.05
+    n_trials = N_TRIALS_LIGHT if os.environ.get('TFT_LIGHT') else N_TRIALS
+    log(f"  Trials: {n_trials}")
 
-    for d in DROPOUT_VALUES:
-        hp_test = {**FIXED_HP, 'dropout': d}
+    trial_log = []
+
+    def objective(trial):
+        hp_test = {
+            **FIXED_HP,
+            'hidden_size': trial.suggest_categorical('hidden_size', HIDDEN_SIZE_VALUES),
+            'lr': trial.suggest_float('lr', LR_RANGE[0], LR_RANGE[1], log=True),
+            'dropout': trial.suggest_categorical('dropout', DROPOUT_VALUES),
+            'scaler_type': trial.suggest_categorical('scaler_type', SCALER_VALUES),
+        }
         t0 = time.time()
-        try:
-            rel, _, _, _ = safe_quick_cv(
-                panel_df, static_df, futr, hist, best_input, horizon,
-                cuda_device=cuda_device, **hp_test)
-            log(f"    dropout={d:.2f} -> relMAE={rel:.5f} ({time.time()-t0:.0f}s)")
-            dropout_log.append({'dropout': d, 'relMAE': rel})
-            if rel < best_dropout_rel:
-                best_dropout_rel, best_dropout = rel, d
-        except Exception as e:
-            log(f"    dropout={d:.2f} -> FAILED: {e}")
+        rel, _, _, _ = safe_quick_cv(
+            panel_df, static_df, futr, hist, best_input, horizon,
+            cuda_device=cuda_device, **hp_test)
+        log(f"    trial {trial.number}: hidden={hp_test['hidden_size']} "
+            f"lr={hp_test['lr']:.2e} dropout={hp_test['dropout']:.2f} "
+            f"scaler={hp_test['scaler_type']} -> relMAE={rel:.5f} ({time.time()-t0:.0f}s)")
+        trial_log.append({**{k: hp_test[k] for k in ('hidden_size', 'lr', 'dropout', 'scaler_type')},
+                          'relMAE': rel})
+        return rel
 
-    pd.DataFrame(dropout_log).to_csv(f'{results_dir}/dropout_sweep_H{horizon}.csv', index=False)
+    study = optuna.create_study(
+        direction='minimize',
+        sampler=optuna.samplers.TPESampler(seed=SEED))
+    study.optimize(objective, n_trials=n_trials, catch=(Exception,))
 
-    best_hp = {**FIXED_HP, 'dropout': best_dropout}
-    log(f"  OPTIMAL H={horizon}: dropout={best_dropout} relMAE={best_dropout_rel:.5f}")
+    pd.DataFrame(trial_log).to_csv(f'{results_dir}/hp_search_H{horizon}.csv', index=False)
+
+    completed = study.get_trials(deepcopy=False, states=(optuna.trial.TrialState.COMPLETE,))
+    if not completed:
+        log(f"  All trials failed for H={horizon}, falling back to defaults", 'WARN')
+        best_hp = {**FIXED_HP, 'hidden_size': 64, 'lr': 1e-3, 'dropout': 0.05, 'scaler_type': 'minmax'}
+        return futr, best_hp
+
+    best_hp = {**FIXED_HP, **study.best_params}
+    log(f"  OPTIMAL H={horizon}: {study.best_params} relMAE={study.best_value:.5f}")
 
     return futr, best_hp
 
@@ -613,7 +644,7 @@ def phase4(label, horizon, cache_df, django_df, all_futr, om_hist,
         'futr_exog': futr,
         'hist_exog': hist,
         'stat_exog': STAT_EXOG,
-        'hp': {k: (float(v) if isinstance(v, float) else int(v)) for k, v in best_hp.items()},
+        'hp': {k: (v if isinstance(v, str) else float(v) if isinstance(v, float) else int(v)) for k, v in best_hp.items()},
         'model_type': 'hourly',
         'season_relMAE': float(season_rel),
         'overall_relMAE': float(rel_m),
@@ -812,20 +843,15 @@ def main(args):
 
         best_input = 48
 
-        # Phase 3: Dropout sweep
-        if args.light:
+        # Phase 3: Focused Optuna HP search (light mode self-clamps trials)
+        try:
+            sel_futr, best_hp = phase3(
+                panel_df, static_df, futr_exog, sel_hist, best_input, horizon, results_dir,
+                cuda_device=cuda_device)
+        except Exception as e:
+            log(f"Phase 3 failed for {label}: {e}", 'ERROR')
             sel_futr = SELECTED_FUTR
-            best_hp = {**FIXED_HP, 'dropout': 0.05}
-            log(f"  [light] Skipping dropout sweep, using fixed HP: {best_hp}")
-        else:
-            try:
-                sel_futr, best_hp = phase3(
-                    panel_df, static_df, futr_exog, sel_hist, best_input, horizon, results_dir,
-                    cuda_device=cuda_device)
-            except Exception as e:
-                log(f"Phase 3 failed for {label}: {e}", 'ERROR')
-                sel_futr = SELECTED_FUTR
-                best_hp = {**FIXED_HP, 'dropout': 0.05}
+            best_hp = {**FIXED_HP, 'hidden_size': 64, 'lr': 1e-3, 'dropout': 0.05, 'scaler_type': 'minmax'}
 
         horizon_configs[label] = {
             'futr': sel_futr, 'hist': sel_hist,
