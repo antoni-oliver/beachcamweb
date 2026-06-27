@@ -894,7 +894,7 @@ def plot_importance_grid(imp_by_cell: dict[str, pd.DataFrame], out_path: Path):
 # ─────────────────────────────────────────────────────────────────────────────
 
 PRIOR_OPTUNA_DB = Path(__file__).resolve().parent / "optuna" / "cross_year.db"
-PRIOR_CAMPAIGN = "cross_year_backup_20260601_125143"  # backup-panel 200-trial run
+PRIOR_CAMPAIGN = "cy_capped_backup_20260623_115630"  # cross-year capped 150-trial campaign (TFT/LSTM/XGB x 3/10/15d), bundled in scripts/optuna/cross_year.db
 
 
 def load_prior_best(family: str, horizon_days: int, campaign: str = None):
