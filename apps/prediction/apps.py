@@ -19,17 +19,27 @@ class PredictionConfig(AppConfig):
             return
 
         def _warmup():
-            try:
-                from apps.prediction.tft_service import tft_service
-                from django.conf import settings
-                for name, base_dir in getattr(settings, 'TFT_MODEL_SETS', {}).items():
+            from apps.prediction.tft_service import tft_service
+            from django.conf import settings
+
+            def _try_load(name, base_dir):
+                # Load each set independently so one missing/broken set (e.g. an
+                # XGB set with no nf_model dir) does not abort the whole warmup.
+                if name in tft_service.model_sets:
+                    return
+                try:
                     tft_service.load_models(base_dir=base_dir, set_name=name)
-                for name, base_dir in tft_service._discovered.items():
-                    if name not in tft_service.model_sets:
-                        tft_service.load_models(base_dir=base_dir, set_name=name)
-                logger.info("TFT models loaded.")
+                except Exception:
+                    logger.exception("skipping model set '%s' (failed to load)", name)
+
+            for name, base_dir in getattr(settings, 'TFT_MODEL_SETS', {}).items():
+                _try_load(name, base_dir)
+            for name, base_dir in list(tft_service._discovered.items()):
+                _try_load(name, base_dir)
+            logger.info("TFT warmup done: %d set(s) loaded.", len(tft_service.model_sets))
+            try:
                 tft_service.warm_forecast_cache()
             except Exception:
-                logger.exception("TFT warmup failed.")
+                logger.exception("forecast cache warmup failed.")
 
         threading.Thread(target=_warmup, name='tft-warmup', daemon=True).start()
