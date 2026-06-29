@@ -129,8 +129,8 @@ class Command(BaseCommand):
             eval_json_path = Path(settings.BASE_DIR) / eval_json_path
         cap_k = options['cap_k']
         # Cap changes the actuals, so capped/uncapped runs use separate caches.
-        cache_name = (f'model_evaluation_cache_cap{cap_k}.json' if cap_k and cap_k > 0
-                      else 'model_evaluation_cache.json')
+        cache_name = (f'model_evaluation_cache_cap{cap_k}_p90.json' if cap_k and cap_k > 0
+                      else 'model_evaluation_cache_p90.json')
         cache_path = eval_json_path.with_name(cache_name)
 
         if options['clear_cache']:
@@ -270,11 +270,11 @@ class Command(BaseCommand):
                     slug = cam.camera_slug
                     if slug not in cam_by_day:
                         continue
-                    # OPERATIONAL lens: normalise by max_crowd_count (the deployment
-                    # capacity), NOT the statistical per-series P90 of actual counts used
-                    # for the cross-family headline. These numbers answer "which deployed
-                    # snapshot to serve", and must not be presented as that headline.
-                    max_crowd = cam.max_crowd_count
+                    # STATISTICAL lens: normalise by the per-series P90 of (capped) actual
+                    # daytime counts — the same denominator as the cross-family headline /
+                    # thesis metric, so the ranking matches the reported relMAE. (Operational
+                    # max_crowd_count is the alternative "which snapshot to serve" reading.)
+                    denom = max(float(cam_p90.get(slug, 0.0)), 1.0)
                     by_day = cam_by_day[slug]
                     first_snap = cam_first_snapshot.get(slug)
                     window_start = global_start
@@ -317,7 +317,7 @@ class Command(BaseCommand):
                             continue
 
                         pred_by_ts = {
-                            p['timestamp'][:16]: p['crowd_count'] / max_crowd
+                            p['timestamp'][:16]: p['crowd_count'] / denom
                             for p in pred.get('predictions', [])
                             if p.get('available') and p.get('crowd_count') is not None
                         }
@@ -331,7 +331,7 @@ class Command(BaseCommand):
                             key = a['timestamp'][:16]
                             if key not in pred_by_ts:
                                 continue
-                            err = abs(pred_by_ts[key] - a['crowd_count'] / max_crowd)
+                            err = abs(pred_by_ts[key] - a['crowd_count'] / denom)
                             window_errors['all'].append(err)
                             if in_summer:
                                 window_errors['summer'].append(err)

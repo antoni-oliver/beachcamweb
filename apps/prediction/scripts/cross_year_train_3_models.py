@@ -77,11 +77,11 @@ from crowd_outliers import cap_outliers, series_p90_thresholds  # canonical P90 
 warnings.filterwarnings("ignore")
 
 SEED = 42
-HOURS_PER_DAY = 12
+HOURS_PER_DAY = 13
 SEASON_MONTHS = {4, 5, 6, 7, 8, 9}
 SUMMER_MONTHS = {6, 7, 8}
 
-TARGET_HORIZONS = {"3d": 36, "10d": 120, "15d": 180}
+TARGET_HORIZONS = {"3d": 39, "10d": 130, "15d": 195}
 
 # Shared NF feature schema — matches tft_train_3_models conventions
 STAT_EXOG = ["stat_mean_y", "stat_cv"]
@@ -289,8 +289,9 @@ def relmae_per_beach(pred: pd.DataFrame, capacity: dict) -> tuple[float, pd.Data
 # ── NeuralForecast models (TFT / LSTM) ──────────────────────────────────────
 
 _NF_TRAINER_KWARGS = {
-    # Force single-GPU. Lightning otherwise picks up all visible CUDA devices
-    # and tries DDP, which crashes when NVML is broken on the host.
+    # Force CPU: on the Mac, Lightning otherwise auto-selects MPS, which is far
+    # slower than CPU for these small models (per-trial time blows up ~30x).
+    "accelerator": "cpu",
     "devices": 1,
     "num_nodes": 1,
     "enable_model_summary": False,

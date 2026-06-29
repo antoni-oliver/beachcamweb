@@ -81,7 +81,11 @@ def load_all_actuals(cam, since: date, until: date) -> list:
 
 
 def _model_family(set_name: str) -> str:
-    return 'TFT' if set_name.startswith('tft') or set_name.startswith('cross') else 'LSTM'
+    if set_name.startswith('xgb'):
+        return 'XGB'
+    if set_name.startswith('tft') or set_name.startswith('cross'):
+        return 'TFT'
+    return 'LSTM'
 
 
 class Command(BaseCommand):

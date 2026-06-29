@@ -1,7 +1,7 @@
 """
 TFT Prediction Service — loads 3 pre-trained models and serves predictions.
 
-Models: 3-day (H=36), 10-day (H=120), 15-day (H=180), on the 12 daytime
+Models: 3-day (H=39), 10-day (H=130), 15-day (H=195), on the 13 daytime
 hours/day frame (8:00-20:00). Auto-selects model based on requested horizon.
 """
 
@@ -15,6 +15,7 @@ from pathlib import Path
 import holidays as _holidays
 import numpy as np
 import pandas as pd
+import torch
 from django.core.cache import cache
 from django.utils.timezone import make_aware
 
@@ -34,7 +35,7 @@ from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
-HOURS_PER_DAY = 12
+HOURS_PER_DAY = 13
 HOUR_MIN, HOUR_MAX = 8, 20   # daytime window standardised to 8-20 (incl. the 20:00 bin), matching the dataset + research pipeline
 
 OCCUPANCY_THRESHOLDS = [
@@ -84,9 +85,9 @@ STATIC_FEATURE_BUILDERS = {
 }
 
 MODEL_CONFIGS = {
-    '3d':  {'dir': 'tft_model_3d',  'horizon': 36,  'max_days': 3},
-    '10d': {'dir': 'tft_model_10d', 'horizon': 120, 'max_days': 10},
-    '15d': {'dir': 'tft_model_15d', 'horizon': 180, 'max_days': 15},
+    '3d':  {'dir': 'tft_model_3d',  'horizon': 39,  'max_days': 3},
+    '10d': {'dir': 'tft_model_10d', 'horizon': 130, 'max_days': 10},
+    '15d': {'dir': 'tft_model_15d', 'horizon': 195, 'max_days': 15},
 }
 
 
@@ -156,6 +157,11 @@ class TFTService:
                         d.pop(k, None)
                     d['logger'] = False
                     d['enable_progress_bar'] = False
+                    # Pin a concrete accelerator: CUDA when the host has a GPU,
+                    # otherwise CPU. On the Mac, Lightning would pick MPS with op
+                    # fallback, which crawls (esp. the LSTM); CPU is much faster there.
+                    d['accelerator'] = 'gpu' if torch.cuda.is_available() else 'cpu'
+                    d['devices'] = 1
             if hasattr(model_obj, 'hparams'):
                 for k in BAD_KEYS:
                     model_obj.hparams.pop(k, None)

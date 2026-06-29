@@ -29,3 +29,13 @@ config/local_settings.py
 
 development_db.sqlite3
 **/lightning_logs/
+
+# session/dev artefacts — keep out of the shared repo
+.DS_Store
+**/.DS_Store
+*.log
+*.bak
+*_bak.py
+*_bk.py
+*model_evaluation.json.*
+apps/prediction/a2_*

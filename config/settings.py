@@ -139,7 +139,9 @@ LANGUAGES = [
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-MEDIA_URL = 'media/'
+# Locally (DEBUG) the image files aren't on disk — serve them from the production
+# media server so webcam snapshots / density maps resolve. Prod keeps local media.
+MEDIA_URL = 'https://ocupacioplatges.uib.eu/media/' if DEBUG else 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # run python manage.py collectstatic

@@ -63,13 +63,13 @@ warnings.filterwarnings('ignore')
 SEED = 42
 SEASON_EVAL = [4, 5, 6, 7, 8, 9]
 STAT_EXOG = ['stat_mean_y', 'stat_cv']
-HOURS_PER_DAY = 12
+HOURS_PER_DAY = 13
 
 
 TARGET_HORIZONS = {
-    '3d': 36,
-    '10d': 120,
-    '15d': 180,
+    '3d': 39,
+    '10d': 130,
+    '15d': 195,
 }
 
 
