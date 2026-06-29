@@ -16,6 +16,9 @@ from django.utils.timezone import now
 from datetime import timedelta
 
 from django.views.decorators.cache import cache_page
+from django.core.cache import cache
+from django.utils import timezone as dj_tz
+import numpy as np
 
 from predictions.classes.BayesianPredictor import BayesianPredictor
 from predictions.actions.CustomerPredict import CustomerPredict
@@ -32,6 +35,30 @@ def home(request):
     return render(request, 'core/home.html', context={'cams': beachcams})
 
 
+SEASON_MONTHS = {4, 5, 6, 7, 8, 9}
+
+
+def _season_daytime_p90(cam):
+    """Per-series P90 of actual season-daytime (Apr-Sep, 8-20 local) counts: the
+    thesis statistical denominator. Computed on the fly from the camera's
+    snapshots and cached for a day, so the score uses the same metric as the
+    thesis without persisting anything on the model."""
+    key = f'season_daytime_p90_{cam.camera_slug}'
+    cached = cache.get(key)
+    if cached is not None:
+        return cached
+    vals = []
+    for ts, cc in (Snapshot.objects
+                   .filter(webcam=cam, predicted_crowd_count__isnull=False)
+                   .values_list('ts', 'predicted_crowd_count')):
+        local = dj_tz.localtime(ts)
+        if 8 <= local.hour <= 20 and local.month in SEASON_MONTHS:
+            vals.append(float(cc))
+    p90 = round(float(np.percentile(vals, 90)), 2) if len(vals) >= 50 else 0.0
+    cache.set(key, p90, 60 * 60 * 24)
+    return p90
+
+
 def webcam(request, camera_slug):
     """ Returns ajax_image of latest prediction overimposed on captured image. """
     beachcam = get_object_or_404(WebCam, camera_slug=camera_slug)
@@ -43,7 +70,7 @@ def webcam(request, camera_slug):
     # history_counts = f'[{",".join([str(a) for a in list(history_counts)])}]'
     history = [ [h.ts.timestamp() * 1000, h.predicted_crowd_count]
                for h in beachcam.history() if h.predicted_crowd_count is not None]
-    return render(request, 'core/beach.html', context={'cam': beachcam, 'other_cams': other_beachcams, 'prediction': beachcam.last_prediction, 'history': history})
+    return render(request, 'core/beach.html', context={'cam': beachcam, 'other_cams': other_beachcams, 'prediction': beachcam.last_prediction, 'history': history, 'cam_daytime_p90': _season_daytime_p90(beachcam)})
 
 def analyze_image(request):
     # https://docs.djangoproject.com/en/5.0/topics/forms/
