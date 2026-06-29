@@ -252,6 +252,7 @@
   document.addEventListener('DOMContentLoaded', () => {
     const slug = '{{ cam.camera_slug }}';
     const maxCrowd = {{ cam.max_crowd_count|default:"0" }};
+    const p90 = {{ cam.daytime_p90|default:"0" }};  // per-series daytime P90 (thesis statistical denominator)
 
     const LEVEL_COLORS = {HIGH: '#e74c3c', MEDIUM: '#f39c12', LOW: '#27ae60', VERY_LOW: '#3498db'};
 
@@ -696,11 +697,14 @@
     function computeRelMAE(predBars, actuals) {
       const predMap = {};
       predBars.forEach(p => { predMap[p.value[0]] = p.value[1]; });
+      // Normalise by the per-series daytime P90 (thesis statistical metric);
+      // fall back to max_crowd_count if P90 is not set for this camera.
+      const denom = p90 > 0 ? p90 : maxCrowd;
       let sum = 0, count = 0;
       actuals.forEach(([ts, , raw]) => {
         if (predMap[ts] !== undefined) {
           const predRaw = maxCrowd > 0 ? (predMap[ts] / 100) * maxCrowd : 0;
-          sum += maxCrowd > 0 ? Math.abs(predRaw - raw) / maxCrowd : 0;
+          sum += denom > 0 ? Math.abs(predRaw - raw) / denom : 0;
           count++;
         }
       });

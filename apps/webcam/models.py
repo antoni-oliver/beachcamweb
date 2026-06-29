@@ -22,6 +22,7 @@ class WebCam(models.Model):
     # Cam/probing info
     num_consecutive_failures = models.IntegerField(default=0)
     max_crowd_count = models.IntegerField(default=0)
+    daytime_p90 = models.FloatField(default=0)
     # Image masks
     mask_sand = models.ImageField(upload_to='masks/beach/', blank=True, null=True, help_text="Mask of the beach area (sand, areas with people, etc). For non-movable webcams only.")
     mask_swimming_water = models.ImageField(upload_to='masks/swimming', blank=True, null=True, help_text="Mask of the swimming area (near the beach, shallow waters). For non-movable webcams only.")
