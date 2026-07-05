@@ -13,9 +13,9 @@ pipeline_workspace/clean_dataset_backup/all_clean.csv --protocol cache2022
 
 The companion `retrain_3models_validated.py` reindexes each series to a
 continuous 24h grid (NeuralForecast freq="h"), which silently halves the
-horizon: H=180 continuous hours = 7.5 calendar days, NOT 15. The DEPLOYED models
+horizon: H=195 continuous hours = 8 calendar days, NOT 15. The DEPLOYED models
 (`cross_year_train_3_models.py` + `tft_service.py`) instead use a daytime-only
-integer index (freq=1, night skipped), so H=180 daytime steps ≈ 15 calendar
+integer index (freq=1, night skipped, 13 buckets/day), so H=195 daytime steps = 15 calendar
 days. This script evaluates THAT frame, so the thesis numbers match the product.
 
 Same rigour as retrain_3models_validated: rolling weekly-Monday origins (see only

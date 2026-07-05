@@ -71,8 +71,8 @@ warnings.filterwarnings("ignore")
 # ─────────────────────────────────────────────────────────────────────────────
 
 SEED = 42
-HOURS_PER_DAY = 12  # operational window 8:00-20:00
-HORIZON_HOURS = {3: 36, 10: 120, 15: 180}  # days -> daytime-padded hours
+HOURS_PER_DAY = 13  # operational window 8:00-20:00 inclusive = 13 buckets/day
+HORIZON_HOURS = {3: 39, 10: 130, 15: 195}  # days -> daytime steps at 13 buckets/day
 SEASON_MONTHS = {4, 5, 6, 7, 8, 9}
 SUMMER_MONTHS = {6, 7, 8}
 
@@ -387,7 +387,9 @@ def per_series_rel_mae(df: pd.DataFrame, capacity: dict[str, float],
             r2 = float(r2_score(sub["y_true"], sub["y_pred"]))
         except Exception:
             r2 = float("nan")
-        p90 = max(float(capacity.get(uid, sub["y_true"].quantile(0.9))), 1.0)
+        if uid not in capacity:
+            continue                      # no train-derived capacity -> skip; never fall back to test-window P90 (I3)
+        p90 = max(float(capacity[uid]), 1.0)
         mean_y = float(sub["y_true"].mean())
         rows.append({"unique_id": uid, "n_rows": len(sub), "P90": p90,
                      "MAE": mae, "RMSE": rmse, "R2": r2,
@@ -811,7 +813,8 @@ def dm_pair(matched: pd.DataFrame, col_a: str, col_b: str,
     dm_tft_vs_lstm.py / dm_summer_from_reeval.py.
     """
     sub = matched.dropna(subset=[col_a, col_b, "y_true"]).copy()
-    sub = sub.sort_values(["unique_id"]).reset_index(drop=True)
+    _sort_keys = ["unique_id"] + [c for c in ("issue_date", "ds") if c in sub.columns]
+    sub = sub.sort_values(_sort_keys, kind="stable").reset_index(drop=True)  # stable + temporal: HAC autocov needs time order within each series block
     n = len(sub)
     if n < 10:
         return None
@@ -1388,7 +1391,7 @@ def main():
     ap.add_argument("--quick", action="store_true",
                     help="Partial look: --use-prior-best with seeds=1 (no search).")
     ap.add_argument("--batch-size", dest="batch_size", type=int, default=NF_BATCH_SIZE,
-                    help="NN minibatch size. Lower (8/16) to fit 15d (H=180) on small RAM.")
+                    help="NN minibatch size. Lower (8/16) to fit 15d (H=195) on small RAM.")
     args = ap.parse_args()
 
     if args.quick:                       # fast partial run with best-known params

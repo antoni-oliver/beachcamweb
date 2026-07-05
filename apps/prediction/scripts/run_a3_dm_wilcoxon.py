@@ -40,7 +40,7 @@ Outputs
 - a3_paired_predictions.csv: long-form (model_set, beach, issue_date, step_hour,
   y_true, y_pred) plus a `_raw.csv` snapshot before the ground-truth join
 - a3_results_3d_vs_15d_truncated.csv: per-series + pooled DM/Wilcoxon stats
-- a3_results_10d_vs_15d_truncated.csv: same for 10d vs 15d[:120]
+- a3_results_10d_vs_15d_truncated.csv: same for 10d vs 15d[:130]
 - a3_summary.csv: headline vote counts for both tests (BH-FDR adjusted)
 """
 from __future__ import annotations
@@ -70,8 +70,8 @@ from apps.prediction.tft_service import tft_service  # noqa: E402
 from apps.webcam.models import WebCam  # noqa: E402
 
 
-HOURS_PER_DAY = 12
-HORIZON_HOURS = {"3d": 36, "10d": 120, "15d": 180}
+HOURS_PER_DAY = 13
+HORIZON_HOURS = {"3d": 39, "10d": 130, "15d": 195}
 
 
 # ════════════════════════════════════════════════════════════════════════
@@ -151,6 +151,8 @@ def collect_predictions(model_set: str, start: str, end: str) -> pd.DataFrame:
                     continue
                 preds = result.get("predictions") or []
                 for step_hour, p in enumerate(preds, start=1):
+                    if not p.get("available", True):
+                        continue                       # drop night placeholder rows (I4)
                     rows.append({
                         "model_set":     model_set,
                         "webcam_slug":   wc.camera_slug,
@@ -251,16 +253,25 @@ def wilcoxon_paired(loss_a: np.ndarray, loss_b: np.ndarray) -> tuple[float, floa
 def run_tests(df: pd.DataFrame, dedicated_label: str, full_label: str, max_step: int):
     """Compare dedicated_label vs full_label[:max_step] per series + pooled."""
     df = df.dropna(subset=["y_true"]).copy()
-    keep = (df["step_hour"] <= max_step) & df["horizon_label"].isin([dedicated_label, full_label])
-    sub = df.loc[keep].copy()
+    if "available" in df.columns:
+        df = df[df["available"].astype(bool)].copy()          # daytime slots only (I4)
+    sub = df[df["horizon_label"].isin([dedicated_label, full_label])].copy()
     if sub.empty:
-        print(f"[warn] no rows for {dedicated_label} vs {full_label} (max_step={max_step})")
+        print(f"[warn] no rows for {dedicated_label} vs {full_label}")
+        return pd.DataFrame()
+    # rank by DAYTIME step within each (webcam, issue, horizon) trajectory, then truncate —
+    # step_hour indexes the 24h/day slot list, so max_step in clock-hours was the wrong unit (I1)
+    sub = sub.sort_values(["webcam_slug", "issue_date", "horizon_label", "step_hour"])
+    sub["day_rank"] = sub.groupby(["webcam_slug", "issue_date", "horizon_label"]).cumcount() + 1
+    sub = sub[sub["day_rank"] <= max_step].copy()
+    if sub.empty:
+        print(f"[warn] no rows within {max_step} daytime steps for {dedicated_label} vs {full_label}")
         return pd.DataFrame()
     sub["abs_err"] = (sub["y_pred"] - sub["y_true"]).abs()
 
     paired = (
         sub.pivot_table(
-            index=["webcam_slug", "issue_date", "step_hour"],
+            index=["webcam_slug", "issue_date", "day_rank"],
             columns="horizon_label",
             values="abs_err",
             aggfunc="first",
@@ -365,7 +376,7 @@ def summarise(per_series: pd.DataFrame, comparison_name: str, alpha: float = 0.0
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--model_set", default="tft_old_20260312_215417")
+    ap.add_argument("--model_set", default="tft_20260628_110439")   # 13-bucket set
     ap.add_argument("--start", default="2025-06-01")
     ap.add_argument("--end", default="2025-08-31")
     ap.add_argument("--output", default="a3_paired_predictions.csv")
@@ -390,16 +401,16 @@ def main():
         df.to_csv(args.output, index=False)
 
     print("\n" + "=" * 72)
-    print("Comparison 1: dedicated 3d  vs  15d truncated to first 36 hours")
+    print("Comparison 1: dedicated 3d  vs  15d truncated to first 39 hours")
     print("=" * 72)
-    res1 = run_tests(df, dedicated_label="3d", full_label="15d", max_step=36)
+    res1 = run_tests(df, dedicated_label="3d", full_label="15d", max_step=39)
     res1.to_csv("a3_results_3d_vs_15d_truncated.csv", index=False)
     print(res1.to_string(index=False))
 
     print("\n" + "=" * 72)
-    print("Comparison 2: dedicated 10d vs  15d truncated to first 120 hours")
+    print("Comparison 2: dedicated 10d vs  15d truncated to first 130 hours")
     print("=" * 72)
-    res2 = run_tests(df, dedicated_label="10d", full_label="15d", max_step=120)
+    res2 = run_tests(df, dedicated_label="10d", full_label="15d", max_step=130)
     res2.to_csv("a3_results_10d_vs_15d_truncated.csv", index=False)
     print(res2.to_string(index=False))
 
@@ -407,8 +418,8 @@ def main():
     print("Headline summary (DM primary; Wilcoxon sanity)")
     print("=" * 72)
     summaries = [
-        summarise(res1, "3d_dedicated vs 15d[:36]"),
-        summarise(res2, "10d_dedicated vs 15d[:120]"),
+        summarise(res1, "3d_dedicated vs 15d[:39]"),
+        summarise(res2, "10d_dedicated vs 15d[:130]"),
     ]
     summary_df = pd.DataFrame(summaries)
     summary_df.to_csv("a3_summary.csv", index=False)

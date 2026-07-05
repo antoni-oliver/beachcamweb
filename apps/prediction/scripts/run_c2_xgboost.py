@@ -47,6 +47,7 @@ import pandas as pd
 import optuna
 from sklearn.metrics import r2_score
 from xgboost import XGBRegressor
+from crowd_outliers import cap_outliers   # canonical 1.5xP90 real-count cap (I2)
 
 
 # ─── Castelle 2025 feature schema (humidity omitted) ─────────────────────
@@ -59,7 +60,7 @@ CASTELLE_WEATHER = [
     "om_shortwave_radiation",  # I
 ]
 CALENDAR = ["hour", "day_of_week", "month", "is_weekend", "is_summer"]
-HORIZONS = {"3d": 36, "10d": 120, "15d": 180}
+HORIZONS = {"3d": 39, "10d": 130, "15d": 195}
 SEASON_MONTHS = {4, 5, 6, 7, 8, 9}
 SUMMER_MONTHS = {6, 7, 8}
 
@@ -144,7 +145,7 @@ def build_features(df: pd.DataFrame, horizon_hours: int) -> pd.DataFrame:
 def split_panel(features: pd.DataFrame, test_start: str, test_end: str,
                 train_filter: str | None) -> tuple[pd.DataFrame, pd.DataFrame]:
     test_mask = (features["ds"] >= test_start) & (features["ds"] <= test_end)
-    train = features.loc[~test_mask].copy()
+    train = features.loc[features["ds"] < pd.Timestamp(test_start)].copy()   # strictly before test — no post-test leakage (I6)
     test = features.loc[test_mask].copy()
     if train_filter == "year_eq_2022":
         train = train[train["ds"].dt.year == 2022]
@@ -291,7 +292,8 @@ def run_config(name: str, spec: dict, trials: int, out_dir: Path,
     panel["ds"] = pd.to_datetime(panel["ds"])
     print(f"[info] panel: {len(panel)} rows, {panel['unique_id'].nunique()} series, "
           f"ds range {panel['ds'].min().date()} → {panel['ds'].max().date()}")
-    capacity = panel.groupby("unique_id")["y"].quantile(0.9).to_dict()
+    panel["y_raw"] = pd.to_numeric(panel["y"], errors="coerce")    # raw for the relMAE denominator (I3)
+    panel, _ncap = cap_outliers(panel, y_col="y", verbose=False)   # cap targets at 1.5xP90 real daytime, like every other family (I2)
 
     cfg_out = out_dir / name
     cfg_out.mkdir(parents=True, exist_ok=True)
@@ -300,6 +302,9 @@ def run_config(name: str, spec: dict, trials: int, out_dir: Path,
     summary_rows = []
     for scen_code, (ts, te) in windows.items():
         print(f"\n=== scenario {scen_code}: {ts} → {te} ===")
+        capacity = {u: max(float(v), 1.0)                          # train-only (ds<test_start), RAW y, floor 1.0 (I3)
+                    for u, v in panel.loc[panel["ds"] < pd.Timestamp(ts)]
+                                     .groupby("unique_id")["y_raw"].quantile(0.9).items()}
         for hz_label, hz_h in HORIZONS.items():
             print(f"--- horizon {hz_label} (h={hz_h}) ---")
             res = train_xgboost_horizon(panel, hz_h, ts, te,

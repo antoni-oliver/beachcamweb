@@ -9,20 +9,18 @@ metric (aligned with the production classification thresholds).
 Scenarios
 ---------
 - S1 (cross-year):   model trained on 2022 only         → test Jun-Aug 2025
-- S2 (operational):  model trained on 2022 + 2025 spr   → test Jun-Aug 2025
-- S3 (full season):  model trained on 2022 + 2025 spr   → test Apr-Sep 2025
-- S4 (recent month): model trained up to 2025-08-31     → test Sep 2025
+- S2 (full season):  model trained on 2022 + 2025 spr   → test Apr-Sep 2025
+- S3 (recent month): model trained up to 2025-08-31     → test Sep 2025
 
-S2 reduces to S1 numerically when both share the same test window and model
-pool. The eligibility filter requires ≥100 labelled snapshots in the test
-window per camera (and ≥100 before the window, except for S3 where pre-window
-data may not exist for the labelling era — see SCENARIOS dict).
+The eligibility filter requires ≥100 labelled snapshots in the test window per
+camera (and ≥100 before the window, except for S2 where pre-window data may not
+exist for the labelling era — see SCENARIOS dict).
 
 Usage
 -----
     cd apps/prediction
     python scripts/run_a2_scenarios.py \\
-        --scenarios S1,S3,S4 \\
+        --scenarios S1,S2,S3 \\
         --normalisation p90 \\
         --output_dir a2_results/
 """
@@ -59,8 +57,8 @@ from run_a3_dm_wilcoxon import (  # noqa: E402
 from crowd_outliers import cap_outliers  # noqa: E402  canonical per-series P90 cap
 
 
-HOURS_PER_DAY = 12
-HORIZON_HOURS = {"3d": 36, "10d": 120, "15d": 180}
+HOURS_PER_DAY = 13
+HORIZON_HOURS = {"3d": 39, "10d": 130, "15d": 195}
 SEASON_MONTHS = {4, 5, 6, 7, 8, 9}
 SUMMER_MONTHS = {6, 7, 8}
 
@@ -76,14 +74,6 @@ SCENARIOS = {
         "expected_anchor_model": "tft_train_2022_validate_2025_summer",
     },
     "S2": {
-        "label": "Operational peak (train 2022+2025 spring → test summer 2025)",
-        "test_start": "2025-06-01",
-        "test_end":   "2025-08-31",
-        "min_before": 100,
-        "min_during": 100,
-        "expected_anchor_model": "tft_old_20260312_215417",
-    },
-    "S3": {
         "label": "Full season (train 2022+2025 spring → test Apr-Sep 2025)",
         "test_start": "2025-04-01",
         "test_end":   "2025-09-30",
@@ -93,7 +83,7 @@ SCENARIOS = {
         "min_during": 100,
         "expected_anchor_model": "tft_old_20260312_215417",
     },
-    "S4": {
+    "S3": {
         "label": "Recent month (train up to 2025-08-31 → test Sep 2025)",
         "test_start": "2025-09-01",
         "test_end":   "2025-09-30",
@@ -188,6 +178,8 @@ def compute_relmae_table(df: pd.DataFrame, capacity_lookup: dict,
       - "mean" : per-camera mean of y_true (legacy/debug). All cameras included.
     """
     df = df.dropna(subset=["y_true", "y_pred"]).copy()
+    if "available" in df.columns:
+        df = df[df["available"].astype(bool)].copy()   # drop night placeholder rows (I4)
     df["ds_parsed"] = pd.to_datetime(df["ds"], errors="coerce")
     df = df.dropna(subset=["ds_parsed"])
     df["abs_err"] = (df["y_pred"] - df["y_true"]).abs()
@@ -237,7 +229,7 @@ def build_capacity_lookup() -> dict[str, float]:
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--scenarios", default="S1,S2,S3,S4",
+    ap.add_argument("--scenarios", default="S1,S2,S3",
                     help="Comma-separated scenario codes to run.")
     ap.add_argument("--model_sets", default="",
                     help="Comma-separated model_set names; default = all registered sets.")
