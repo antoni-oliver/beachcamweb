@@ -1,5 +1,5 @@
 {
-  "evaluated_at": "2026-05-21T02:44:28.668707Z",
+  "evaluated_at": "2026-05-21T11:11:45.240206Z",
   "date_range": {
     "since": "2025-04-15",
     "until": "2026-05-21"
@@ -34,6 +34,14 @@
       "pct_vs_best": 0.0
     },
     {
+      "model_set": "tft_20260521_003941",
+      "model_key": "3d",
+      "relMAE_all": 0.0457,
+      "relMAE_summer": 0.0578,
+      "relMAE_season": 0.0528,
+      "pct_vs_best": 5.54
+    },
+    {
       "model_set": "tft_20260323_180247",
       "model_key": "10d",
       "relMAE_all": 0.0476,
@@ -48,6 +56,22 @@
       "relMAE_summer": 0.064,
       "relMAE_season": 0.0568,
       "pct_vs_best": 16.4
+    },
+    {
+      "model_set": "tft_20260521_003941",
+      "model_key": "10d",
+      "relMAE_all": 0.0513,
+      "relMAE_summer": 0.0686,
+      "relMAE_season": 0.0602,
+      "pct_vs_best": 18.48
+    },
+    {
+      "model_set": "tft_20260521_003941",
+      "model_key": "15d",
+      "relMAE_all": 0.0556,
+      "relMAE_summer": 0.0746,
+      "relMAE_season": 0.0647,
+      "pct_vs_best": 28.41
     },
     {
       "model_set": "tft_old_20260312_215417",
@@ -601,7 +625,7 @@
           "camera": "port-pollenca",
           "beach": "Port Pollen\u00e7a",
           "island": "",
-          "p90": 34.2,
+          "p90": 34.0,
           "relMAE_all": 0.0558,
           "relMAE_summer": null,
           "relMAE_season": 0.0413
@@ -628,7 +652,7 @@
           "camera": "palmanova-matias-beach",
           "beach": "Playa de Palmanova",
           "island": "",
-          "p90": 67.0,
+          "p90": 67.7,
           "relMAE_all": 0.1796,
           "relMAE_summer": null,
           "relMAE_season": 0.197
@@ -1017,7 +1041,7 @@
           "camera": "port-pollenca",
           "beach": "Port Pollen\u00e7a",
           "island": "",
-          "p90": 34.2,
+          "p90": 34.0,
           "relMAE_all": 0.0459,
           "relMAE_summer": null,
           "relMAE_season": 0.0405
@@ -1044,7 +1068,7 @@
           "camera": "palmanova-matias-beach",
           "beach": "Playa de Palmanova",
           "island": "",
-          "p90": 67.0,
+          "p90": 67.7,
           "relMAE_all": 0.2164,
           "relMAE_summer": null,
           "relMAE_season": 0.2393
@@ -1433,7 +1457,7 @@
           "camera": "port-pollenca",
           "beach": "Port Pollen\u00e7a",
           "island": "",
-          "p90": 34.2,
+          "p90": 34.0,
           "relMAE_all": 0.0496,
           "relMAE_summer": null,
           "relMAE_season": 0.0521
@@ -1460,7 +1484,7 @@
           "camera": "palmanova-matias-beach",
           "beach": "Playa de Palmanova",
           "island": "",
-          "p90": 67.0,
+          "p90": 67.7,
           "relMAE_all": 0.2334,
           "relMAE_summer": null,
           "relMAE_season": 0.2339
@@ -1849,7 +1873,7 @@
           "camera": "port-pollenca",
           "beach": "Port Pollen\u00e7a",
           "island": "",
-          "p90": 34.2,
+          "p90": 34.0,
           "relMAE_all": 0.047,
           "relMAE_summer": null,
           "relMAE_season": 0.0333
@@ -1876,7 +1900,7 @@
           "camera": "palmanova-matias-beach",
           "beach": "Playa de Palmanova",
           "island": "",
-          "p90": 67.0,
+          "p90": 67.7,
           "relMAE_all": 0.2101,
           "relMAE_summer": null,
           "relMAE_season": 0.2297
@@ -2265,7 +2289,7 @@
           "camera": "port-pollenca",
           "beach": "Port Pollen\u00e7a",
           "island": "",
-          "p90": 34.2,
+          "p90": 34.0,
           "relMAE_all": 0.0412,
           "relMAE_summer": null,
           "relMAE_season": 0.0354
@@ -2292,7 +2316,7 @@
           "camera": "palmanova-matias-beach",
           "beach": "Playa de Palmanova",
           "island": "",
-          "p90": 67.0,
+          "p90": 67.7,
           "relMAE_all": 0.2094,
           "relMAE_summer": null,
           "relMAE_season": 0.2289
@@ -2681,7 +2705,7 @@
           "camera": "port-pollenca",
           "beach": "Port Pollen\u00e7a",
           "island": "",
-          "p90": 34.2,
+          "p90": 34.0,
           "relMAE_all": 0.0354,
           "relMAE_summer": null,
           "relMAE_season": 0.034
@@ -2708,7 +2732,7 @@
           "camera": "palmanova-matias-beach",
           "beach": "Playa de Palmanova",
           "island": "",
-          "p90": 67.0,
+          "p90": 67.7,
           "relMAE_all": 0.229,
           "relMAE_summer": null,
           "relMAE_season": 0.2295
@@ -3097,7 +3121,7 @@
           "camera": "port-pollenca",
           "beach": "Port Pollen\u00e7a",
           "island": "",
-          "p90": 34.2,
+          "p90": 34.0,
           "relMAE_all": 0.047,
           "relMAE_summer": null,
           "relMAE_season": 0.0333
@@ -3124,7 +3148,7 @@
           "camera": "palmanova-matias-beach",
           "beach": "Playa de Palmanova",
           "island": "",
-          "p90": 67.0,
+          "p90": 67.7,
           "relMAE_all": 0.2097,
           "relMAE_summer": null,
           "relMAE_season": 0.2293
@@ -3513,7 +3537,7 @@
           "camera": "port-pollenca",
           "beach": "Port Pollen\u00e7a",
           "island": "",
-          "p90": 34.2,
+          "p90": 34.0,
           "relMAE_all": 0.0412,
           "relMAE_summer": null,
           "relMAE_season": 0.0354
@@ -3540,7 +3564,7 @@
           "camera": "palmanova-matias-beach",
           "beach": "Playa de Palmanova",
           "island": "",
-          "p90": 67.0,
+          "p90": 67.7,
           "relMAE_all": 0.2094,
           "relMAE_summer": null,
           "relMAE_season": 0.2289
@@ -3929,7 +3953,7 @@
           "camera": "port-pollenca",
           "beach": "Port Pollen\u00e7a",
           "island": "",
-          "p90": 34.2,
+          "p90": 34.0,
           "relMAE_all": 0.0356,
           "relMAE_summer": null,
           "relMAE_season": 0.0341
@@ -3956,7 +3980,7 @@
           "camera": "palmanova-matias-beach",
           "beach": "Playa de Palmanova",
           "island": "",
-          "p90": 67.0,
+          "p90": 67.7,
           "relMAE_all": 0.2376,
           "relMAE_summer": null,
           "relMAE_season": 0.2381
@@ -4345,7 +4369,7 @@
           "camera": "port-pollenca",
           "beach": "Port Pollen\u00e7a",
           "island": "",
-          "p90": 34.2,
+          "p90": 34.0,
           "relMAE_all": 0.0375,
           "relMAE_summer": null,
           "relMAE_season": 0.0369
@@ -4372,7 +4396,7 @@
           "camera": "palmanova-matias-beach",
           "beach": "Playa de Palmanova",
           "island": "",
-          "p90": 67.0,
+          "p90": 67.7,
           "relMAE_all": 0.1214,
           "relMAE_summer": null,
           "relMAE_season": 0.157
@@ -4761,7 +4785,7 @@
           "camera": "port-pollenca",
           "beach": "Port Pollen\u00e7a",
           "island": "",
-          "p90": 34.2,
+          "p90": 34.0,
           "relMAE_all": 0.0375,
           "relMAE_summer": null,
           "relMAE_season": 0.0358
@@ -4788,7 +4812,7 @@
           "camera": "palmanova-matias-beach",
           "beach": "Playa de Palmanova",
           "island": "",
-          "p90": 67.0,
+          "p90": 67.7,
           "relMAE_all": 0.1474,
           "relMAE_summer": null,
           "relMAE_season": 0.1757
@@ -5177,7 +5201,7 @@
           "camera": "port-pollenca",
           "beach": "Port Pollen\u00e7a",
           "island": "",
-          "p90": 34.2,
+          "p90": 34.0,
           "relMAE_all": 0.0432,
           "relMAE_summer": null,
           "relMAE_season": 0.0445
@@ -5204,10 +5228,1258 @@
           "camera": "palmanova-matias-beach",
           "beach": "Playa de Palmanova",
           "island": "",
-          "p90": 67.0,
+          "p90": 67.7,
           "relMAE_all": 0.1556,
           "relMAE_summer": null,
           "relMAE_season": 0.1681
+        }
+      ]
+    },
+    {
+      "model_set": "tft_20260521_003941",
+      "model_key": "3d",
+      "overall": {
+        "all": 0.0457,
+        "summer": 0.0578,
+        "season": 0.0528
+      },
+      "per_beach": [
+        {
+          "camera": "playa-de-tora_2",
+          "beach": "Playa de Tor\u00e0",
+          "island": "",
+          "p90": 43.0,
+          "relMAE_all": 0.0711,
+          "relMAE_summer": null,
+          "relMAE_season": 0.0732
+        },
+        {
+          "camera": "playa-de-palmira_1",
+          "beach": "Playa de Palmira",
+          "island": "",
+          "p90": 136.0,
+          "relMAE_all": 0.0531,
+          "relMAE_summer": 0.0624,
+          "relMAE_season": 0.0583
+        },
+        {
+          "camera": "camp-de-mar_1",
+          "beach": "Camp de Mar",
+          "island": "",
+          "p90": 286.0,
+          "relMAE_all": 0.0615,
+          "relMAE_summer": null,
+          "relMAE_season": 0.0615
+        },
+        {
+          "camera": "camp-de-mar_3",
+          "beach": "Camp de Mar",
+          "island": "",
+          "p90": 11.0,
+          "relMAE_all": 0.0127,
+          "relMAE_summer": null,
+          "relMAE_season": 0.0148
+        },
+        {
+          "camera": "cala-portals-vells",
+          "beach": "Cala Portals Vells",
+          "island": "",
+          "p90": 44.0,
+          "relMAE_all": 0.0384,
+          "relMAE_summer": 0.0468,
+          "relMAE_season": 0.0435
+        },
+        {
+          "camera": "port-dandratx",
+          "beach": "Brismar",
+          "island": "",
+          "p90": 41.0,
+          "relMAE_all": 0.0473,
+          "relMAE_summer": 0.0523,
+          "relMAE_season": 0.0485
+        },
+        {
+          "camera": "platja-de-peguera_1",
+          "beach": "Playa de Palmira",
+          "island": "",
+          "p90": 317.0,
+          "relMAE_all": 0.0195,
+          "relMAE_summer": 0.0209,
+          "relMAE_season": 0.0212
+        },
+        {
+          "camera": "playa-de-tora_1",
+          "beach": "Playa de Tor\u00e0",
+          "island": "",
+          "p90": 233.0,
+          "relMAE_all": 0.0972,
+          "relMAE_summer": 0.0899,
+          "relMAE_season": 0.0972
+        },
+        {
+          "camera": "playa-de-palmira",
+          "beach": "Playa de Palmira",
+          "island": "",
+          "p90": 149.0,
+          "relMAE_all": 0.0382,
+          "relMAE_summer": 0.0576,
+          "relMAE_season": 0.0452
+        },
+        {
+          "camera": "playa-de-magaluf",
+          "beach": "Playa de Magaluf",
+          "island": "",
+          "p90": 111.0,
+          "relMAE_all": 0.136,
+          "relMAE_summer": 0.1423,
+          "relMAE_season": 0.136
+        },
+        {
+          "camera": "port-dandratx_2",
+          "beach": "Brismar",
+          "island": "",
+          "p90": 288.0,
+          "relMAE_all": 0.1146,
+          "relMAE_summer": null,
+          "relMAE_season": 0.0974
+        },
+        {
+          "camera": "playa-de-ses-penyes-roges",
+          "beach": "Playa de ses Penyes Roges",
+          "island": "",
+          "p90": 118.0,
+          "relMAE_all": 0.0388,
+          "relMAE_summer": 0.0338,
+          "relMAE_season": 0.0382
+        },
+        {
+          "camera": "playa-de-santa-ponca",
+          "beach": "Playa de Santa Pon\u00e7a",
+          "island": "",
+          "p90": 59.9,
+          "relMAE_all": 0.0472,
+          "relMAE_summer": null,
+          "relMAE_season": 0.0522
+        },
+        {
+          "camera": "port-dandratx-port_1",
+          "beach": "Brismar",
+          "island": "",
+          "p90": 32.0,
+          "relMAE_all": 0.0636,
+          "relMAE_summer": 0.0606,
+          "relMAE_season": 0.0568
+        },
+        {
+          "camera": "cala-fornells_2",
+          "beach": "Cala Fornells",
+          "island": "",
+          "p90": 51.0,
+          "relMAE_all": 0.0226,
+          "relMAE_summer": 0.0377,
+          "relMAE_season": 0.0233
+        },
+        {
+          "camera": "port-dandratx-la-mola_1",
+          "beach": "Brismar",
+          "island": "",
+          "p90": 108.0,
+          "relMAE_all": 0.0741,
+          "relMAE_summer": 0.0682,
+          "relMAE_season": 0.0706
+        },
+        {
+          "camera": "cala-llamp",
+          "beach": "Cala Llamp",
+          "island": "",
+          "p90": 25.0,
+          "relMAE_all": 0.042,
+          "relMAE_summer": null,
+          "relMAE_season": 0.0174
+        },
+        {
+          "camera": "camp-de-mar_2",
+          "beach": "Camp de Mar",
+          "island": "",
+          "p90": 21.0,
+          "relMAE_all": 0.0285,
+          "relMAE_summer": null,
+          "relMAE_season": 0.0396
+        },
+        {
+          "camera": "andratx",
+          "beach": "Brismar",
+          "island": "",
+          "p90": 0.0,
+          "relMAE_all": 0.0,
+          "relMAE_summer": 0.0,
+          "relMAE_season": 0.0
+        },
+        {
+          "camera": "cala-fornells_1",
+          "beach": "Cala Fornells",
+          "island": "",
+          "p90": 33.0,
+          "relMAE_all": 0.0458,
+          "relMAE_summer": 0.0373,
+          "relMAE_season": 0.0479
+        },
+        {
+          "camera": "cala-fornells",
+          "beach": "Cala Fornells",
+          "island": "",
+          "p90": 26.0,
+          "relMAE_all": 0.0257,
+          "relMAE_summer": 0.0276,
+          "relMAE_season": 0.0287
+        },
+        {
+          "camera": "playa-de-tora",
+          "beach": "Playa de Tor\u00e0",
+          "island": "",
+          "p90": 121.0,
+          "relMAE_all": 0.051,
+          "relMAE_summer": 0.0718,
+          "relMAE_season": 0.0561
+        },
+        {
+          "camera": "santa-ponca-serra-de-tramuntana_1",
+          "beach": "Playa de Santa Pon\u00e7a",
+          "island": "",
+          "p90": 52.0,
+          "relMAE_all": 0.0578,
+          "relMAE_summer": null,
+          "relMAE_season": 0.0629
+        },
+        {
+          "camera": "golf-camp-de-mar",
+          "beach": "Camp de Mar",
+          "island": "",
+          "p90": 148.0,
+          "relMAE_all": 0.0931,
+          "relMAE_summer": 0.1657,
+          "relMAE_season": 0.1245
+        },
+        {
+          "camera": "platja-marina",
+          "beach": "Marina",
+          "island": "",
+          "p90": 10.0,
+          "relMAE_all": 0.0319,
+          "relMAE_summer": 0.0436,
+          "relMAE_season": 0.0413
+        },
+        {
+          "camera": "cala-agulla",
+          "beach": "Cala Agulla",
+          "island": "",
+          "p90": 8.0,
+          "relMAE_all": 0.0507,
+          "relMAE_summer": null,
+          "relMAE_season": 0.062
+        },
+        {
+          "camera": "can-pastilla-bonaona",
+          "beach": "Palma",
+          "island": "",
+          "p90": 194.0,
+          "relMAE_all": 0.0902,
+          "relMAE_summer": 0.1206,
+          "relMAE_season": 0.0958
+        },
+        {
+          "camera": "cala-vedella_1",
+          "beach": "Cala Vedella",
+          "island": "",
+          "p90": 5.0,
+          "relMAE_all": 0.0095,
+          "relMAE_summer": 0.016,
+          "relMAE_season": 0.0147
+        },
+        {
+          "camera": "cala-vedella",
+          "beach": "Cala Vedella",
+          "island": "",
+          "p90": 144.0,
+          "relMAE_all": 0.035,
+          "relMAE_summer": 0.0621,
+          "relMAE_season": 0.054
+        },
+        {
+          "camera": "es-pujols",
+          "beach": "Es Pujols",
+          "island": "",
+          "p90": 30.0,
+          "relMAE_all": 0.0347,
+          "relMAE_summer": 0.0515,
+          "relMAE_season": 0.0426
+        },
+        {
+          "camera": "punta-de-sa-galera",
+          "beach": "Punta de Sa Galera",
+          "island": "",
+          "p90": 16.0,
+          "relMAE_all": 0.0167,
+          "relMAE_summer": 0.024,
+          "relMAE_season": 0.0236
+        },
+        {
+          "camera": "can-pastilla_mallorca-pipeline",
+          "beach": "Palma",
+          "island": "",
+          "p90": 47.0,
+          "relMAE_all": 0.0302,
+          "relMAE_summer": 0.0609,
+          "relMAE_season": 0.0423
+        },
+        {
+          "camera": "marina",
+          "beach": "Marina",
+          "island": "",
+          "p90": 10.0,
+          "relMAE_all": 0.045,
+          "relMAE_summer": 0.0334,
+          "relMAE_season": 0.0404
+        },
+        {
+          "camera": "muro-sector-i",
+          "beach": "Muro-Sector I",
+          "island": "",
+          "p90": 49.2,
+          "relMAE_all": 0.0385,
+          "relMAE_summer": null,
+          "relMAE_season": 0.0448
+        },
+        {
+          "camera": "son-serra-de-marina",
+          "beach": "Son Serra de Marina",
+          "island": "",
+          "p90": 51.0,
+          "relMAE_all": 0.1068,
+          "relMAE_summer": 0.1459,
+          "relMAE_season": 0.1286
+        },
+        {
+          "camera": "soller-santa-catalina-nord",
+          "beach": "Port",
+          "island": "",
+          "p90": 1.0,
+          "relMAE_all": 0.0015,
+          "relMAE_summer": 0.0014,
+          "relMAE_season": 0.0017
+        },
+        {
+          "camera": "port",
+          "beach": "Port",
+          "island": "",
+          "p90": 6.0,
+          "relMAE_all": 0.0172,
+          "relMAE_summer": 0.0239,
+          "relMAE_season": 0.0261
+        },
+        {
+          "camera": "cala-gat",
+          "beach": "Cala Gat",
+          "island": "",
+          "p90": 4.0,
+          "relMAE_all": 0.0506,
+          "relMAE_summer": null,
+          "relMAE_season": null
+        },
+        {
+          "camera": "tora-multimediatres",
+          "beach": "Playa de Tor\u00e0",
+          "island": "",
+          "p90": 47.6,
+          "relMAE_all": 0.0625,
+          "relMAE_summer": null,
+          "relMAE_season": null
+        },
+        {
+          "camera": "pacific-bay-tora-multimediatres",
+          "beach": "Playa de Tor\u00e0",
+          "island": "",
+          "p90": 70.0,
+          "relMAE_all": 0.1076,
+          "relMAE_summer": null,
+          "relMAE_season": 0.1046
+        },
+        {
+          "camera": "port-pollenca-sail-surf",
+          "beach": "Port Pollen\u00e7a",
+          "island": "",
+          "p90": 14.0,
+          "relMAE_all": 0.0705,
+          "relMAE_summer": null,
+          "relMAE_season": 0.0838
+        },
+        {
+          "camera": "port-pollenca",
+          "beach": "Port Pollen\u00e7a",
+          "island": "",
+          "p90": 34.0,
+          "relMAE_all": 0.0363,
+          "relMAE_summer": null,
+          "relMAE_season": 0.0352
+        },
+        {
+          "camera": "cala-millor-1",
+          "beach": "Cala Millor Son Servera",
+          "island": "",
+          "p90": 6.0,
+          "relMAE_all": 0.0448,
+          "relMAE_summer": null,
+          "relMAE_season": 0.3107
+        },
+        {
+          "camera": "cala-millor-2",
+          "beach": "Cala Millor Son Servera",
+          "island": "",
+          "p90": 4.0,
+          "relMAE_all": 0.0198,
+          "relMAE_summer": null,
+          "relMAE_season": 0.0092
+        },
+        {
+          "camera": "palmanova-matias-beach",
+          "beach": "Playa de Palmanova",
+          "island": "",
+          "p90": 67.7,
+          "relMAE_all": 0.0918,
+          "relMAE_summer": null,
+          "relMAE_season": 0.1214
+        }
+      ]
+    },
+    {
+      "model_set": "tft_20260521_003941",
+      "model_key": "10d",
+      "overall": {
+        "all": 0.0513,
+        "summer": 0.0686,
+        "season": 0.0602
+      },
+      "per_beach": [
+        {
+          "camera": "playa-de-tora_2",
+          "beach": "Playa de Tor\u00e0",
+          "island": "",
+          "p90": 43.0,
+          "relMAE_all": 0.0721,
+          "relMAE_summer": null,
+          "relMAE_season": 0.0777
+        },
+        {
+          "camera": "playa-de-palmira_1",
+          "beach": "Playa de Palmira",
+          "island": "",
+          "p90": 136.0,
+          "relMAE_all": 0.0613,
+          "relMAE_summer": 0.0845,
+          "relMAE_season": 0.0705
+        },
+        {
+          "camera": "camp-de-mar_1",
+          "beach": "Camp de Mar",
+          "island": "",
+          "p90": 286.0,
+          "relMAE_all": 0.0705,
+          "relMAE_summer": null,
+          "relMAE_season": 0.0705
+        },
+        {
+          "camera": "camp-de-mar_3",
+          "beach": "Camp de Mar",
+          "island": "",
+          "p90": 11.0,
+          "relMAE_all": 0.0126,
+          "relMAE_summer": null,
+          "relMAE_season": 0.0147
+        },
+        {
+          "camera": "cala-portals-vells",
+          "beach": "Cala Portals Vells",
+          "island": "",
+          "p90": 44.0,
+          "relMAE_all": 0.0407,
+          "relMAE_summer": 0.0542,
+          "relMAE_season": 0.0472
+        },
+        {
+          "camera": "port-dandratx",
+          "beach": "Brismar",
+          "island": "",
+          "p90": 41.0,
+          "relMAE_all": 0.0543,
+          "relMAE_summer": 0.0618,
+          "relMAE_season": 0.0553
+        },
+        {
+          "camera": "platja-de-peguera_1",
+          "beach": "Playa de Palmira",
+          "island": "",
+          "p90": 317.0,
+          "relMAE_all": 0.0209,
+          "relMAE_summer": 0.022,
+          "relMAE_season": 0.0227
+        },
+        {
+          "camera": "playa-de-tora_1",
+          "beach": "Playa de Tor\u00e0",
+          "island": "",
+          "p90": 233.0,
+          "relMAE_all": 0.127,
+          "relMAE_summer": 0.1262,
+          "relMAE_season": 0.127
+        },
+        {
+          "camera": "playa-de-palmira",
+          "beach": "Playa de Palmira",
+          "island": "",
+          "p90": 149.0,
+          "relMAE_all": 0.0436,
+          "relMAE_summer": 0.0727,
+          "relMAE_season": 0.0544
+        },
+        {
+          "camera": "playa-de-magaluf",
+          "beach": "Playa de Magaluf",
+          "island": "",
+          "p90": 111.0,
+          "relMAE_all": 0.1483,
+          "relMAE_summer": 0.162,
+          "relMAE_season": 0.1483
+        },
+        {
+          "camera": "port-dandratx_2",
+          "beach": "Brismar",
+          "island": "",
+          "p90": 288.0,
+          "relMAE_all": 0.1087,
+          "relMAE_summer": null,
+          "relMAE_season": 0.0989
+        },
+        {
+          "camera": "playa-de-ses-penyes-roges",
+          "beach": "Playa de ses Penyes Roges",
+          "island": "",
+          "p90": 118.0,
+          "relMAE_all": 0.0419,
+          "relMAE_summer": 0.0371,
+          "relMAE_season": 0.0408
+        },
+        {
+          "camera": "playa-de-santa-ponca",
+          "beach": "Playa de Santa Pon\u00e7a",
+          "island": "",
+          "p90": 59.9,
+          "relMAE_all": 0.0484,
+          "relMAE_summer": null,
+          "relMAE_season": 0.0571
+        },
+        {
+          "camera": "port-dandratx-port_1",
+          "beach": "Brismar",
+          "island": "",
+          "p90": 32.0,
+          "relMAE_all": 0.0711,
+          "relMAE_summer": 0.0727,
+          "relMAE_season": 0.0655
+        },
+        {
+          "camera": "cala-fornells_2",
+          "beach": "Cala Fornells",
+          "island": "",
+          "p90": 51.0,
+          "relMAE_all": 0.0243,
+          "relMAE_summer": 0.0396,
+          "relMAE_season": 0.0258
+        },
+        {
+          "camera": "port-dandratx-la-mola_1",
+          "beach": "Brismar",
+          "island": "",
+          "p90": 108.0,
+          "relMAE_all": 0.0829,
+          "relMAE_summer": 0.0652,
+          "relMAE_season": 0.0726
+        },
+        {
+          "camera": "cala-llamp",
+          "beach": "Cala Llamp",
+          "island": "",
+          "p90": 25.0,
+          "relMAE_all": 0.0368,
+          "relMAE_summer": null,
+          "relMAE_season": null
+        },
+        {
+          "camera": "camp-de-mar_2",
+          "beach": "Camp de Mar",
+          "island": "",
+          "p90": 21.0,
+          "relMAE_all": 0.0326,
+          "relMAE_summer": null,
+          "relMAE_season": 0.0362
+        },
+        {
+          "camera": "andratx",
+          "beach": "Brismar",
+          "island": "",
+          "p90": 0.0,
+          "relMAE_all": 0.0,
+          "relMAE_summer": 0.0,
+          "relMAE_season": 0.0
+        },
+        {
+          "camera": "cala-fornells_1",
+          "beach": "Cala Fornells",
+          "island": "",
+          "p90": 33.0,
+          "relMAE_all": 0.0514,
+          "relMAE_summer": 0.0381,
+          "relMAE_season": 0.0543
+        },
+        {
+          "camera": "cala-fornells",
+          "beach": "Cala Fornells",
+          "island": "",
+          "p90": 26.0,
+          "relMAE_all": 0.0284,
+          "relMAE_summer": 0.0326,
+          "relMAE_season": 0.0323
+        },
+        {
+          "camera": "playa-de-tora",
+          "beach": "Playa de Tor\u00e0",
+          "island": "",
+          "p90": 121.0,
+          "relMAE_all": 0.0589,
+          "relMAE_summer": 0.0824,
+          "relMAE_season": 0.0656
+        },
+        {
+          "camera": "santa-ponca-serra-de-tramuntana_1",
+          "beach": "Playa de Santa Pon\u00e7a",
+          "island": "",
+          "p90": 52.0,
+          "relMAE_all": 0.0777,
+          "relMAE_summer": null,
+          "relMAE_season": 0.0875
+        },
+        {
+          "camera": "golf-camp-de-mar",
+          "beach": "Camp de Mar",
+          "island": "",
+          "p90": 148.0,
+          "relMAE_all": 0.1203,
+          "relMAE_summer": 0.2407,
+          "relMAE_season": 0.167
+        },
+        {
+          "camera": "platja-marina",
+          "beach": "Marina",
+          "island": "",
+          "p90": 10.0,
+          "relMAE_all": 0.0336,
+          "relMAE_summer": 0.0497,
+          "relMAE_season": 0.0449
+        },
+        {
+          "camera": "cala-agulla",
+          "beach": "Cala Agulla",
+          "island": "",
+          "p90": 8.0,
+          "relMAE_all": 0.0545,
+          "relMAE_summer": null,
+          "relMAE_season": 0.0695
+        },
+        {
+          "camera": "can-pastilla-bonaona",
+          "beach": "Palma",
+          "island": "",
+          "p90": 194.0,
+          "relMAE_all": 0.0992,
+          "relMAE_summer": 0.1294,
+          "relMAE_season": 0.1059
+        },
+        {
+          "camera": "cala-vedella_1",
+          "beach": "Cala Vedella",
+          "island": "",
+          "p90": 5.0,
+          "relMAE_all": 0.01,
+          "relMAE_summer": 0.0158,
+          "relMAE_season": 0.0156
+        },
+        {
+          "camera": "cala-vedella",
+          "beach": "Cala Vedella",
+          "island": "",
+          "p90": 144.0,
+          "relMAE_all": 0.0415,
+          "relMAE_summer": 0.07,
+          "relMAE_season": 0.0653
+        },
+        {
+          "camera": "es-pujols",
+          "beach": "Es Pujols",
+          "island": "",
+          "p90": 30.0,
+          "relMAE_all": 0.0398,
+          "relMAE_summer": 0.0632,
+          "relMAE_season": 0.0495
+        },
+        {
+          "camera": "punta-de-sa-galera",
+          "beach": "Punta de Sa Galera",
+          "island": "",
+          "p90": 16.0,
+          "relMAE_all": 0.018,
+          "relMAE_summer": 0.0274,
+          "relMAE_season": 0.0248
+        },
+        {
+          "camera": "can-pastilla_mallorca-pipeline",
+          "beach": "Palma",
+          "island": "",
+          "p90": 47.0,
+          "relMAE_all": 0.0331,
+          "relMAE_summer": 0.0726,
+          "relMAE_season": 0.0476
+        },
+        {
+          "camera": "marina",
+          "beach": "Marina",
+          "island": "",
+          "p90": 10.0,
+          "relMAE_all": 0.0484,
+          "relMAE_summer": 0.0343,
+          "relMAE_season": 0.0431
+        },
+        {
+          "camera": "muro-sector-i",
+          "beach": "Muro-Sector I",
+          "island": "",
+          "p90": 49.2,
+          "relMAE_all": 0.04,
+          "relMAE_summer": null,
+          "relMAE_season": 0.0468
+        },
+        {
+          "camera": "son-serra-de-marina",
+          "beach": "Son Serra de Marina",
+          "island": "",
+          "p90": 51.0,
+          "relMAE_all": 0.1154,
+          "relMAE_summer": 0.1726,
+          "relMAE_season": 0.1428
+        },
+        {
+          "camera": "soller-santa-catalina-nord",
+          "beach": "Port",
+          "island": "",
+          "p90": 1.0,
+          "relMAE_all": 0.0019,
+          "relMAE_summer": 0.0017,
+          "relMAE_season": 0.0019
+        },
+        {
+          "camera": "port",
+          "beach": "Port",
+          "island": "",
+          "p90": 6.0,
+          "relMAE_all": 0.0171,
+          "relMAE_summer": 0.0228,
+          "relMAE_season": 0.0249
+        },
+        {
+          "camera": "cala-gat",
+          "beach": "Cala Gat",
+          "island": "",
+          "p90": 4.0,
+          "relMAE_all": 0.0824,
+          "relMAE_summer": null,
+          "relMAE_season": null
+        },
+        {
+          "camera": "tora-multimediatres",
+          "beach": "Playa de Tor\u00e0",
+          "island": "",
+          "p90": 47.6,
+          "relMAE_all": 0.1001,
+          "relMAE_summer": null,
+          "relMAE_season": null
+        },
+        {
+          "camera": "pacific-bay-tora-multimediatres",
+          "beach": "Playa de Tor\u00e0",
+          "island": "",
+          "p90": 70.0,
+          "relMAE_all": 0.1432,
+          "relMAE_summer": null,
+          "relMAE_season": 0.1105
+        },
+        {
+          "camera": "port-pollenca-sail-surf",
+          "beach": "Port Pollen\u00e7a",
+          "island": "",
+          "p90": 14.0,
+          "relMAE_all": 0.0661,
+          "relMAE_summer": null,
+          "relMAE_season": 0.0766
+        },
+        {
+          "camera": "port-pollenca",
+          "beach": "Port Pollen\u00e7a",
+          "island": "",
+          "p90": 34.0,
+          "relMAE_all": 0.0464,
+          "relMAE_summer": null,
+          "relMAE_season": 0.0335
+        },
+        {
+          "camera": "cala-millor-1",
+          "beach": "Cala Millor Son Servera",
+          "island": "",
+          "p90": 6.0,
+          "relMAE_all": 0.0475,
+          "relMAE_summer": null,
+          "relMAE_season": null
+        },
+        {
+          "camera": "cala-millor-2",
+          "beach": "Cala Millor Son Servera",
+          "island": "",
+          "p90": 4.0,
+          "relMAE_all": 0.0229,
+          "relMAE_summer": null,
+          "relMAE_season": null
+        },
+        {
+          "camera": "palmanova-matias-beach",
+          "beach": "Playa de Palmanova",
+          "island": "",
+          "p90": 67.7,
+          "relMAE_all": 0.1211,
+          "relMAE_summer": null,
+          "relMAE_season": 0.1394
+        }
+      ]
+    },
+    {
+      "model_set": "tft_20260521_003941",
+      "model_key": "15d",
+      "overall": {
+        "all": 0.0556,
+        "summer": 0.0746,
+        "season": 0.0647
+      },
+      "per_beach": [
+        {
+          "camera": "playa-de-tora_2",
+          "beach": "Playa de Tor\u00e0",
+          "island": "",
+          "p90": 43.0,
+          "relMAE_all": 0.0747,
+          "relMAE_summer": null,
+          "relMAE_season": 0.0828
+        },
+        {
+          "camera": "playa-de-palmira_1",
+          "beach": "Playa de Palmira",
+          "island": "",
+          "p90": 136.0,
+          "relMAE_all": 0.0634,
+          "relMAE_summer": 0.0765,
+          "relMAE_season": 0.0721
+        },
+        {
+          "camera": "camp-de-mar_1",
+          "beach": "Camp de Mar",
+          "island": "",
+          "p90": 286.0,
+          "relMAE_all": 0.0707,
+          "relMAE_summer": null,
+          "relMAE_season": 0.0707
+        },
+        {
+          "camera": "camp-de-mar_3",
+          "beach": "Camp de Mar",
+          "island": "",
+          "p90": 11.0,
+          "relMAE_all": 0.0173,
+          "relMAE_summer": null,
+          "relMAE_season": 0.013
+        },
+        {
+          "camera": "cala-portals-vells",
+          "beach": "Cala Portals Vells",
+          "island": "",
+          "p90": 44.0,
+          "relMAE_all": 0.0393,
+          "relMAE_summer": 0.0499,
+          "relMAE_season": 0.0443
+        },
+        {
+          "camera": "port-dandratx",
+          "beach": "Brismar",
+          "island": "",
+          "p90": 41.0,
+          "relMAE_all": 0.06,
+          "relMAE_summer": 0.0675,
+          "relMAE_season": 0.0597
+        },
+        {
+          "camera": "platja-de-peguera_1",
+          "beach": "Playa de Palmira",
+          "island": "",
+          "p90": 317.0,
+          "relMAE_all": 0.0221,
+          "relMAE_summer": 0.024,
+          "relMAE_season": 0.024
+        },
+        {
+          "camera": "playa-de-tora_1",
+          "beach": "Playa de Tor\u00e0",
+          "island": "",
+          "p90": 233.0,
+          "relMAE_all": 0.1389,
+          "relMAE_summer": 0.1194,
+          "relMAE_season": 0.1389
+        },
+        {
+          "camera": "playa-de-palmira",
+          "beach": "Playa de Palmira",
+          "island": "",
+          "p90": 149.0,
+          "relMAE_all": 0.0466,
+          "relMAE_summer": 0.0765,
+          "relMAE_season": 0.0564
+        },
+        {
+          "camera": "playa-de-magaluf",
+          "beach": "Playa de Magaluf",
+          "island": "",
+          "p90": 111.0,
+          "relMAE_all": 0.1366,
+          "relMAE_summer": 0.1272,
+          "relMAE_season": 0.1366
+        },
+        {
+          "camera": "port-dandratx_2",
+          "beach": "Brismar",
+          "island": "",
+          "p90": 288.0,
+          "relMAE_all": 0.1307,
+          "relMAE_summer": null,
+          "relMAE_season": 0.1138
+        },
+        {
+          "camera": "playa-de-ses-penyes-roges",
+          "beach": "Playa de ses Penyes Roges",
+          "island": "",
+          "p90": 118.0,
+          "relMAE_all": 0.0458,
+          "relMAE_summer": 0.0423,
+          "relMAE_season": 0.046
+        },
+        {
+          "camera": "playa-de-santa-ponca",
+          "beach": "Playa de Santa Pon\u00e7a",
+          "island": "",
+          "p90": 59.9,
+          "relMAE_all": 0.0664,
+          "relMAE_summer": null,
+          "relMAE_season": 0.0777
+        },
+        {
+          "camera": "port-dandratx-port_1",
+          "beach": "Brismar",
+          "island": "",
+          "p90": 32.0,
+          "relMAE_all": 0.0745,
+          "relMAE_summer": 0.0715,
+          "relMAE_season": 0.0677
+        },
+        {
+          "camera": "cala-fornells_2",
+          "beach": "Cala Fornells",
+          "island": "",
+          "p90": 51.0,
+          "relMAE_all": 0.0282,
+          "relMAE_summer": 0.048,
+          "relMAE_season": 0.0301
+        },
+        {
+          "camera": "port-dandratx-la-mola_1",
+          "beach": "Brismar",
+          "island": "",
+          "p90": 108.0,
+          "relMAE_all": 0.094,
+          "relMAE_summer": 0.0686,
+          "relMAE_season": 0.0782
+        },
+        {
+          "camera": "cala-llamp",
+          "beach": "Cala Llamp",
+          "island": "",
+          "p90": 25.0,
+          "relMAE_all": 0.0544,
+          "relMAE_summer": null,
+          "relMAE_season": null
+        },
+        {
+          "camera": "camp-de-mar_2",
+          "beach": "Camp de Mar",
+          "island": "",
+          "p90": 21.0,
+          "relMAE_all": 0.0283,
+          "relMAE_summer": null,
+          "relMAE_season": 0.0318
+        },
+        {
+          "camera": "andratx",
+          "beach": "Brismar",
+          "island": "",
+          "p90": 0.0,
+          "relMAE_all": 0.0,
+          "relMAE_summer": 0.0,
+          "relMAE_season": 0.0
+        },
+        {
+          "camera": "cala-fornells_1",
+          "beach": "Cala Fornells",
+          "island": "",
+          "p90": 33.0,
+          "relMAE_all": 0.0554,
+          "relMAE_summer": 0.0411,
+          "relMAE_season": 0.0595
+        },
+        {
+          "camera": "cala-fornells",
+          "beach": "Cala Fornells",
+          "island": "",
+          "p90": 26.0,
+          "relMAE_all": 0.029,
+          "relMAE_summer": 0.0325,
+          "relMAE_season": 0.0322
+        },
+        {
+          "camera": "playa-de-tora",
+          "beach": "Playa de Tor\u00e0",
+          "island": "",
+          "p90": 121.0,
+          "relMAE_all": 0.0675,
+          "relMAE_summer": 0.1172,
+          "relMAE_season": 0.0767
+        },
+        {
+          "camera": "santa-ponca-serra-de-tramuntana_1",
+          "beach": "Playa de Santa Pon\u00e7a",
+          "island": "",
+          "p90": 52.0,
+          "relMAE_all": 0.0717,
+          "relMAE_summer": null,
+          "relMAE_season": 0.0779
+        },
+        {
+          "camera": "golf-camp-de-mar",
+          "beach": "Camp de Mar",
+          "island": "",
+          "p90": 148.0,
+          "relMAE_all": 0.1748,
+          "relMAE_summer": 0.3534,
+          "relMAE_season": 0.2292
+        },
+        {
+          "camera": "platja-marina",
+          "beach": "Marina",
+          "island": "",
+          "p90": 10.0,
+          "relMAE_all": 0.0327,
+          "relMAE_summer": 0.0445,
+          "relMAE_season": 0.0419
+        },
+        {
+          "camera": "cala-agulla",
+          "beach": "Cala Agulla",
+          "island": "",
+          "p90": 8.0,
+          "relMAE_all": 0.062,
+          "relMAE_summer": null,
+          "relMAE_season": 0.0663
+        },
+        {
+          "camera": "can-pastilla-bonaona",
+          "beach": "Palma",
+          "island": "",
+          "p90": 194.0,
+          "relMAE_all": 0.1149,
+          "relMAE_summer": 0.1347,
+          "relMAE_season": 0.1204
+        },
+        {
+          "camera": "cala-vedella_1",
+          "beach": "Cala Vedella",
+          "island": "",
+          "p90": 5.0,
+          "relMAE_all": 0.0102,
+          "relMAE_summer": 0.0154,
+          "relMAE_season": 0.0158
+        },
+        {
+          "camera": "cala-vedella",
+          "beach": "Cala Vedella",
+          "island": "",
+          "p90": 144.0,
+          "relMAE_all": 0.0448,
+          "relMAE_summer": 0.0821,
+          "relMAE_season": 0.0717
+        },
+        {
+          "camera": "es-pujols",
+          "beach": "Es Pujols",
+          "island": "",
+          "p90": 30.0,
+          "relMAE_all": 0.0407,
+          "relMAE_summer": 0.0663,
+          "relMAE_season": 0.0493
+        },
+        {
+          "camera": "punta-de-sa-galera",
+          "beach": "Punta de Sa Galera",
+          "island": "",
+          "p90": 16.0,
+          "relMAE_all": 0.0192,
+          "relMAE_summer": 0.0257,
+          "relMAE_season": 0.0265
+        },
+        {
+          "camera": "can-pastilla_mallorca-pipeline",
+          "beach": "Palma",
+          "island": "",
+          "p90": 47.0,
+          "relMAE_all": 0.0325,
+          "relMAE_summer": 0.0729,
+          "relMAE_season": 0.0485
+        },
+        {
+          "camera": "marina",
+          "beach": "Marina",
+          "island": "",
+          "p90": 10.0,
+          "relMAE_all": 0.0553,
+          "relMAE_summer": 0.0482,
+          "relMAE_season": 0.046
+        },
+        {
+          "camera": "muro-sector-i",
+          "beach": "Muro-Sector I",
+          "island": "",
+          "p90": 49.2,
+          "relMAE_all": 0.0448,
+          "relMAE_summer": null,
+          "relMAE_season": 0.05
+        },
+        {
+          "camera": "son-serra-de-marina",
+          "beach": "Son Serra de Marina",
+          "island": "",
+          "p90": 51.0,
+          "relMAE_all": 0.1273,
+          "relMAE_summer": 0.1913,
+          "relMAE_season": 0.1541
+        },
+        {
+          "camera": "soller-santa-catalina-nord",
+          "beach": "Port",
+          "island": "",
+          "p90": 1.0,
+          "relMAE_all": 0.0017,
+          "relMAE_summer": 0.002,
+          "relMAE_season": 0.002
+        },
+        {
+          "camera": "port",
+          "beach": "Port",
+          "island": "",
+          "p90": 6.0,
+          "relMAE_all": 0.0179,
+          "relMAE_summer": 0.023,
+          "relMAE_season": 0.0254
+        },
+        {
+          "camera": "cala-gat",
+          "beach": "Cala Gat",
+          "island": "",
+          "p90": 4.0,
+          "relMAE_all": 0.1122,
+          "relMAE_summer": null,
+          "relMAE_season": null
+        },
+        {
+          "camera": "tora-multimediatres",
+          "beach": "Playa de Tor\u00e0",
+          "island": "",
+          "p90": 47.6,
+          "relMAE_all": 0.1532,
+          "relMAE_summer": null,
+          "relMAE_season": null
+        },
+        {
+          "camera": "pacific-bay-tora-multimediatres",
+          "beach": "Playa de Tor\u00e0",
+          "island": "",
+          "p90": 70.0,
+          "relMAE_all": 0.1114,
+          "relMAE_summer": null,
+          "relMAE_season": 0.1047
+        },
+        {
+          "camera": "port-pollenca-sail-surf",
+          "beach": "Port Pollen\u00e7a",
+          "island": "",
+          "p90": 14.0,
+          "relMAE_all": 0.0741,
+          "relMAE_summer": null,
+          "relMAE_season": 0.0883
+        },
+        {
+          "camera": "port-pollenca",
+          "beach": "Port Pollen\u00e7a",
+          "island": "",
+          "p90": 34.0,
+          "relMAE_all": 0.0391,
+          "relMAE_summer": null,
+          "relMAE_season": 0.0335
+        },
+        {
+          "camera": "cala-millor-1",
+          "beach": "Cala Millor Son Servera",
+          "island": "",
+          "p90": 6.0,
+          "relMAE_all": 0.0409,
+          "relMAE_summer": null,
+          "relMAE_season": null
+        },
+        {
+          "camera": "cala-millor-2",
+          "beach": "Cala Millor Son Servera",
+          "island": "",
+          "p90": 4.0,
+          "relMAE_all": 0.0126,
+          "relMAE_summer": null,
+          "relMAE_season": 0.0148
+        },
+        {
+          "camera": "palmanova-matias-beach",
+          "beach": "Playa de Palmanova",
+          "island": "",
+          "p90": 67.7,
+          "relMAE_all": 0.1255,
+          "relMAE_summer": null,
+          "relMAE_season": 0.1504
         }
       ]
     },
@@ -5593,7 +6865,7 @@
           "camera": "port-pollenca",
           "beach": "Port Pollen\u00e7a",
           "island": "",
-          "p90": 34.2,
+          "p90": 34.0,
           "relMAE_all": 0.0486,
           "relMAE_summer": null,
           "relMAE_season": 0.0388
@@ -5620,7 +6892,7 @@
           "camera": "palmanova-matias-beach",
           "beach": "Playa de Palmanova",
           "island": "",
-          "p90": 67.0,
+          "p90": 67.7,
           "relMAE_all": 0.1478,
           "relMAE_summer": null,
           "relMAE_season": 0.1535
@@ -6009,7 +7281,7 @@
           "camera": "port-pollenca",
           "beach": "Port Pollen\u00e7a",
           "island": "",
-          "p90": 34.2,
+          "p90": 34.0,
           "relMAE_all": 0.0398,
           "relMAE_summer": null,
           "relMAE_season": 0.0367
@@ -6036,7 +7308,7 @@
           "camera": "palmanova-matias-beach",
           "beach": "Playa de Palmanova",
           "island": "",
-          "p90": 67.0,
+          "p90": 67.7,
           "relMAE_all": 0.181,
           "relMAE_summer": null,
           "relMAE_season": 0.1977
@@ -6425,7 +7697,7 @@
           "camera": "port-pollenca",
           "beach": "Port Pollen\u00e7a",
           "island": "",
-          "p90": 34.2,
+          "p90": 34.0,
           "relMAE_all": 0.0351,
           "relMAE_summer": null,
           "relMAE_season": 0.0342
@@ -6452,7 +7724,7 @@
           "camera": "palmanova-matias-beach",
           "beach": "Playa de Palmanova",
           "island": "",
-          "p90": 67.0,
+          "p90": 67.7,
           "relMAE_all": 0.1724,
           "relMAE_summer": null,
           "relMAE_season": 0.1729
@@ -6841,7 +8113,7 @@
           "camera": "port-pollenca",
           "beach": "Port Pollen\u00e7a",
           "island": "",
-          "p90": 34.2,
+          "p90": 34.0,
           "relMAE_all": 0.0462,
           "relMAE_summer": null,
           "relMAE_season": 0.0361
@@ -6868,7 +8140,7 @@
           "camera": "palmanova-matias-beach",
           "beach": "Playa de Palmanova",
           "island": "",
-          "p90": 67.0,
+          "p90": 67.7,
           "relMAE_all": 0.1668,
           "relMAE_summer": null,
           "relMAE_season": 0.1798
@@ -7257,7 +8529,7 @@
           "camera": "port-pollenca",
           "beach": "Port Pollen\u00e7a",
           "island": "",
-          "p90": 34.2,
+          "p90": 34.0,
           "relMAE_all": 0.041,
           "relMAE_summer": null,
           "relMAE_season": 0.0368
@@ -7284,7 +8556,7 @@
           "camera": "palmanova-matias-beach",
           "beach": "Playa de Palmanova",
           "island": "",
-          "p90": 67.0,
+          "p90": 67.7,
           "relMAE_all": 0.1443,
           "relMAE_summer": null,
           "relMAE_season": 0.1531
@@ -7673,7 +8945,7 @@
           "camera": "port-pollenca",
           "beach": "Port Pollen\u00e7a",
           "island": "",
-          "p90": 34.2,
+          "p90": 34.0,
           "relMAE_all": 0.0364,
           "relMAE_summer": null,
           "relMAE_season": 0.0359
@@ -7700,7 +8972,7 @@
           "camera": "palmanova-matias-beach",
           "beach": "Playa de Palmanova",
           "island": "",
-          "p90": 67.0,
+          "p90": 67.7,
           "relMAE_all": 0.1925,
           "relMAE_summer": null,
           "relMAE_season": 0.193
@@ -8089,7 +9361,7 @@
           "camera": "port-pollenca",
           "beach": "Port Pollen\u00e7a",
           "island": "",
-          "p90": 34.2,
+          "p90": 34.0,
           "relMAE_all": 0.0476,
           "relMAE_summer": null,
           "relMAE_season": 0.0354
@@ -8116,7 +9388,7 @@
           "camera": "palmanova-matias-beach",
           "beach": "Playa de Palmanova",
           "island": "",
-          "p90": 67.0,
+          "p90": 67.7,
           "relMAE_all": 0.168,
           "relMAE_summer": null,
           "relMAE_season": 0.1795
@@ -8505,7 +9777,7 @@
           "camera": "port-pollenca",
           "beach": "Port Pollen\u00e7a",
           "island": "",
-          "p90": 34.2,
+          "p90": 34.0,
           "relMAE_all": 0.0436,
           "relMAE_summer": null,
           "relMAE_season": 0.0414
@@ -8532,7 +9804,7 @@
           "camera": "palmanova-matias-beach",
           "beach": "Playa de Palmanova",
           "island": "",
-          "p90": 67.0,
+          "p90": 67.7,
           "relMAE_all": 0.1906,
           "relMAE_summer": null,
           "relMAE_season": 0.2096
@@ -8921,7 +10193,7 @@
           "camera": "port-pollenca",
           "beach": "Port Pollen\u00e7a",
           "island": "",
-          "p90": 34.2,
+          "p90": 34.0,
           "relMAE_all": 0.039,
           "relMAE_summer": null,
           "relMAE_season": 0.0395
@@ -8948,7 +10220,7 @@
           "camera": "palmanova-matias-beach",
           "beach": "Playa de Palmanova",
           "island": "",
-          "p90": 67.0,
+          "p90": 67.7,
           "relMAE_all": 0.2663,
           "relMAE_summer": null,
           "relMAE_season": 0.2667
@@ -9337,7 +10609,7 @@
           "camera": "port-pollenca",
           "beach": "Port Pollen\u00e7a",
           "island": "",
-          "p90": 34.2,
+          "p90": 34.0,
           "relMAE_all": 0.0482,
           "relMAE_summer": null,
           "relMAE_season": 0.037
@@ -9364,7 +10636,7 @@
           "camera": "palmanova-matias-beach",
           "beach": "Playa de Palmanova",
           "island": "",
-          "p90": 67.0,
+          "p90": 67.7,
           "relMAE_all": 0.163,
           "relMAE_summer": null,
           "relMAE_season": 0.175
@@ -9753,7 +11025,7 @@
           "camera": "port-pollenca",
           "beach": "Port Pollen\u00e7a",
           "island": "",
-          "p90": 34.2,
+          "p90": 34.0,
           "relMAE_all": 0.0401,
           "relMAE_summer": null,
           "relMAE_season": 0.0362
@@ -9780,7 +11052,7 @@
           "camera": "palmanova-matias-beach",
           "beach": "Playa de Palmanova",
           "island": "",
-          "p90": 67.0,
+          "p90": 67.7,
           "relMAE_all": 0.1817,
           "relMAE_summer": null,
           "relMAE_season": 0.1993
@@ -10169,7 +11441,7 @@
           "camera": "port-pollenca",
           "beach": "Port Pollen\u00e7a",
           "island": "",
-          "p90": 34.2,
+          "p90": 34.0,
           "relMAE_all": 0.0384,
           "relMAE_summer": null,
           "relMAE_season": 0.0366
@@ -10196,7 +11468,7 @@
           "camera": "palmanova-matias-beach",
           "beach": "Playa de Palmanova",
           "island": "",
-          "p90": 67.0,
+          "p90": 67.7,
           "relMAE_all": 0.2513,
           "relMAE_summer": null,
           "relMAE_season": 0.252
