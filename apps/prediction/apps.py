@@ -28,7 +28,10 @@ class PredictionConfig(AppConfig):
                 if name in tft_service.model_sets:
                     return
                 try:
-                    tft_service.load_models(base_dir=base_dir, set_name=name)
+                    if tft_service._set_kind.get(name) == 'xgb':
+                        tft_service.load_xgb_models(base_dir=base_dir, set_name=name)
+                    else:
+                        tft_service.load_models(base_dir=base_dir, set_name=name)
                 except Exception:
                     logger.exception("skipping model set '%s' (failed to load)", name)
 
