@@ -251,8 +251,8 @@
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const slug = '{{ cam.camera_slug }}';
-    const maxCrowd = {{ cam.max_crowd_count|default:"0" }};
-    const p90 = {{ cam_daytime_p90|default:"0" }};  // per-series season-daytime P90, computed on the fly (thesis statistical denominator)
+    const maxCrowd = {{ cam.max_crowd_count|default:"0"|unlocalize }};
+    const p90 = {{ cam_daytime_p90|default:"0"|unlocalize }};  // per-series season-daytime P90, computed on the fly (thesis statistical denominator)
 
     const LEVEL_COLORS = {HIGH: '#e74c3c', MEDIUM: '#f39c12', LOW: '#27ae60', VERY_LOW: '#3498db'};
 
