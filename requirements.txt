@@ -28,7 +28,7 @@ seaborn
 requests==2.31.0
 selenium==4.31.0
 selenium-wire==5.1.0
-yt-dlp==2025.3.31
+yt-dlp==2026.3.17
 
 # Deployment
 fabric==3.2.2
