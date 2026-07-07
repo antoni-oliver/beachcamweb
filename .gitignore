@@ -39,3 +39,4 @@ development_db.sqlite3
 *_bk.py
 *model_evaluation.json.*
 apps/prediction/a2_*
+a3_*.csv
