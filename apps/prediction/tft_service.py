@@ -1,8 +1,8 @@
 """
 TFT Prediction Service — loads 3 pre-trained models and serves predictions.
 
-Models: 3-day (H=36), 14-day (H=168), 30-day (H=360)
-Auto-selects model based on requested horizon.
+Models: 3-day (H=39), 10-day (H=130), 15-day (H=195), on the 13 daytime
+hours/day frame (8:00-20:00). Auto-selects model based on requested horizon.
 """
 
 import hashlib
@@ -13,7 +13,9 @@ from datetime import timedelta, date
 from pathlib import Path
 
 import holidays as _holidays
+import numpy as np
 import pandas as pd
+import torch
 from django.core.cache import cache
 from django.utils.timezone import make_aware
 
@@ -33,8 +35,8 @@ from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
-HOURS_PER_DAY = 12
-HOUR_MIN, HOUR_MAX = 8, 19
+HOURS_PER_DAY = 13
+HOUR_MIN, HOUR_MAX = 8, 20   # daytime window standardised to 8-20 (incl. the 20:00 bin), matching the dataset + research pipeline
 
 OCCUPANCY_THRESHOLDS = [
     (0.75, 'HIGH'),
@@ -83,9 +85,9 @@ STATIC_FEATURE_BUILDERS = {
 }
 
 MODEL_CONFIGS = {
-    '3d':  {'dir': 'tft_model_3d',  'horizon': 36,  'max_days': 3},
-    '10d': {'dir': 'tft_model_10d', 'horizon': 120, 'max_days': 10},
-    '15d': {'dir': 'tft_model_15d', 'horizon': 180, 'max_days': 15},
+    '3d':  {'dir': 'tft_model_3d',  'horizon': 39,  'max_days': 3},
+    '10d': {'dir': 'tft_model_10d', 'horizon': 130, 'max_days': 10},
+    '15d': {'dir': 'tft_model_15d', 'horizon': 195, 'max_days': 15},
 }
 
 
@@ -132,6 +134,7 @@ class TFTService:
         self.model_sets = {}
         self._best_for_horizon = {}
         self._discovered = {}     # name -> base_dir path, from auto-discovery
+        self._set_kind = {}       # name -> 'tft' or 'xgb'
         self._load_best_models()
         self._auto_discover()
         self._initialized = True
@@ -154,6 +157,11 @@ class TFTService:
                         d.pop(k, None)
                     d['logger'] = False
                     d['enable_progress_bar'] = False
+                    # Pin a concrete accelerator: CUDA when the host has a GPU,
+                    # otherwise CPU. On the Mac, Lightning would pick MPS with op
+                    # fallback, which crawls (esp. the LSTM); CPU is much faster there.
+                    d['accelerator'] = 'gpu' if torch.cuda.is_available() else 'cpu'
+                    d['devices'] = 1
             if hasattr(model_obj, 'hparams'):
                 for k in BAD_KEYS:
                     model_obj.hparams.pop(k, None)
@@ -240,6 +248,53 @@ class TFTService:
         logger.info(f"TFT set '{set_name}': {len(loaded)} models loaded")
         return loaded
 
+    def load_xgb_models(self, base_dir=None, set_name='xgb'):
+        """Load <set>/xgb_model_<H>/{model.joblib, config.json} for each horizon."""
+        import joblib
+        base_dir = Path(base_dir)
+        max_days_map = {'3d': 3, '10d': 10, '15d': 15}
+        loaded = {}
+        for key in ['3d', '10d', '15d']:
+            candidates = [p for p in base_dir.iterdir()
+                          if p.is_dir() and p.name.endswith(f'_{key}')
+                          and (p / 'model.joblib').exists()
+                          and (p / 'config.json').exists()]
+            if not candidates:
+                logger.warning(f"[{set_name}] xgb {key} not found in {base_dir}, skipping")
+                continue
+            model_dir = sorted(candidates)[0]
+            with open(model_dir / 'config.json') as f:
+                config = json.load(f)
+            model = joblib.load(model_dir / 'model.joblib')
+            per_beach_path = model_dir / 'per_beach.csv'
+            per_beach = pd.read_csv(per_beach_path) if per_beach_path.exists() else pd.DataFrame()
+            loaded[key] = {
+                'model':       model,
+                'config':      config,
+                'features':    config.get('features', []),
+                'hist_pool':   config.get('hist_pool', []),
+                'horizon':     int(config.get('horizon', max_days_map[key] * HOURS_PER_DAY)),
+                'max_days':    max_days_map[key],
+                'per_beach':   per_beach,
+                'model_dir':   str(model_dir),
+                'model_type':  'XGBRegressor',
+                'feature_importance': self._xgb_feature_importance(model, config.get('features', [])),
+            }
+            logger.info(f"[{set_name}] Loaded XGB {key} (H={loaded[key]['horizon']}) from {model_dir.name}")
+
+        self.model_sets[set_name] = loaded
+        self._set_kind[set_name] = 'xgb'
+        logger.info(f"XGB set '{set_name}': {len(loaded)} models loaded")
+        return loaded
+
+    @staticmethod
+    def _xgb_feature_importance(model, features):
+        try:
+            imp = model.feature_importances_
+            return {features[i]: float(imp[i]) for i in range(min(len(features), len(imp)))}
+        except Exception:
+            return {f: round(1.0 / max(len(features), 1), 4) for f in features}
+
     def list_model_sets(self):
         loaded = {
             name: {k: {'horizon': m['horizon'], 'max_days': m['max_days'], 'dir': m['model_dir']}
@@ -292,33 +347,53 @@ class TFTService:
             logger.warning(f"Could not load eval JSON: {e}")
 
     def _auto_discover(self):
-        """Scan TFT_MODELS_DIR for run subfolders containing tft_model_Xd dirs."""
-        models_dir = Path(settings.TFT_MODELS_DIR)
-        if not models_dir.exists():
-            logger.warning(f"TFT_MODELS_DIR not found: {models_dir}")
-            return
+        """Scan TFT_MODELS_DIR + XGB_MODELS_DIR for run subfolders.
 
+        TFT/LSTM sets must have <model>_<H>/config.json + nf_model/ subdirs.
+        XGB sets must have <model>_<H>/config.json + model.joblib.
+        """
         configured = getattr(settings, 'TFT_MODEL_SETS', {})
 
-        for candidate in sorted(models_dir.iterdir()):
-            if not candidate.is_dir():
-                continue
-            # Valid run folder must contain at least one *_3d/*_10d/*_15d subdir with config.json
-            has_model = any(
-                sub.is_dir() and (sub / 'config.json').exists()
-                for sub in candidate.iterdir()
-                if sub.name.endswith('_3d') or sub.name.endswith('_10d') or sub.name.endswith('_15d')
-            )
-            if not has_model:
-                continue
-            name = candidate.name
-            # TFT_MODEL_SETS takes priority — skip if already explicitly configured
-            if name in configured:
-                continue
-            self._discovered[name] = candidate
-            logger.info(f"Auto-discovered model set: {name}")
+        def _classify(candidate: Path) -> str | None:
+            horizons = [s for s in candidate.iterdir()
+                        if s.is_dir() and s.name.endswith(('_3d', '_10d', '_15d'))]
+            if not horizons:
+                return None
+            if any((s / 'config.json').exists() and (s / 'nf_model').is_dir() for s in horizons):
+                return 'tft'
+            if any((s / 'config.json').exists() and (s / 'model.joblib').exists() for s in horizons):
+                return 'xgb'
+            return None
 
-        logger.info(f"Auto-discovered {len(self._discovered)} model set(s): {list(self._discovered)}")
+        scan_dirs = [Path(settings.TFT_MODELS_DIR)]
+        xgb_dir = getattr(settings, 'XGB_MODELS_DIR', None)
+        if xgb_dir:
+            scan_dirs.append(Path(xgb_dir))
+
+        for models_dir in scan_dirs:
+            if not models_dir.exists():
+                logger.warning(f"Models dir not found: {models_dir}")
+                continue
+            for candidate in sorted(models_dir.iterdir()):
+                if not candidate.is_dir():
+                    continue
+                kind = _classify(candidate)
+                if kind is None:
+                    continue
+                name = candidate.name
+                if name in configured or name in self._discovered:
+                    # An XGB set sharing a TFT set's name (same run, two model
+                    # families) is kept under an `xgb_` prefix so both are servable.
+                    if kind == 'xgb' and f"xgb_{name}" not in self._discovered \
+                            and f"xgb_{name}" not in configured:
+                        name = f"xgb_{name}"
+                    else:
+                        continue
+                self._discovered[name] = candidate
+                self._set_kind[name] = kind
+                logger.info(f"Auto-discovered {kind} set: {name}")
+
+        logger.info(f"Auto-discovered {len(self._discovered)} set(s): {list(self._discovered)}")
 
     def _horizon_key_for_days(self, days):
         if days <= 3:
@@ -471,12 +546,17 @@ class TFTService:
         if model_set == 'default' or model_set in self.model_sets:
             return  # default is virtual — resolved at predict time per horizon
         configured = getattr(settings, 'TFT_MODEL_SETS', {})
+        kind = self._set_kind.get(model_set, 'tft')
         if model_set in configured:
             logger.info(f"TFT: lazy loading configured set '{model_set}'...")
             self.load_models(base_dir=configured[model_set], set_name=model_set)
         elif model_set in self._discovered:
-            logger.info(f"TFT: lazy loading discovered set '{model_set}'...")
-            self.load_models(base_dir=self._discovered[model_set], set_name=model_set)
+            base = self._discovered[model_set]
+            logger.info(f"{kind.upper()}: lazy loading discovered set '{model_set}'...")
+            if kind == 'xgb':
+                self.load_xgb_models(base_dir=base, set_name=model_set)
+            else:
+                self.load_models(base_dir=base, set_name=model_set)
         else:
             available = list(self.model_sets) + list(configured) + list(self._discovered)
             raise RuntimeError(f"Model set '{model_set}' not found. Available: {available}")
@@ -492,6 +572,9 @@ class TFTService:
                 raise RuntimeError("No model sets available. Check TFT_MODELS_DIR or TFT_MODEL_SETS.")
 
         self._ensure_loaded(model_set)
+
+        if self._set_kind.get(model_set) == 'xgb':
+            return self._predict_xgb(webcam, days, since=since, model_set=model_set, model_key=model_key)
 
         # If the resolved set loaded nothing (e.g. stale eval JSON pointing to a legacy path),
         # fall back to any set that actually has models
@@ -636,6 +719,190 @@ class TFTService:
         else:
             self._hindcast_write(hc_path, result)
 
+        return result
+
+    def _predict_xgb(self, webcam, days, since=None, model_set=None, model_key=None):
+        """Castelle-style XGB prediction: each of the H rows of feature history
+        produces one prediction at offset H ahead, filling the daytime window
+        last_real+1 .. last_real+H (daytime hours 8-20 only)."""
+        models = self.model_sets[model_set]
+        model_key = model_key if model_key and model_key in models else self.select_model(days, model_set=model_set)
+        if not model_key or model_key not in models:
+            raise RuntimeError(f"No XGB model for set '{model_set}'")
+        m = models[model_key]
+
+        if not since:
+            cache_key = self._forecast_cache_key(webcam.camera_slug, days, model_set, model_key)
+            cached = cache.get(cache_key)
+            if cached is not None:
+                return cached
+        else:
+            hc_path = self._hindcast_cache_path(webcam.camera_slug, since, days, model_set, model_key)
+            cached = self._hindcast_read(hc_path)
+            if cached is not None:
+                return cached
+
+        H = m['horizon']
+        H_out = min(days * HOURS_PER_DAY, H)
+        feat_cols = m['features']
+        uid = webcam.camera_slug
+
+        lat = float(webcam.camera_latitude or (webcam.beach.coordenadas_geograficas.split(',')[0]
+                    if webcam.beach.coordenadas_geograficas else 39.5))
+        lon = float(webcam.camera_longitude or (webcam.beach.coordenadas_geograficas.split(',')[1]
+                    if webcam.beach.coordenadas_geograficas else 2.6))
+
+        since_naive = None
+        if since:
+            since_naive = since.replace(tzinfo=None) if hasattr(since, 'tzinfo') and since.tzinfo else since
+            weather_all = self._fetch_weather_for_period(lat, lon, since_naive, days, context_days=10)
+        else:
+            weather_all = self._fetch_weather_forecast(lat, lon, past_days=10, forecast_days=16)
+        weather_dt = self._filter_daytime(weather_all).sort_values('ds_real').reset_index(drop=True)
+
+        # ── Snapshot history (daytime only)
+        qs = Snapshot.objects.filter(webcam=webcam, predicted_crowd_count__isnull=False)
+        if since:
+            since_aware = since if (hasattr(since, "tzinfo") and since.tzinfo) else make_aware(since_naive)
+            qs = qs.filter(ts__lt=since_aware)
+        snapshots = list(qs.order_by('-ts')[:(H + 60)])[::-1]
+        rows = []
+        for s in snapshots:
+            ts = timezone.localtime(s.ts).replace(tzinfo=None).replace(minute=0, second=0, microsecond=0)
+            if HOUR_MIN <= ts.hour <= HOUR_MAX:
+                rows.append({'ds': ts, 'y': float(s.predicted_crowd_count)})
+        if len(rows) < 5:
+            raise ValueError(f"Not enough daytime history for {uid}: {len(rows)}")
+        hist = pd.DataFrame(rows).drop_duplicates(subset='ds').sort_values('ds').reset_index(drop=True)
+
+        last_real = hist['ds'].iloc[-1]
+
+        # Build target daytime timestamps after last_real
+        target_ts = []
+        cur = last_real
+        while len(target_ts) < H:
+            cur = cur + pd.Timedelta(hours=1)
+            if cur.hour > HOUR_MAX:
+                cur = (cur + pd.Timedelta(days=1)).normalize().replace(hour=HOUR_MIN)
+            if cur.hour < HOUR_MIN:
+                cur = cur.replace(hour=HOUR_MIN)
+            target_ts.append(cur)
+
+        # Compute lag/roll features on the full daytime history, then take last H rows
+        hist['y_lag1'] = hist['y'].shift(1)
+        hist['y_roll12'] = hist['y'].shift(1).rolling(12, min_periods=1).mean()
+        hist['y_roll36'] = hist['y'].shift(1).rolling(36, min_periods=1).mean()
+
+        # Pad history if we don't have enough rows for H predictions
+        if len(hist) < H:
+            need = H - len(hist)
+            pad = pd.concat([hist.iloc[[0]]] * need, ignore_index=True)
+            hist = pd.concat([pad, hist], ignore_index=True).reset_index(drop=True)
+        feat_rows = hist.tail(H).reset_index(drop=True)
+
+        # Build feature matrix: feat_rows[i] predicts target_ts[i]
+        X_rows = []
+        for i in range(H):
+            target = target_ts[i]
+            # nearest weather row to target
+            diffs = (weather_dt['ds_real'] - target).abs()
+            w = weather_dt.loc[diffs.idxmin()] if len(weather_dt) else None
+
+            row = {
+                'y_lag1':   float(feat_rows['y_lag1'].iloc[i]) if pd.notna(feat_rows['y_lag1'].iloc[i]) else 0.0,
+                'y_roll12': float(feat_rows['y_roll12'].iloc[i]) if pd.notna(feat_rows['y_roll12'].iloc[i]) else 0.0,
+                'y_roll36': float(feat_rows['y_roll36'].iloc[i]) if pd.notna(feat_rows['y_roll36'].iloc[i]) else 0.0,
+            }
+            for col in feat_cols:
+                if col in row:
+                    continue
+                if not col.endswith('_t_plus_h'):
+                    row[col] = 0.0
+                    continue
+                raw = col[: -len('_t_plus_h')]
+                if raw == 'hour':
+                    row[col] = target.hour
+                elif raw == 'day_of_week':
+                    row[col] = target.weekday()
+                elif raw == 'month':
+                    row[col] = target.month
+                elif raw == 'is_weekend':
+                    row[col] = int(target.weekday() >= 5)
+                elif w is not None and raw in w.index and pd.notna(w[raw]):
+                    row[col] = float(w[raw])
+                else:
+                    row[col] = 0.0
+            X_rows.append([row.get(c, 0.0) for c in feat_cols])
+
+        X = np.asarray(X_rows, dtype=float)
+        preds = m['model'].predict(X).clip(0, None)
+        pred_map = {target_ts[i].strftime('%Y-%m-%dT%H:00'): float(preds[i]) for i in range(H_out)}
+
+        max_cc = webcam.max_crowd_count or 0
+        start_day = target_ts[0].normalize()
+        om_cols = [c for c in feat_cols if c.endswith('_t_plus_h') and c[:-len('_t_plus_h')].startswith('om_')]
+        weather_map = {}
+        for _, wrow in weather_dt.iterrows():
+            entry = {}
+            for col in om_cols:
+                raw = col[: -len('_t_plus_h')]
+                if raw in wrow.index and pd.notna(wrow[raw]):
+                    entry[col[: -len('_t_plus_h')]] = round(float(wrow[raw]), 2)
+            if entry:
+                weather_map[wrow['ds_real'].strftime('%Y-%m-%dT%H:00')] = entry
+
+        temp_col = next((c for c in feat_cols if 'temperature' in c), None)
+        predictions = []
+        for day_offset in range(days):
+            current_day = start_day + pd.Timedelta(days=day_offset)
+            for hour in range(24):
+                ts = current_day.replace(hour=hour)
+                key = ts.strftime('%Y-%m-%dT%H:00')
+                w = weather_map.get(key, {})
+                if key in pred_map:
+                    cc = round(pred_map[key], 1)
+                    level = classify_occupancy(cc, max_cc)
+                    predictions.append({
+                        'timestamp': ts.isoformat(),
+                        'hour': hour,
+                        'crowd_count': cc,
+                        'available': True,
+                        'occupancy_level': level,
+                        'occupancy_ratio': round(cc / max_cc, 3) if max_cc > 0 else None,
+                        'temperature': w.get(temp_col[:-len('_t_plus_h')]) if temp_col else None,
+                        'features': w,
+                    })
+                else:
+                    predictions.append({
+                        'timestamp': ts.isoformat(),
+                        'hour': hour,
+                        'crowd_count': 0,
+                        'available': False,
+                        'occupancy_level': None,
+                        'occupancy_ratio': None,
+                        'temperature': None,
+                        'features': {},
+                    })
+
+        result = {
+            'model': model_key,
+            'model_set': model_set,
+            'beach': webcam.beach.beach_name,
+            'webcam': uid,
+            'horizon_days': days,
+            'horizon_hours': H_out,
+            'max_crowd_count': max_cc,
+            'last_data': last_real.strftime('%Y-%m-%dT%H:%M:%S'),
+            'feature_importance': m.get('feature_importance', {}),
+            'futr_features': feat_cols,
+            'hist_features': [],
+            'predictions': predictions,
+        }
+        if not since:
+            cache_key = self._forecast_cache_key(webcam.camera_slug, days, model_set, model_key)
+            cache.set(cache_key, result, self.PREDICTION_TTL)
+        else:
+            self._hindcast_write(hc_path, result)
         return result
 
     def _build_context(self, webcam, m, weather_all, since=None):

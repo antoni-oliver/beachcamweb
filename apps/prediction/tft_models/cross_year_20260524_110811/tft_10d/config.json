@@ -1,0 +1,38 @@
+{
+  "model_type": "TFT",
+  "horizon": 120,
+  "horizon_days": 10,
+  "hours_per_day": 12,
+  "input_size": 48,
+  "futr_exog": [
+    "hour",
+    "day_of_week",
+    "month",
+    "is_weekend",
+    "is_summer",
+    "om_temperature_2m",
+    "om_apparent_temperature",
+    "om_cloud_cover"
+  ],
+  "hist_exog": [
+    "om_cloud_cover_low",
+    "om_shortwave_radiation",
+    "om_vapour_pressure_deficit"
+  ],
+  "stat_exog": [
+    "stat_mean_y",
+    "stat_cv"
+  ],
+  "hp": {
+    "hidden_size": 64,
+    "dropout": 0.2960660809801552,
+    "lr": 0.0035033984911586884,
+    "batch_size": 64,
+    "n_head": 8
+  },
+  "optuna_study": "cross_year_20260524_110811__tft__10d",
+  "regime": "cross_year_train_2022",
+  "season_relMAE": 0.5517800603259987,
+  "overall_relMAE": 0.5517800603259987,
+  "trained_at": "2026-05-24T12:40:29.483834"
+}

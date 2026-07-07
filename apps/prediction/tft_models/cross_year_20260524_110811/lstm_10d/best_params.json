@@ -1,0 +1,8 @@
+{
+  "hidden_size": 64,
+  "dropout": 0.04020071374370038,
+  "lr": 0.0027382876429614825,
+  "batch_size": 32,
+  "encoder_n_layers": 1,
+  "decoder_layers": 3
+}

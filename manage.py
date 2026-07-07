@@ -12,6 +12,15 @@ warnings.filterwarnings("ignore", message=".*ModelSummary.*")
 logging.getLogger("pytorch_lightning").setLevel(logging.ERROR)
 logging.getLogger("lightning").setLevel(logging.ERROR)
 
+# XGBoost and PyTorch each ship their own OpenMP runtime; loading both in one
+# process segfaults on macOS unless OpenMP is pinned to a single thread. The web
+# server serves both families (the forecast comparison loads TFT/LSTM and XGB
+# together), so pin it for runserver only, before any numpy/torch/xgboost import.
+# Management commands (training, evaluation) keep full threading.
+if "runserver" in sys.argv:
+    os.environ.setdefault("OMP_NUM_THREADS", "1")
+
+
 def main():
     """Run administrative tasks."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')

@@ -16,6 +16,11 @@ Usage:
     python manage.py evaluate_model_sets --clear-weather-cache
 """
 
+import os
+os.environ.setdefault('OMP_NUM_THREADS', '1')
+os.environ.setdefault('MKL_NUM_THREADS', '1')
+os.environ.setdefault('KMP_DUPLICATE_LIB_OK', 'TRUE')
+
 import csv
 import json
 from collections import defaultdict
@@ -36,8 +41,8 @@ from pathlib import Path as _Path
 from django.conf import settings as _settings
 
 SEASON_MONTHS = {4, 5, 6, 7, 8, 9}
-SUMMER_MONTHS = {7, 8}
-HOUR_MIN, HOUR_MAX = 8, 19
+SUMMER_MONTHS = {6, 7, 8}   # standardised to match run_a2/retrain/train scripts (was {7,8})
+HOUR_MIN, HOUR_MAX = 8, 20   # daytime window standardised to 8-20 (was 8-19)
 
 
 def _cam_lat(cam) -> float:
@@ -108,6 +113,9 @@ class Command(BaseCommand):
         parser.add_argument('--out', default='model_set_evaluation')
         parser.add_argument('--clear-cache', action='store_true', help='Clear the window error cache')
         parser.add_argument('--clear-weather-cache', action='store_true')
+        parser.add_argument('--cap-k', dest='cap_k', type=float, default=1.5,
+                            help='Cap real actuals above k*P90 per camera before scoring '
+                                 '(outlier removal; 0 disables). Predictions never capped.')
 
     def handle(self, *args, **options):
         if options['clear_weather_cache']:
@@ -119,7 +127,11 @@ class Command(BaseCommand):
         eval_json_path = Path(eval_json_setting)
         if not eval_json_path.is_absolute():
             eval_json_path = Path(settings.BASE_DIR) / eval_json_path
-        cache_path = eval_json_path.with_name('model_evaluation_cache.json')
+        cap_k = options['cap_k']
+        # Cap changes the actuals, so capped/uncapped runs use separate caches.
+        cache_name = (f'model_evaluation_cache_cap{cap_k}_p90.json' if cap_k and cap_k > 0
+                      else 'model_evaluation_cache_p90.json')
+        cache_path = eval_json_path.with_name(cache_name)
 
         if options['clear_cache']:
             if cache_path.exists():
@@ -198,9 +210,20 @@ class Command(BaseCommand):
         cam_by_day: dict = {}
         cam_p90:    dict = {}
         cam_first_snapshot: dict = {}  # slug -> date of first snapshot ever
+        n_capped = 0
 
         for cam in cams:
             rows = load_all_actuals(cam, global_start, global_end + timedelta(days=1))
+            if rows and cap_k and cap_k > 0:
+                # Clamp the REAL actuals above k*P90 per camera (mirrors
+                # crowd_outliers.cap_outliers). Predictions are never capped.
+                pos = [r['crowd_count'] for r in rows if r['crowd_count'] > 0]
+                if pos:
+                    thr = cap_k * float(np.percentile(pos, 90))
+                    for r in rows:
+                        if r['crowd_count'] > thr:
+                            r['crowd_count'] = thr
+                            n_capped += 1
             if rows:
                 by_day = defaultdict(list)
                 for r in rows:
@@ -219,7 +242,10 @@ class Command(BaseCommand):
                 d = first_ts.date() if hasattr(first_ts, 'date') else date.fromisoformat(str(first_ts)[:10])
                 cam_first_snapshot[cam.camera_slug] = d
 
-        self.stdout.write(f'{len(cam_by_day)} cameras have snapshot data\n')
+        self.stdout.write(f'{len(cam_by_day)} cameras have snapshot data')
+        if cap_k and cap_k > 0:
+            self.stdout.write(f'Outlier cap k={cap_k}*P90 on actuals: clamped {n_capped:,} rows')
+        self.stdout.write('')
 
         # ── Evaluate — skip cached windows ────────────────────────────────────
         all_errors: dict = {}
@@ -244,7 +270,11 @@ class Command(BaseCommand):
                     slug = cam.camera_slug
                     if slug not in cam_by_day:
                         continue
-                    max_crowd = cam.max_crowd_count
+                    # STATISTICAL lens: normalise by the per-series P90 of (capped) actual
+                    # daytime counts — the same denominator as the cross-family headline /
+                    # thesis metric, so the ranking matches the reported relMAE. (Operational
+                    # max_crowd_count is the alternative "which snapshot to serve" reading.)
+                    denom = max(float(cam_p90.get(slug, 0.0)), 1.0)
                     by_day = cam_by_day[slug]
                     first_snap = cam_first_snapshot.get(slug)
                     window_start = global_start
@@ -287,7 +317,7 @@ class Command(BaseCommand):
                             continue
 
                         pred_by_ts = {
-                            p['timestamp'][:16]: p['crowd_count'] / max_crowd
+                            p['timestamp'][:16]: p['crowd_count'] / denom
                             for p in pred.get('predictions', [])
                             if p.get('available') and p.get('crowd_count') is not None
                         }
@@ -301,7 +331,7 @@ class Command(BaseCommand):
                             key = a['timestamp'][:16]
                             if key not in pred_by_ts:
                                 continue
-                            err = abs(pred_by_ts[key] - a['crowd_count'] / max_crowd)
+                            err = abs(pred_by_ts[key] - a['crowd_count'] / denom)
                             window_errors['all'].append(err)
                             if in_summer:
                                 window_errors['summer'].append(err)

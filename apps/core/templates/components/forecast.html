@@ -252,6 +252,7 @@
   document.addEventListener('DOMContentLoaded', () => {
     const slug = '{{ cam.camera_slug }}';
     const maxCrowd = {{ cam.max_crowd_count|default:"0" }};
+    const p90 = {{ cam_daytime_p90|default:"0" }};  // per-series season-daytime P90, computed on the fly (thesis statistical denominator)
 
     const LEVEL_COLORS = {HIGH: '#e74c3c', MEDIUM: '#f39c12', LOW: '#27ae60', VERY_LOW: '#3498db'};
 
@@ -696,21 +697,24 @@
     function computeRelMAE(predBars, actuals) {
       const predMap = {};
       predBars.forEach(p => { predMap[p.value[0]] = p.value[1]; });
+      // Normalise by the per-series daytime P90 (thesis statistical metric);
+      // fall back to max_crowd_count if P90 is not set for this camera.
+      const denom = p90 > 0 ? p90 : maxCrowd;
       let sum = 0, count = 0;
       actuals.forEach(([ts, , raw]) => {
         if (predMap[ts] !== undefined) {
           const predRaw = maxCrowd > 0 ? (predMap[ts] / 100) * maxCrowd : 0;
-          sum += maxCrowd > 0 ? Math.abs(predRaw - raw) / maxCrowd : 0;
+          sum += denom > 0 ? Math.abs(predRaw - raw) / denom : 0;
           count++;
         }
       });
       return count > 0 ? (sum / count * 100).toFixed(1) + '%' : '—';
     }
 
-    function predsToBars(preds, opacity, modelSetName, responseFallback) {
+    function predsToBars(preds, opacity, modelSetName, responseFallback, seriesColor) {
       return preds.filter(p => p.available).map(p => ({
         value:     [new Date(p.timestamp).getTime(), p.occupancy_ratio != null ? p.occupancy_ratio * 100 : 0],
-        itemStyle: {color: LEVEL_COLORS[p.occupancy_level] || '#3498db', opacity},
+        itemStyle: {color: seriesColor || LEVEL_COLORS[p.occupancy_level] || '#3498db', opacity},
         features:  p.features || {},
         modelSet:  p.model_set || modelSetName,
         modelKey:  p.model_key || responseFallback?.model || null,
@@ -719,9 +723,10 @@
 
     function renderComparison(el, dataA, dataB, actData, nameA, nameB, days, dataC, nameC, evalData, meta) {
       const chart      = echarts.init(el);
-      const barsA      = predsToBars(dataA.predictions || [], 0.8, nameA, dataA);
-      const barsB      = predsToBars(dataB.predictions || [], 0.8, nameB, dataB);
-      const barsC      = dataC ? predsToBars(dataC.predictions || [], 0.8, nameC, dataC) : [];
+      const SET_COLORS = ['#2980b9', '#27ae60', '#8e44ad'];   // one colour per model set (A/B/C)
+      const barsA      = predsToBars(dataA.predictions || [], 0.6, nameA, dataA, SET_COLORS[0]);
+      const barsB      = predsToBars(dataB.predictions || [], 0.6, nameB, dataB, SET_COLORS[1]);
+      const barsC      = dataC ? predsToBars(dataC.predictions || [], 0.6, nameC, dataC, SET_COLORS[2]) : [];
       const actualLine = (actData.actuals || []).map(a => [
         new Date(a.timestamp).getTime(),
         maxCrowd > 0 ? (a.crowd_count / maxCrowd) * 100 : 0,
@@ -840,7 +845,7 @@
             return h + `</div>`;
           },
         },
-        // legend: {data: [...seriesNames, 'Actual'], top: 22, itemGap: 20},
+        legend: {data: [...seriesNames, 'Actual'], top: 22, itemGap: 20, type: 'scroll'},
         grid:   {left: 50, right: 30, bottom: 40, top: 55},
         xAxis:  {type: 'time', axisLabel: {formatter: fmtAxisLabel}},
         yAxis:  {type: 'value', name: '%', min: 0, max: 100, axisLabel: {formatter: '{value}%'}},

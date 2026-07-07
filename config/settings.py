@@ -139,7 +139,9 @@ LANGUAGES = [
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-MEDIA_URL = 'media/'
+# Locally (DEBUG) the image files aren't on disk — serve them from the production
+# media server so webcam snapshots / density maps resolve. Prod keeps local media.
+MEDIA_URL = 'https://ocupacioplatges.uib.eu/media/' if DEBUG else 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # run python manage.py collectstatic
@@ -165,34 +167,12 @@ os.putenv("PYTORCH_ENABLE_MPS_FALLBACK", "1")
 # ── Prediction app paths (single root) ────────────────────────────────────────
 PREDICTION_DIR    = BASE_DIR / 'apps' / 'prediction'
 TFT_MODELS_DIR    = PREDICTION_DIR / 'tft_models'
+XGB_MODELS_DIR    = PREDICTION_DIR / 'xgb_models'
 TFT_EVAL_JSON     = PREDICTION_DIR / 'model_evaluation.json'
 WEATHER_CACHE_DIR = PREDICTION_DIR / 'cache' / 'weather'
-TFT_MODEL_SETS = {
-    'lstm': BASE_DIR / 'apps/prediction/lstm_models/lstm_model_v4',
-}
+TFT_MODEL_SETS = {}
 TFT_HINDCAST_CACHE_DIR = BASE_DIR / 'apps/prediction/cache/hindcast_cache'
 
 # ── Pipeline ──────────────────────────────────────────────────────────────────
 PIPELINE_MEDIA_2022_DIR = BASE_DIR / 'BeachCamDataset_NoVideos'
 PIPELINE_CUDA_DEVICE    = '0'
-#
-# cron_every_day = '0 2 * * *'  # every day at 2:00 AM
-# cron_every_week = '0 2 * * 1'   # every Monday at 2:00 AM
-# cron_every_month = '0 2 1 * *'    # on the 1st of every month at 2:00 AM
-# cron_every_thirty_minutes = '*/30 * * * *'  # every 30 minutes
-#
-# CRONJOBS = [
-#     (
-#         cron_every_month,
-#         'django.core.management.call_command',
-#         ['run_pipeline'],
-#         f'>> {BASE_DIR}/pipeline_workspace/logs/pipeline.log 2>&1'
-#     ),
-#     (
-#         cron_every_thirty_minutes,
-#         'download_and_process.main',
-#         [],
-#         {},
-#         f'>> {BASE_DIR}/logs/download.log 2>&1'
-#     ),
-# ]
