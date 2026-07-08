@@ -54,7 +54,7 @@ def _season_daytime_p90(cam):
         local = dj_tz.localtime(ts)
         if 8 <= local.hour <= 20 and local.month in SEASON_MONTHS:
             vals.append(float(cc))
-    p90 = round(float(np.percentile(vals, 90)), 2) if len(vals) >= 50 else 0.0
+    p90 = f"{np.percentile(vals, 90):.2f}" if len(vals) >= 50 else "0"
     cache.set(key, p90, 60 * 60 * 24)
     return p90
 
