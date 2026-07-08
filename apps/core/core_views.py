@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404, redirect, render
+from django.db.models import Max
 from django.urls import reverse
 from django.contrib.admin.views.decorators import staff_member_required
 
@@ -195,7 +196,11 @@ def admin_webcam_snapshots_filters(request, webcam_id):
 
 
 def beach_overview(request):
-    cams = WebCam.objects.select_related('beach').filter(snapshots__isnull=False).distinct()
+    cams = (WebCam.objects
+            .select_related('beach')
+            .filter(snapshots__isnull=False)
+            .annotate(last_snapshot=Max('snapshots__ts'))
+            .order_by('-last_snapshot'))
     return render(request, 'core/beach_overview.html', {'cams': cams})
 
 
