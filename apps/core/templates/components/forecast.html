@@ -295,7 +295,12 @@
     function pad(n) { return n.toString().padStart(2, '0'); }
     function dateLabel(d) { return pad(d.getDate()) + '/' + pad(d.getMonth() + 1); }
     function midnight(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
-    function fmtAxisLabel(val) { const d = new Date(val); return dateLabel(d) + '\n' + pad(d.getHours()) + ':00'; }
+    // Everything internal is UTC; the webcam images carry Palma local time.
+    // These format an epoch in Europe/Madrid so every chart label matches the images.
+    function palmaHour(d) { return parseInt(d.toLocaleString('en-GB', {timeZone: 'Europe/Madrid', hour: '2-digit', hour12: false}), 10); }
+    function palmaDM(d)   { return d.toLocaleDateString('en-GB', {timeZone: 'Europe/Madrid', day: '2-digit', month: '2-digit'}); }
+    function palmaY(d)    { return d.toLocaleDateString('en-GB', {timeZone: 'Europe/Madrid', year: 'numeric'}); }
+    function fmtAxisLabel(val) { const d = new Date(val); return palmaDM(d) + '\n' + pad(palmaHour(d)) + ':00'; }
 
     function featLabel(k) {
       return FEATURE_DISPLAY_NAMES[k] || k.replace(/^om_/, '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
@@ -312,7 +317,7 @@
 
     function fmtTooltip(params) {
       const ts        = new Date(params[0].value[0]);
-      const dateStr   = dateLabel(ts) + '/' + ts.getFullYear() + ' ' + pad(ts.getHours()) + ':00';
+      const dateStr   = palmaDM(ts) + '/' + palmaY(ts) + ' ' + pad(palmaHour(ts)) + ':00';
       const barParam  = params.find(p => p.seriesType === 'bar');
       const features  = barParam?.data?.features || {};
       const pct       = barParam ? barParam.value[1].toFixed(1) + '%' : null;
@@ -325,7 +330,7 @@
       if (Object.keys(features).length) {
         h += `<div class="fc-fmttt-section"><div class="fc-fmttt-section-title">Input Conditions</div>`;
         Object.entries(features).forEach(([k, v]) => {
-          h += `<div class="fc-fmttt-row"><span class="fc-fmttt-feat-label">${featLabel(k)}</span><span class="fc-fmttt-feat-val">${featValue(k, v)}</span></div>`;
+          h += `<div class="fc-fmttt-row"><span class="fc-fmttt-feat-label">${featLabel(k)}</span><span class="fc-fmttt-feat-val">${k === 'hour' ? palmaHour(ts) : featValue(k, v)}</span></div>`;
         });
         h += `</div>`;
       }
@@ -578,7 +583,14 @@
       try {
         const res  = await fetch(`/platja/${slug}/snapshot-image/?ts=${encodeURIComponent(iso)}`);
         const data = await res.json();
-        document.getElementById(tsId).textContent = iso.replace('T', ' ');
+        // The webcam image carries Palma local time (Europe/Madrid). Everything
+        // internal is UTC, so show the snapshot's real timestamp converted to
+        // Palma local, which matches the time burned into the image.
+        const shownTs = (data.ts
+          ? new Date(data.ts).toLocaleString('en-GB', {timeZone: 'Europe/Madrid', hour12: false,
+              day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'})
+          : iso.replace('T', ' ')) + ' (Palma local)';
+        document.getElementById(tsId).textContent = shownTs;
         const orig = document.getElementById(origId);
         const pred = document.getElementById(predId);
         orig.src = (data.url && data.url !== 'null') ? data.url : '';
@@ -817,7 +829,7 @@
           trigger: 'axis', enterable: false,
           formatter(params) {
             const ts      = new Date(params[0].value[0]);
-            const dateStr = `${dateLabel(ts)}/${ts.getFullYear()} ${pad(ts.getHours())}:00`;
+            const dateStr = `${palmaDM(ts)}/${palmaY(ts)} ${pad(palmaHour(ts))}:00`;
             let h = `<div class="fc-tooltip"><div class="fc-tooltip-header">${dateStr}</div>`;
             params.filter(p => p.seriesType === 'bar').forEach(p => {
               const v       = Array.isArray(p.value) ? p.value[1] : null;
@@ -831,7 +843,7 @@
                 h += `<div class="fc-tooltip-weather">`;
                 Object.entries(weather).forEach(([k, val]) => {
                   if (val == null) return;
-                  h += `<div class="fc-tooltip-weather-row"><span>${featLabel(k)}</span><span class="fc-tooltip-weather-val">${featValue(k, val)}</span></div>`;
+                  h += `<div class="fc-tooltip-weather-row"><span>${featLabel(k)}</span><span class="fc-tooltip-weather-val">${k === 'hour' ? palmaHour(ts) : featValue(k, val)}</span></div>`;
                 });
                 h += `</div>`;
               }

@@ -863,7 +863,7 @@ class TFTService:
                     cc = round(pred_map[key], 1)
                     level = classify_occupancy(cc, max_cc)
                     predictions.append({
-                        'timestamp': ts.isoformat(),
+                        'timestamp': ts.isoformat() + 'Z',  # naive UTC grid -> mark UTC so the browser parses it tz-correctly
                         'hour': hour,
                         'crowd_count': cc,
                         'available': True,
@@ -874,7 +874,7 @@ class TFTService:
                     })
                 else:
                     predictions.append({
-                        'timestamp': ts.isoformat(),
+                        'timestamp': ts.isoformat() + 'Z',  # naive UTC grid -> mark UTC so the browser parses it tz-correctly
                         'hour': hour,
                         'crowd_count': 0,
                         'available': False,
@@ -1083,7 +1083,7 @@ class TFTService:
                     for col in temporal_cols:
                         features[col] = TEMPORAL_FEATURE_BUILDERS[col](ts)
                     predictions.append({
-                        'timestamp': ts.isoformat(),
+                        'timestamp': ts.isoformat() + 'Z',  # naive UTC grid -> mark UTC so the browser parses it tz-correctly
                         'hour': hour,
                         'crowd_count': cc,
                         'available': True,
@@ -1094,7 +1094,7 @@ class TFTService:
                     })
                 else:
                     predictions.append({
-                        'timestamp': ts.isoformat(),
+                        'timestamp': ts.isoformat() + 'Z',  # naive UTC grid -> mark UTC so the browser parses it tz-correctly
                         'hour': hour,
                         'crowd_count': 0,
                         'available': False,
@@ -1154,7 +1154,7 @@ class TFTService:
             if ts.hour < HOUR_MIN or ts.hour > HOUR_MAX:
                 continue
             actuals.append({
-                'timestamp': ts.isoformat(),
+                'timestamp': ts.isoformat() + 'Z',  # naive UTC grid -> mark UTC so the browser parses it tz-correctly
                 'hour': ts.hour,
                 'crowd_count': round(float(s.predicted_crowd_count), 1),
             })
