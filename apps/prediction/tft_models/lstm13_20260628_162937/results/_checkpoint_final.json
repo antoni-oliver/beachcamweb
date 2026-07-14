@@ -1,0 +1,111 @@
+{
+  "run_dir": "/Users/guilhermemossibento/Desktop/master_activities/TFM/beach_counting/beachcamweb/apps/prediction/tft_models/lstm13_20260628_162937",
+  "cuda_device": "",
+  "selected_futr": [
+    "hour",
+    "day_of_week",
+    "month",
+    "is_weekend",
+    "is_summer",
+    "om_temperature_2m",
+    "om_apparent_temperature",
+    "om_cloud_cover"
+  ],
+  "selected_hist": [
+    "om_cloud_cover_low",
+    "om_shortwave_radiation",
+    "om_vapour_pressure_deficit"
+  ],
+  "best_input": 48,
+  "best_hp": {
+    "hidden_size": 64,
+    "n_head": 4,
+    "dropout": 0.05,
+    "lr": 0.001
+  },
+  "models": {
+    "3d": {
+      "season_relMAE": 0.2861515641639761,
+      "relMAE": 0.1383996628876464,
+      "model_dir": "/Users/guilhermemossibento/Desktop/master_activities/TFM/beach_counting/beachcamweb/apps/prediction/tft_models/lstm13_20260628_162937/lstm_model_3d",
+      "futr": [
+        "hour",
+        "day_of_week",
+        "month",
+        "is_weekend",
+        "is_summer",
+        "om_temperature_2m",
+        "om_apparent_temperature",
+        "om_cloud_cover"
+      ],
+      "hist": [
+        "om_cloud_cover_low",
+        "om_shortwave_radiation",
+        "om_vapour_pressure_deficit"
+      ],
+      "input_size": 48,
+      "hp": {
+        "hidden_size": 64,
+        "n_head": 4,
+        "dropout": 0.05,
+        "lr": 0.001
+      }
+    },
+    "10d": {
+      "season_relMAE": 0.2388311246124767,
+      "relMAE": 0.1194393961791646,
+      "model_dir": "/Users/guilhermemossibento/Desktop/master_activities/TFM/beach_counting/beachcamweb/apps/prediction/tft_models/lstm13_20260628_162937/lstm_model_10d",
+      "futr": [
+        "hour",
+        "day_of_week",
+        "month",
+        "is_weekend",
+        "is_summer",
+        "om_temperature_2m",
+        "om_apparent_temperature",
+        "om_cloud_cover"
+      ],
+      "hist": [
+        "om_cloud_cover_low",
+        "om_shortwave_radiation",
+        "om_vapour_pressure_deficit"
+      ],
+      "input_size": 48,
+      "hp": {
+        "hidden_size": 64,
+        "n_head": 4,
+        "dropout": 0.05,
+        "lr": 0.001
+      }
+    },
+    "15d": {
+      "season_relMAE": 0.2156908485169825,
+      "relMAE": 0.1177006358759426,
+      "model_dir": "/Users/guilhermemossibento/Desktop/master_activities/TFM/beach_counting/beachcamweb/apps/prediction/tft_models/lstm13_20260628_162937/lstm_model_15d",
+      "futr": [
+        "hour",
+        "day_of_week",
+        "month",
+        "is_weekend",
+        "is_summer",
+        "om_temperature_2m",
+        "om_apparent_temperature",
+        "om_cloud_cover"
+      ],
+      "hist": [
+        "om_cloud_cover_low",
+        "om_shortwave_radiation",
+        "om_vapour_pressure_deficit"
+      ],
+      "input_size": 48,
+      "hp": {
+        "hidden_size": 64,
+        "n_head": 4,
+        "dropout": 0.05,
+        "lr": 0.001
+      }
+    }
+  },
+  "total_time_min": 5.455323199431102,
+  "status": "complete"
+}

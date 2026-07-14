@@ -1,0 +1,11 @@
+{
+  "hidden_size": 256,
+  "dropout": 0.140666091759919,
+  "lr": 0.000618207152051509,
+  "batch_size": 16,
+  "input_size": 24,
+  "scaler": "standard",
+  "early_stop_patience": 37,
+  "n_head": 2,
+  "attn_dropout": 0.4205054917625996
+}

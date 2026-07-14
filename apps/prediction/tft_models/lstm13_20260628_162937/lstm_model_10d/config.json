@@ -1,0 +1,42 @@
+{
+  "horizon": 130,
+  "horizon_days": 10,
+  "hours_per_day": 13,
+  "input_size": 48,
+  "futr_exog": [
+    "hour",
+    "day_of_week",
+    "month",
+    "is_weekend",
+    "is_summer",
+    "om_temperature_2m",
+    "om_apparent_temperature",
+    "om_cloud_cover"
+  ],
+  "hist_exog": [
+    "om_cloud_cover_low",
+    "om_shortwave_radiation",
+    "om_vapour_pressure_deficit"
+  ],
+  "stat_exog": [
+    "stat_mean_y",
+    "stat_cv"
+  ],
+  "hp": {
+    "hidden_size": 64,
+    "n_head": 4,
+    "dropout": 0.05,
+    "lr": 0.001
+  },
+  "model_type": "hourly",
+  "season_relMAE": 0.2388311246124767,
+  "overall_relMAE": 0.1194393961791646,
+  "season_months": [
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ]
+}

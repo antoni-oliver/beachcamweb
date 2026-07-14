@@ -1,0 +1,20 @@
+group,feature,importance
+Past variable importance over time,om_shortwave_radiation,0.17545557022094727
+Past variable importance over time,om_wind_speed_10m,0.051229193806648254
+Past variable importance over time,hour,0.29138121008872986
+Past variable importance over time,day_of_week,0.026188664138317108
+Past variable importance over time,month,0.04593782126903534
+Past variable importance over time,is_weekend,0.0390862375497818
+Past variable importance over time,is_summer,0.01598803512752056
+Past variable importance over time,om_temperature_2m,0.0678166076540947
+Past variable importance over time,om_apparent_temperature,0.058913704007864
+Past variable importance over time,is_holiday,0.011361866258084774
+Past variable importance over time,observed_target,0.2166411429643631
+Future variable importance over time,hour,0.6516096591949463
+Future variable importance over time,day_of_week,0.07870577275753021
+Future variable importance over time,month,0.03634247928857803
+Future variable importance over time,is_weekend,0.04659905284643173
+Future variable importance over time,is_summer,0.031392280012369156
+Future variable importance over time,om_temperature_2m,0.06869208067655563
+Future variable importance over time,om_apparent_temperature,0.0632440596818924
+Future variable importance over time,is_holiday,0.023414677008986473

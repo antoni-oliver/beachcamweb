@@ -1,0 +1,47 @@
+{
+  "model_type": "XGBRegressor",
+  "horizon": 130,
+  "horizon_days": 10,
+  "hours_per_day": 13,
+  "features": [
+    "y_lag1",
+    "y_roll12",
+    "y_roll36",
+    "om_precipitation_t_plus_h",
+    "om_wind_speed_10m_t_plus_h",
+    "om_wind_direction_10m_t_plus_h",
+    "hour_t_plus_h",
+    "day_of_week_t_plus_h",
+    "is_weekend_t_plus_h"
+  ],
+  "hist_pool": [
+    "om_precipitation",
+    "om_wind_speed_10m",
+    "om_wind_direction_10m",
+    "hour",
+    "day_of_week",
+    "is_weekend"
+  ],
+  "schema": "castelle_2025",
+  "hp": {
+    "n_estimators": 1000,
+    "max_depth": 6,
+    "learning_rate": 0.005138376731796646,
+    "subsample": 0.5048567793367932,
+    "colsample_bytree": 0.7258663225811013,
+    "min_child_weight": 6,
+    "reg_alpha": 0.9941450502972566,
+    "reg_lambda": 0.07287669348113077
+  },
+  "season_relMAE": 0.26255840577345524,
+  "overall_relMAE": 0.1783626177824957,
+  "season_months": [
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "trained_at": "2026-07-13T14:23:42.763395"
+}

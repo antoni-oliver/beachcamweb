@@ -1,7 +1,7 @@
 import logging
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone as dt_timezone
 from django.utils import timezone as tz
 from apps.prediction.models import Snapshot
 from django.conf import settings
@@ -91,7 +91,9 @@ def tft_snapshot_image_json(request, camera_slug):
         return JsonResponse({'error': 'ts required'}, status=400)
 
     try:
-        ts = tz.make_aware(datetime.strptime(ts_str, '%Y-%m-%dT%H:%M:%S'))
+        # the browser sends toISOString() (UTC wall-clock), so pin the parse to UTC
+        # regardless of TIME_ZONE — keeps the image lookup aligned with the bar it came from
+        ts = datetime.strptime(ts_str, '%Y-%m-%dT%H:%M:%S').replace(tzinfo=dt_timezone.utc)
     except ValueError:
         return JsonResponse({'error': 'ts must be YYYY-MM-DDTHH:MM:SS'}, status=400)
 

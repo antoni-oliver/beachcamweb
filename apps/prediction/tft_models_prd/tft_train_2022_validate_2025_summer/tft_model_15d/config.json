@@ -1,0 +1,68 @@
+{
+  "model_type": "TFT",
+  "version": "v8b",
+  "horizon": 180,
+  "horizon_days": 15,
+  "hours_per_day": 12,
+  "input_size": 48,
+  "n_head": 2,
+  "futr_exog": [
+    "hour",
+    "day_of_week",
+    "month",
+    "is_weekend",
+    "is_summer",
+    "om_temperature_2m",
+    "om_apparent_temperature",
+    "is_holiday"
+  ],
+  "hist_exog": [
+    "om_shortwave_radiation",
+    "om_wind_speed_10m"
+  ],
+  "stat_exog": [
+    "stat_mean_y",
+    "stat_cv"
+  ],
+  "hp": {
+    "hidden_size": 32,
+    "dropout": 0.07897268745935726,
+    "attn_dropout": 0.03663668452846364,
+    "lr": 0.0011524770014044229,
+    "scaler_type": "minmax",
+    "batch_size": 32
+  },
+  "metrics": {
+    "overall_relMAE": 0.21263226675827807,
+    "season_relMAE": 0.2285992020104294,
+    "summer_relMAE": 0.26021668239745993
+  },
+  "monthly": {
+    "5": {
+      "relMAE": 0.220238575669748,
+      "MAE": 27.300746104938014
+    },
+    "6": {
+      "relMAE": 0.32494683181371775,
+      "MAE": 30.807295840581258
+    },
+    "7": {
+      "relMAE": 0.2500005985513972,
+      "MAE": 24.7889095167319
+    },
+    "8": {
+      "relMAE": 0.20570261682726487,
+      "MAE": 18.556714605291685
+    },
+    "9": {
+      "relMAE": 0.14210738719001914,
+      "MAE": 14.628958723545075
+    },
+    "10": {
+      "relMAE": 0.13279759049752132,
+      "MAE": 11.949914616749483
+    }
+  },
+  "dataset": "clean_dataset_backup",
+  "n_beaches": 25
+}

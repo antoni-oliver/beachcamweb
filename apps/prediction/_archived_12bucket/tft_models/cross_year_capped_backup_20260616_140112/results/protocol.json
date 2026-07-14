@@ -1,0 +1,95 @@
+{
+  "set_name": "cross_year_capped_backup_20260616_140112",
+  "dataset_tag": "backup",
+  "dataset_path": "/Users/guilhermemossibento/Desktop/master_activities/TFM/beach_counting/beachcamweb/apps/prediction/pipeline_workspace/clean_dataset_backup",
+  "models": [
+    "xgb"
+  ],
+  "horizons": [
+    "3d",
+    "10d",
+    "15d"
+  ],
+  "horizon_hours": {
+    "3d": 36,
+    "10d": 120,
+    "15d": 180
+  },
+  "regime": "train on cache_2022 (full year, daytime 8-20); test on django_2025 window",
+  "test_window": {
+    "start": "2025-06-01",
+    "end": "2025-08-31"
+  },
+  "n_train_rows": 9062,
+  "n_test_rows": 4724,
+  "n_beaches": 4,
+  "beaches": [
+    "cala-vedella-platja",
+    "can-pastilla",
+    "sant-antoni-de-portmany",
+    "son-serra-de-marina"
+  ],
+  "capacity_p90_per_beach": {
+    "cala-vedella-platja": 152.6530914306641,
+    "can-pastilla": 50.13258590698242,
+    "sant-antoni-de-portmany": 60.93462982177735,
+    "son-serra-de-marina": 43.73243522644043
+  },
+  "normalisation": "P90 per series (daytime only)",
+  "seed": 42,
+  "input_size_default": 48,
+  "input_size_search_pool": [
+    48,
+    72,
+    96,
+    120
+  ],
+  "batch_size_search_pool": [
+    16,
+    32,
+    64,
+    128
+  ],
+  "hidden_size_search_pool": [
+    32,
+    64,
+    96,
+    128,
+    192,
+    256,
+    384,
+    512
+  ],
+  "n_head_search_pool": [
+    1,
+    2,
+    4,
+    8,
+    16,
+    32
+  ],
+  "scaler_search_pool": [
+    "robust",
+    "standard",
+    "minmax"
+  ],
+  "lr_search_range": [
+    1e-05,
+    0.01
+  ],
+  "dropout_search_range": [
+    0.0,
+    0.5
+  ],
+  "optuna_trials_per_model_horizon": 50,
+  "optuna_startup_trials": 30,
+  "multi_seed": 1,
+  "multi_seed_values": [
+    42
+  ],
+  "nf_trial_max_steps": 500,
+  "nf_final_max_steps": 1500,
+  "optuna_storage": "sqlite:////Users/guilhermemossibento/Desktop/master_activities/TFM/beach_counting/beachcamweb/apps/prediction/optuna/cross_year.db",
+  "primary_significance_test": "Diebold-Mariano (Wilcoxon as sanity check)",
+  "started_at": "2026-06-16T14:01:13.210398"
+}

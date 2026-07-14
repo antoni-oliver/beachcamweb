@@ -475,6 +475,8 @@ def parse_args():
                     help="Optuna trials per horizon (default 30; use 50+ for final runs)")
     p.add_argument("--deploy-only", action="store_true",
                     help="Skip Phase 1 + Phase 3, use FALLBACK_HP and the full hist pool")
+    p.add_argument("--cache-only", action="store_true",
+                    help="Train on cache_2022 only (drop django_2025 data)")
     p.add_argument("--eval-dirs", nargs="*", default=None)
     p.add_argument("--skip-eval", action="store_true")
     return p.parse_args()
@@ -523,6 +525,9 @@ def main(args):
     log(f"Eval dirs: {eval_dirs}")
 
     cache_df, django_df = load_data(args.data_dir)
+    if getattr(args, 'cache_only', False):
+        django_df = None
+        log("cache-only mode: django_2025 data excluded from training")
     panel_probe = build_panel(cache_df, django_df)
     static_cols, hist_pool = define_features_xgb(panel_probe)
     log(f"Static features (always kept): {static_cols}")
@@ -565,8 +570,8 @@ def main(args):
                                    "y", "y_target"}]
         horizon_configs[label] = {"hist": sel_hist, "feat_cols": feat_cols, "hp": best_hp}
 
-        r = phase4(label, horizon, cache_df, django_df, sel_hist, feat_cols, best_hp,
-                    run_dir, results_dir)
+        r = phase4(label, horizon, cache_df, django_df if not getattr(args, 'cache_only', False) else None,
+                    sel_hist, feat_cols, best_hp, run_dir, results_dir)
         if r:
             model_results[label] = r
 

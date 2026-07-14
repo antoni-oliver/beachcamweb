@@ -1,0 +1,110 @@
+{
+  "set_name": "cache2022_data_20260713_142431",
+  "dataset_tag": "data",
+  "dataset_path": "/root/runpod_cache2022_deploy/data",
+  "models": [
+    "tft",
+    "lstm",
+    "xgb"
+  ],
+  "horizons": [
+    "3d",
+    "10d",
+    "15d"
+  ],
+  "horizon_hours": {
+    "3d": 39,
+    "10d": 130,
+    "15d": 195
+  },
+  "regime": "train on cache_2022 (full year, daytime 8-20); test on django_2025 window",
+  "test_window": {
+    "start": "2025-06-01",
+    "end": "2025-08-31"
+  },
+  "n_train_rows": 23008,
+  "n_test_rows": 4724,
+  "n_beaches": 10,
+  "beaches": [
+    "alcudia-sa-marina",
+    "badia-dalcudia",
+    "cala-major",
+    "cala-vedella-platja",
+    "can-pastilla",
+    "can-pastilla-bonaona",
+    "la-savina",
+    "magaluf-palmanova",
+    "sant-antoni-de-portmany",
+    "son-serra-de-marina"
+  ],
+  "capacity_p90_per_beach": {
+    "alcudia-sa-marina": 298.34275817871094,
+    "badia-dalcudia": 34.263674926757815,
+    "cala-major": 37.92842483520508,
+    "cala-vedella-platja": 152.6530914306641,
+    "can-pastilla": 50.13258590698242,
+    "can-pastilla-bonaona": 60.317644119262695,
+    "la-savina": 19.863231658935547,
+    "magaluf-palmanova": 45.26050872802737,
+    "sant-antoni-de-portmany": 60.93462982177735,
+    "son-serra-de-marina": 43.73243522644043
+  },
+  "normalisation": "P90 per series (daytime only)",
+  "seed": 42,
+  "input_size_default": 48,
+  "input_size_search_pool": [
+    12,
+    24,
+    36,
+    48,
+    72,
+    96,
+    120
+  ],
+  "batch_size_search_pool": [
+    16,
+    32,
+    64,
+    128
+  ],
+  "hidden_size_search_pool": [
+    32,
+    64,
+    96,
+    128,
+    192,
+    256,
+    384,
+    512
+  ],
+  "n_head_search_pool": [
+    1,
+    2,
+    4,
+    8
+  ],
+  "scaler_search_pool": [
+    "robust",
+    "standard",
+    "minmax"
+  ],
+  "lr_search_range": [
+    1e-05,
+    0.01
+  ],
+  "dropout_search_range": [
+    0.0,
+    0.5
+  ],
+  "optuna_trials_per_model_horizon": 30,
+  "optuna_startup_trials": 10,
+  "multi_seed": 1,
+  "multi_seed_values": [
+    42
+  ],
+  "nf_trial_max_steps": 150,
+  "nf_final_max_steps": 1500,
+  "optuna_storage": "sqlite:////root/runpod_cache2022_deploy/out/optuna/cross_year.db",
+  "primary_significance_test": "Diebold-Mariano (Wilcoxon as sanity check)",
+  "started_at": "2026-07-13T14:24:32.608939"
+}

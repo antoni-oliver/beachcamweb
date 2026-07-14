@@ -1,0 +1,14 @@
+{
+  "hidden_size": 96,
+  "dropout": 0.10477258652933441,
+  "lr": 0.009874000181959034,
+  "batch_size": 128,
+  "input_size": 72,
+  "scaler": "robust",
+  "early_stop_patience": 39,
+  "encoder_n_layers": 2,
+  "decoder_layers": 3,
+  "decoder_hidden_size": 64,
+  "encoder_hidden_size": 96,
+  "encoder_dropout": 0.10477258652933441
+}

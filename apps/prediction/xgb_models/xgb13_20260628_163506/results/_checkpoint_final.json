@@ -1,0 +1,222 @@
+{
+  "run_dir": "/Users/guilhermemossibento/Desktop/master_activities/TFM/beach_counting/beachcamweb/apps/prediction/xgb_models/xgb13_20260628_163506",
+  "data_dir": "/Users/guilhermemossibento/Desktop/master_activities/TFM/beach_counting/beachcamweb/apps/prediction/pipeline_workspace/clean_datasets",
+  "horizon_configs": {
+    "3d": {
+      "hist": [
+        "om_temperature_2m",
+        "om_precipitation",
+        "om_wind_speed_10m",
+        "om_wind_direction_10m",
+        "om_shortwave_radiation",
+        "hour",
+        "day_of_week",
+        "month",
+        "is_weekend"
+      ],
+      "feat_cols": [
+        "y_lag1",
+        "y_roll12",
+        "y_roll36",
+        "om_temperature_2m_t_plus_h",
+        "om_precipitation_t_plus_h",
+        "om_wind_speed_10m_t_plus_h",
+        "om_wind_direction_10m_t_plus_h",
+        "om_shortwave_radiation_t_plus_h",
+        "hour_t_plus_h",
+        "day_of_week_t_plus_h",
+        "month_t_plus_h",
+        "is_weekend_t_plus_h"
+      ],
+      "hp": {
+        "n_estimators": 500,
+        "max_depth": 6,
+        "learning_rate": 0.05,
+        "subsample": 0.9,
+        "colsample_bytree": 0.8,
+        "min_child_weight": 3,
+        "reg_alpha": 0.01,
+        "reg_lambda": 0.1
+      }
+    },
+    "10d": {
+      "hist": [
+        "om_temperature_2m",
+        "om_precipitation",
+        "om_wind_speed_10m",
+        "om_wind_direction_10m",
+        "om_shortwave_radiation",
+        "hour",
+        "day_of_week",
+        "month",
+        "is_weekend"
+      ],
+      "feat_cols": [
+        "y_lag1",
+        "y_roll12",
+        "y_roll36",
+        "om_temperature_2m_t_plus_h",
+        "om_precipitation_t_plus_h",
+        "om_wind_speed_10m_t_plus_h",
+        "om_wind_direction_10m_t_plus_h",
+        "om_shortwave_radiation_t_plus_h",
+        "hour_t_plus_h",
+        "day_of_week_t_plus_h",
+        "month_t_plus_h",
+        "is_weekend_t_plus_h"
+      ],
+      "hp": {
+        "n_estimators": 500,
+        "max_depth": 6,
+        "learning_rate": 0.05,
+        "subsample": 0.9,
+        "colsample_bytree": 0.8,
+        "min_child_weight": 3,
+        "reg_alpha": 0.01,
+        "reg_lambda": 0.1
+      }
+    },
+    "15d": {
+      "hist": [
+        "om_temperature_2m",
+        "om_precipitation",
+        "om_wind_speed_10m",
+        "om_wind_direction_10m",
+        "om_shortwave_radiation",
+        "hour",
+        "day_of_week",
+        "month",
+        "is_weekend"
+      ],
+      "feat_cols": [
+        "y_lag1",
+        "y_roll12",
+        "y_roll36",
+        "om_temperature_2m_t_plus_h",
+        "om_precipitation_t_plus_h",
+        "om_wind_speed_10m_t_plus_h",
+        "om_wind_direction_10m_t_plus_h",
+        "om_shortwave_radiation_t_plus_h",
+        "hour_t_plus_h",
+        "day_of_week_t_plus_h",
+        "month_t_plus_h",
+        "is_weekend_t_plus_h"
+      ],
+      "hp": {
+        "n_estimators": 500,
+        "max_depth": 6,
+        "learning_rate": 0.05,
+        "subsample": 0.9,
+        "colsample_bytree": 0.8,
+        "min_child_weight": 3,
+        "reg_alpha": 0.01,
+        "reg_lambda": 0.1
+      }
+    }
+  },
+  "models": {
+    "3d": {
+      "season_relMAE": 0.279836712464988,
+      "relMAE": 0.2248513185863115,
+      "model_dir": "/Users/guilhermemossibento/Desktop/master_activities/TFM/beach_counting/beachcamweb/apps/prediction/xgb_models/xgb13_20260628_163506/xgb_model_3d",
+      "hp": {
+        "n_estimators": 500,
+        "max_depth": 6,
+        "learning_rate": 0.05,
+        "subsample": 0.9,
+        "colsample_bytree": 0.8,
+        "min_child_weight": 3,
+        "reg_alpha": 0.01,
+        "reg_lambda": 0.1
+      }
+    },
+    "10d": {
+      "season_relMAE": 0.3002704464184919,
+      "relMAE": 0.2439927920590462,
+      "model_dir": "/Users/guilhermemossibento/Desktop/master_activities/TFM/beach_counting/beachcamweb/apps/prediction/xgb_models/xgb13_20260628_163506/xgb_model_10d",
+      "hp": {
+        "n_estimators": 500,
+        "max_depth": 6,
+        "learning_rate": 0.05,
+        "subsample": 0.9,
+        "colsample_bytree": 0.8,
+        "min_child_weight": 3,
+        "reg_alpha": 0.01,
+        "reg_lambda": 0.1
+      }
+    },
+    "15d": {
+      "season_relMAE": 0.3211204567184091,
+      "relMAE": 0.2588025672404283,
+      "model_dir": "/Users/guilhermemossibento/Desktop/master_activities/TFM/beach_counting/beachcamweb/apps/prediction/xgb_models/xgb13_20260628_163506/xgb_model_15d",
+      "hp": {
+        "n_estimators": 500,
+        "max_depth": 6,
+        "learning_rate": 0.05,
+        "subsample": 0.9,
+        "colsample_bytree": 0.8,
+        "min_child_weight": 3,
+        "reg_alpha": 0.01,
+        "reg_lambda": 0.1
+      }
+    }
+  },
+  "evaluation": {
+    "3d": {
+      "default": {
+        "dataset": "default",
+        "data_dir": "/Users/guilhermemossibento/Desktop/master_activities/TFM/beach_counting/beachcamweb/apps/prediction/pipeline_workspace/clean_datasets_210526",
+        "relMAE": 0.2248513185863115,
+        "season_relMAE": 0.279836712464988,
+        "MAE": 15.963873475287558,
+        "n_series": 35
+      },
+      "old": {
+        "dataset": "old",
+        "data_dir": "/Users/guilhermemossibento/Desktop/master_activities/TFM/beach_counting/beachcamweb/apps/prediction/pipeline_workspace/clean_dataset_backup",
+        "relMAE": 0.17509559789890916,
+        "season_relMAE": 0.21110450003763487,
+        "MAE": 16.271523957061763,
+        "n_series": 26
+      }
+    },
+    "10d": {
+      "default": {
+        "dataset": "default",
+        "data_dir": "/Users/guilhermemossibento/Desktop/master_activities/TFM/beach_counting/beachcamweb/apps/prediction/pipeline_workspace/clean_datasets_210526",
+        "relMAE": 0.2439927920590462,
+        "season_relMAE": 0.3002704464184919,
+        "MAE": 17.179786421474578,
+        "n_series": 35
+      },
+      "old": {
+        "dataset": "old",
+        "data_dir": "/Users/guilhermemossibento/Desktop/master_activities/TFM/beach_counting/beachcamweb/apps/prediction/pipeline_workspace/clean_dataset_backup",
+        "relMAE": 0.18653668872024604,
+        "season_relMAE": 0.2200371733636301,
+        "MAE": 17.341105244476044,
+        "n_series": 26
+      }
+    },
+    "15d": {
+      "default": {
+        "dataset": "default",
+        "data_dir": "/Users/guilhermemossibento/Desktop/master_activities/TFM/beach_counting/beachcamweb/apps/prediction/pipeline_workspace/clean_datasets_210526",
+        "relMAE": 0.2588025672404283,
+        "season_relMAE": 0.3211204567184091,
+        "MAE": 17.976267310341534,
+        "n_series": 35
+      },
+      "old": {
+        "dataset": "old",
+        "data_dir": "/Users/guilhermemossibento/Desktop/master_activities/TFM/beach_counting/beachcamweb/apps/prediction/pipeline_workspace/clean_dataset_backup",
+        "relMAE": 0.20474174542181975,
+        "season_relMAE": 0.24649127648047817,
+        "MAE": 18.92877312368637,
+        "n_series": 26
+      }
+    }
+  },
+  "total_time_min": 0.5937852660814921,
+  "status": "complete"
+}

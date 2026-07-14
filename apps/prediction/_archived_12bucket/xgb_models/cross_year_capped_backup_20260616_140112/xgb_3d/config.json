@@ -1,0 +1,38 @@
+{
+  "model_type": "XGBRegressor",
+  "horizon": 36,
+  "horizon_days": 3,
+  "features": [
+    "y_lag1",
+    "y_roll12",
+    "y_roll36",
+    "om_temperature_2m_t_plus_h",
+    "om_precipitation_t_plus_h",
+    "om_wind_speed_10m_t_plus_h",
+    "om_wind_direction_10m_t_plus_h",
+    "om_shortwave_radiation_t_plus_h",
+    "hour_t_plus_h",
+    "day_of_week_t_plus_h",
+    "month_t_plus_h",
+    "is_weekend_t_plus_h"
+  ],
+  "regime": "cross_year_train_2022",
+  "schema": "castelle_2025",
+  "hp": {
+    "n_estimators": 1500,
+    "max_depth": 3,
+    "learning_rate": 0.0032403130378901323,
+    "subsample": 0.8281777417203382,
+    "colsample_bytree": 0.6378450584825142,
+    "colsample_bylevel": 0.4644970055318468,
+    "min_child_weight": 1,
+    "gamma": 0.0015033864678977616,
+    "reg_alpha": 0.8474040808016468,
+    "reg_lambda": 0.00010910932632933854
+  },
+  "optuna_study": "cross_year_capped_backup_20260616_140112__xgb__3d",
+  "overall_relMAE": 0.3858823075434347,
+  "season_relMAE": 0.3858823075434347,
+  "summer_relMAE": 0.3858823075434347,
+  "trained_at": "2026-06-16T14:01:49.132597"
+}

@@ -270,7 +270,7 @@ def merge_datasets(django_df, cache_df, matches_df):
         result = cache_df.copy()
         result["unique_id"] = result["beach_name"]
         if result["ds"].dt.tz is not None:
-            result["ds"] = result["ds"].dt.tz_convert("UTC").dt.tz_localize(None)
+            result["ds"] = result["ds"].dt.tz_convert("Europe/Madrid").dt.tz_localize(None)
         result["ds"] = result["ds"].dt.floor("h")
         result["y"] = result["crowd_count"]
         result["source"] = "cache"
@@ -287,7 +287,7 @@ def merge_datasets(django_df, cache_df, matches_df):
         result = django_df.copy()
         result["unique_id"] = result["slug"]
         if result["ds"].dt.tz is not None:
-            result["ds"] = result["ds"].dt.tz_convert("UTC").dt.tz_localize(None)
+            result["ds"] = result["ds"].dt.tz_convert("Europe/Madrid").dt.tz_localize(None)
         result["ds"] = result["ds"].dt.floor("h")
         result["y"] = result["crowd_count"]
         result["source"] = "django"
@@ -314,10 +314,13 @@ def merge_datasets(django_df, cache_df, matches_df):
     django_df["unique_id"] = django_df["beach_name"].map(name_map_django).fillna(django_df["beach_name"])
     cache_df["unique_id"] = cache_df["beach_name"].map(name_map_cache).fillna(cache_df["beach_name"])
 
-    # Normalize timezones to naive UTC
+    # Normalize timezones to naive Palma local (Europe/Madrid). The Django export
+    # is aware UTC -> convert to Madrid; the 2022 cache is already naive Madrid
+    # (built with datetime.fromtimestamp on a Madrid machine) so it is left as-is.
+    # This keeps both cross-year halves + the weather feed on the same wall-clock.
     for d in [django_df, cache_df]:
         if d["ds"].dt.tz is not None:
-            d["ds"] = d["ds"].dt.tz_convert("UTC").dt.tz_localize(None)
+            d["ds"] = d["ds"].dt.tz_convert("Europe/Madrid").dt.tz_localize(None)
     django_df["ds_hour"] = django_df["ds"].dt.floor("h")
     cache_df["ds_hour"] = cache_df["ds"].dt.floor("h")
 

@@ -227,6 +227,7 @@ def _worker_main(work_dir):
         stat_exog_list=STAT_EXOG,
         dropout=kw.get('dropout', 0.1), attn_dropout=kw.get('dropout', 0.1),
         val_check_steps=50, random_seed=SEED, start_padding_enabled=True,
+        accelerator='cpu', devices=1,  # Mac has no CUDA; pin CPU so Lightning never picks MPS (crawls)
     )
     nf = NeuralForecast(models=[tft], freq=1)
     train_cols = ['unique_id', 'ds', 'y'] + list(dict.fromkeys(futr + hist))

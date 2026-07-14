@@ -1,0 +1,111 @@
+{
+  "run_dir": "/workspace/beachcamweb/apps/prediction/tft_models/lstm_run_20260714_061412",
+  "cuda_device": "0",
+  "selected_futr": [
+    "hour",
+    "day_of_week",
+    "month",
+    "is_weekend",
+    "is_summer",
+    "om_temperature_2m",
+    "om_apparent_temperature",
+    "om_cloud_cover"
+  ],
+  "selected_hist": [
+    "om_cloud_cover_low",
+    "om_shortwave_radiation",
+    "om_vapour_pressure_deficit"
+  ],
+  "best_input": 48,
+  "best_hp": {
+    "hidden_size": 64,
+    "n_head": 4,
+    "dropout": 0.05,
+    "lr": 0.001
+  },
+  "models": {
+    "3d": {
+      "season_relMAE": 0.20895006448640616,
+      "relMAE": 0.11041256392119787,
+      "model_dir": "/workspace/beachcamweb/apps/prediction/tft_models/lstm_run_20260714_061412/lstm_model_3d",
+      "futr": [
+        "hour",
+        "day_of_week",
+        "month",
+        "is_weekend",
+        "is_summer",
+        "om_temperature_2m",
+        "om_apparent_temperature",
+        "om_cloud_cover"
+      ],
+      "hist": [
+        "om_cloud_cover_low",
+        "om_shortwave_radiation",
+        "om_vapour_pressure_deficit"
+      ],
+      "input_size": 48,
+      "hp": {
+        "hidden_size": 64,
+        "n_head": 4,
+        "dropout": 0.05,
+        "lr": 0.001
+      }
+    },
+    "10d": {
+      "season_relMAE": 0.19746292319092856,
+      "relMAE": 0.10842216540474846,
+      "model_dir": "/workspace/beachcamweb/apps/prediction/tft_models/lstm_run_20260714_061412/lstm_model_10d",
+      "futr": [
+        "hour",
+        "day_of_week",
+        "month",
+        "is_weekend",
+        "is_summer",
+        "om_temperature_2m",
+        "om_apparent_temperature",
+        "om_cloud_cover"
+      ],
+      "hist": [
+        "om_cloud_cover_low",
+        "om_shortwave_radiation",
+        "om_vapour_pressure_deficit"
+      ],
+      "input_size": 48,
+      "hp": {
+        "hidden_size": 64,
+        "n_head": 4,
+        "dropout": 0.05,
+        "lr": 0.001
+      }
+    },
+    "15d": {
+      "season_relMAE": 0.22030057912398546,
+      "relMAE": 0.12704504956038515,
+      "model_dir": "/workspace/beachcamweb/apps/prediction/tft_models/lstm_run_20260714_061412/lstm_model_15d",
+      "futr": [
+        "hour",
+        "day_of_week",
+        "month",
+        "is_weekend",
+        "is_summer",
+        "om_temperature_2m",
+        "om_apparent_temperature",
+        "om_cloud_cover"
+      ],
+      "hist": [
+        "om_cloud_cover_low",
+        "om_shortwave_radiation",
+        "om_vapour_pressure_deficit"
+      ],
+      "input_size": 48,
+      "hp": {
+        "hidden_size": 64,
+        "n_head": 4,
+        "dropout": 0.05,
+        "lr": 0.001
+      }
+    }
+  },
+  "total_time_min": 16.605028021335603,
+  "status": "complete"
+}

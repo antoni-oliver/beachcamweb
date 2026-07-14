@@ -119,7 +119,10 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+# Palma-local. The webcam images, the 2022 cache (naive Madrid), and the weather
+# feed (Open-Meteo timezone=Europe/Madrid) are all on Palma wall-clock, so the
+# daytime frame (8-20) and the hour feature must be Palma-local too, not UTC.
+TIME_ZONE = 'Europe/Madrid'
 
 USE_I18N = True
 

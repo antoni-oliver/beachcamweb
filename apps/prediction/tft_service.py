@@ -36,7 +36,16 @@ from django.utils import timezone
 logger = logging.getLogger(__name__)
 
 HOURS_PER_DAY = 13
-HOUR_MIN, HOUR_MAX = 8, 20   # daytime window standardised to 8-20 (incl. the 20:00 bin), matching the dataset + research pipeline
+HOUR_MIN, HOUR_MAX = 8, 20   # daytime window 8-20 (incl. the 20:00 bin) in Palma local time, matching the dataset + research pipeline
+
+
+def _emit_iso(ts):
+    """Naive Palma wall-clock -> ISO 8601 with the correct Europe/Madrid offset,
+    so the browser reconstructs the exact instant regardless of its own timezone."""
+    ts = pd.Timestamp(ts)
+    if ts.tz is None:
+        ts = ts.tz_localize('Europe/Madrid', ambiguous=True, nonexistent='shift_forward')
+    return ts.isoformat()
 
 OCCUPANCY_THRESHOLDS = [
     (0.75, 'HIGH'),
@@ -863,7 +872,7 @@ class TFTService:
                     cc = round(pred_map[key], 1)
                     level = classify_occupancy(cc, max_cc)
                     predictions.append({
-                        'timestamp': ts.isoformat() + 'Z',  # naive UTC grid -> mark UTC so the browser parses it tz-correctly
+                        'timestamp': _emit_iso(ts),  # naive Palma grid -> ISO with Europe/Madrid offset
                         'hour': hour,
                         'crowd_count': cc,
                         'available': True,
@@ -874,7 +883,7 @@ class TFTService:
                     })
                 else:
                     predictions.append({
-                        'timestamp': ts.isoformat() + 'Z',  # naive UTC grid -> mark UTC so the browser parses it tz-correctly
+                        'timestamp': _emit_iso(ts),  # naive Palma grid -> ISO with Europe/Madrid offset
                         'hour': hour,
                         'crowd_count': 0,
                         'available': False,
@@ -1083,7 +1092,7 @@ class TFTService:
                     for col in temporal_cols:
                         features[col] = TEMPORAL_FEATURE_BUILDERS[col](ts)
                     predictions.append({
-                        'timestamp': ts.isoformat() + 'Z',  # naive UTC grid -> mark UTC so the browser parses it tz-correctly
+                        'timestamp': _emit_iso(ts),  # naive Palma grid -> ISO with Europe/Madrid offset
                         'hour': hour,
                         'crowd_count': cc,
                         'available': True,
@@ -1094,7 +1103,7 @@ class TFTService:
                     })
                 else:
                     predictions.append({
-                        'timestamp': ts.isoformat() + 'Z',  # naive UTC grid -> mark UTC so the browser parses it tz-correctly
+                        'timestamp': _emit_iso(ts),  # naive Palma grid -> ISO with Europe/Madrid offset
                         'hour': hour,
                         'crowd_count': 0,
                         'available': False,
@@ -1154,7 +1163,7 @@ class TFTService:
             if ts.hour < HOUR_MIN or ts.hour > HOUR_MAX:
                 continue
             actuals.append({
-                'timestamp': ts.isoformat() + 'Z',  # naive UTC grid -> mark UTC so the browser parses it tz-correctly
+                'timestamp': _emit_iso(ts),  # naive Palma grid -> ISO with Europe/Madrid offset
                 'hour': ts.hour,
                 'crowd_count': round(float(s.predicted_crowd_count), 1),
             })

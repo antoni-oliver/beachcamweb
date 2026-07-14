@@ -68,6 +68,7 @@ django.setup()
 
 from apps.prediction.tft_service import tft_service  # noqa: E402
 from apps.webcam.models import WebCam  # noqa: E402
+from django.utils import timezone as dj_tz  # noqa: E402
 
 
 HOURS_PER_DAY = 13
@@ -202,7 +203,10 @@ def attach_ground_truth(pred_df: pd.DataFrame) -> pd.DataFrame:
         ).order_by("ts").values("ts", "predicted_crowd_count")
         bucket = {}
         for s in snaps:
-            key = (s["ts"].date(), s["ts"].hour)
+            # ts is aware-UTC from the ORM; key by Palma local hour to match the
+            # prediction side (ds is Palma-local), else y_true joins ~2h off in summer.
+            local = dj_tz.localtime(s["ts"])
+            key = (local.date(), local.hour)
             if key not in bucket:
                 bucket[key] = s["predicted_crowd_count"]
         for ds_val, ds_p in sub[["ds", "ds_parsed"]].drop_duplicates().itertuples(index=False):

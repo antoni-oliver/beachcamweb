@@ -473,13 +473,13 @@
           trigger: 'axis', textStyle: {fontSize: 11},
           formatter(params) {
             const ts = new Date(params[0].value[0]);
-            let h = '<b>' + dateLabel(ts) + ' ' + pad(ts.getHours()) + ':00</b><br/>';
+            let h = '<b>' + palmaDM(ts) + ' ' + pad(palmaHour(ts)) + ':00</b><br/>';
             params.forEach((p, i) => { h += p.marker + ' ' + (i === 0 ? p.value[1].toFixed(1) + '%' : p.value[1].toFixed(1) + ' °C') + '<br/>'; });
             return h;
           },
         },
         grid:  {left: 35, right: 30, top: 8, bottom: 22},
-        xAxis: {type: 'time', splitLine: {show: false}, axisLabel: {fontSize: 10, formatter: val => pad(new Date(val).getHours()) + 'h'}},
+        xAxis: {type: 'time', splitLine: {show: false}, axisLabel: {fontSize: 10, formatter: val => pad(palmaHour(new Date(val))) + 'h'}},
         yAxis: [
           {type: 'value', min: 0, max: 100, axisLabel: {fontSize: 9, formatter: '{value}%'}, splitLine: {lineStyle: {opacity: 0.3}}},
           {type: 'value', show: false},

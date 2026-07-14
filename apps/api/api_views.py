@@ -283,7 +283,10 @@ def prediccio_futura(request: HttpRequest):
 
         predictions = []
         for ts in sorted(prediction_times):
-            dt  = datetime.fromtimestamp(ts, tz=dt_timezone.utc).astimezone(local_tz)
+            # predict_mixed keys forecasts in Django localtime (TIME_ZONE='UTC'), so build the
+            # lookup key in that same tz — converting to Europe/Madrid here shifts it by the
+            # UTC offset (1–2 h) and every key misses, returning null estimations.
+            dt  = timezone.localtime(datetime.fromtimestamp(ts, tz=dt_timezone.utc))
             key = dt.strftime("%Y-%m-%dT%H:00")
 
             sum_cc_x_max = 0.0

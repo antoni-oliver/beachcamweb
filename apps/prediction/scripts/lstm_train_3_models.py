@@ -722,6 +722,8 @@ def parse_args():
                         help='CUDA device id (e.g. "0", "1"). Default: auto-detect best available GPU')
     parser.add_argument('--phase0', action='store_true', help='Run optional horizon limit analysis')
     parser.add_argument('--deploy-only', action='store_true', help='Skip optimization, use known config')
+    parser.add_argument('--cache-only', action='store_true', dest='cache_only',
+                        help='Train on cache_2022 only (drop django_2025) — honest 2022-only deploy model')
     parser.add_argument('--eval-dirs', nargs='*', default=None,
                         help='Directories to evaluate on (default: train dir + all known dirs)')
     parser.add_argument('--skip-eval', action='store_true', help='Skip evaluation phase')
@@ -917,6 +919,9 @@ def main_deploy_only(args):
 
     cache_df, django_df = load_data(data_dir)
     all_futr, om_hist = define_features(cache_df, django_df)
+    if getattr(args, 'cache_only', False):
+        django_df = None
+        log("cache-only: training the LSTM on cache_2022 rows only (honest 2022-only)")
 
     selected_futr = SELECTED_FUTR
     selected_hist = ['om_cloud_cover_low', 'om_shortwave_radiation', 'om_vapour_pressure_deficit']
