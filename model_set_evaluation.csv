@@ -1,0 +1,599 @@
+model_set,model_key,scope,camera,beach,island,p90,relMAE_all,relMAE_summer,relMAE_season,is_best
+cross_year_20260522_184606,3d,OVERALL,ALL,,,,0.3152,0.4101,0.3667,False
+cross_year_20260522_184606,3d,per_beach,playa-de-tora_2,Playa de Torà,,45.0,0.4244,0.5211,0.4905,False
+cross_year_20260522_184606,3d,per_beach,playa-de-palmira_1,Playa de Palmira,,140.0,0.3419,0.4645,0.4094,False
+cross_year_20260522_184606,3d,per_beach,camp-de-mar_1,Camp de Mar,,285.0,0.4228,0.5941,0.4228,False
+cross_year_20260522_184606,3d,per_beach,camp-de-mar_3,Camp de Mar,,10.0,0.6173,,0.9331,False
+cross_year_20260522_184606,3d,per_beach,cala-portals-vells,Cala Portals Vells,,43.0,0.3776,0.5055,0.4447,False
+cross_year_20260522_184606,3d,per_beach,port-dandratx,Brismar,,40.0,0.3327,0.34,0.3326,False
+cross_year_20260522_184606,3d,per_beach,platja-de-peguera_1,Playa de Palmira,,315.0,0.405,0.6025,0.5009,False
+cross_year_20260522_184606,3d,per_beach,playa-de-tora_1,Playa de Torà,,231.0,0.4299,0.4657,0.4299,False
+cross_year_20260522_184606,3d,per_beach,playa-de-palmira,Playa de Palmira,,149.0,0.3255,0.5244,0.4109,False
+cross_year_20260522_184606,3d,per_beach,playa-de-magaluf,Playa de Magaluf,,109.0,0.3982,0.4286,0.3982,False
+cross_year_20260522_184606,3d,per_beach,port-dandratx_2,Brismar,,282.8,0.5015,0.5323,0.4819,False
+cross_year_20260522_184606,3d,per_beach,playa-de-ses-penyes-roges,Playa de ses Penyes Roges,,137.0,0.3859,0.4666,0.4286,False
+cross_year_20260522_184606,3d,per_beach,playa-de-santa-ponca,Playa de Santa Ponça,,57.0,0.2701,0.2122,0.2935,False
+cross_year_20260522_184606,3d,per_beach,port-dandratx-port_1,Brismar,,31.0,0.2864,0.2242,0.2618,False
+cross_year_20260522_184606,3d,per_beach,cala-fornells_2,Cala Fornells,,43.0,0.3092,0.4039,0.3177,False
+cross_year_20260522_184606,3d,per_beach,port-dandratx-la-mola_1,Brismar,,106.0,0.3674,0.3854,0.3804,False
+cross_year_20260522_184606,3d,per_beach,cala-llamp,Cala Llamp,,17.7,0.3234,,0.1181,False
+cross_year_20260522_184606,3d,per_beach,camp-de-mar_2,Camp de Mar,,20.0,0.2931,,0.3701,False
+cross_year_20260522_184606,3d,per_beach,andratx,Brismar,,0.0,0.2287,0.237,0.2391,False
+cross_year_20260522_184606,3d,per_beach,cala-fornells_1,Cala Fornells,,70.0,0.228,0.3054,0.2717,False
+cross_year_20260522_184606,3d,per_beach,cala-fornells,Cala Fornells,,25.0,0.295,0.3248,0.3307,False
+cross_year_20260522_184606,3d,per_beach,playa-de-tora,Playa de Torà,,119.0,0.3507,0.4165,0.4061,False
+cross_year_20260522_184606,3d,per_beach,santa-ponca-serra-de-tramuntana_1,Playa de Santa Ponça,,224.0,0.2547,0.5848,0.2971,False
+cross_year_20260522_184606,3d,per_beach,golf-camp-de-mar,Camp de Mar,,135.0,0.159,0.2026,0.202,False
+cross_year_20260522_184606,3d,per_beach,platja-marina,Marina,,10.0,0.2922,0.4432,0.4112,False
+cross_year_20260522_184606,3d,per_beach,cala-agulla,Cala Agulla,,8.0,0.3043,,0.3813,False
+cross_year_20260522_184606,3d,per_beach,can-pastilla-bonaona,Palma,,193.0,0.3249,0.452,0.3506,False
+cross_year_20260522_184606,3d,per_beach,cala-vedella_1,Cala Vedella,,5.0,0.247,0.3648,0.3513,False
+cross_year_20260522_184606,3d,per_beach,cala-vedella,Cala Vedella,,142.0,0.2757,0.5603,0.46,False
+cross_year_20260522_184606,3d,per_beach,es-pujols,Es Pujols,,29.0,0.2809,0.4576,0.3505,False
+cross_year_20260522_184606,3d,per_beach,punta-de-sa-galera,Punta de Sa Galera,,16.0,0.254,0.4374,0.3748,False
+cross_year_20260522_184606,3d,per_beach,can-pastilla_mallorca-pipeline,Palma,,51.0,0.2787,0.4771,0.3668,False
+cross_year_20260522_184606,3d,per_beach,marina,Marina,,10.0,0.348,0.2461,0.295,False
+cross_year_20260522_184606,3d,per_beach,muro-sector-i,Muro-Sector I,,185.0,0.2213,0.4107,0.259,False
+cross_year_20260522_184606,3d,per_beach,son-serra-de-marina,Son Serra de Marina,,52.0,0.3501,0.4471,0.4481,False
+cross_year_20260522_184606,3d,per_beach,soller-santa-catalina-nord,Port,,1.0,0.4122,0.415,0.4154,False
+cross_year_20260522_184606,3d,per_beach,port,Port,,7.0,0.3061,0.4332,0.4187,False
+cross_year_20260522_184606,3d,per_beach,cala-gat,Cala Gat,,4.0,0.2162,,,False
+cross_year_20260522_184606,3d,per_beach,tora-multimediatres,Playa de Torà,,57.0,0.2231,,,False
+cross_year_20260522_184606,3d,per_beach,pacific-bay-tora-multimediatres,Playa de Torà,,68.0,0.3847,,0.4225,False
+cross_year_20260522_184606,3d,per_beach,port-pollenca-sail-surf,Port Pollença,,16.0,0.3414,0.4161,0.386,False
+cross_year_20260522_184606,3d,per_beach,port-pollenca,Port Pollença,,57.0,0.2822,0.452,0.3349,False
+cross_year_20260522_184606,3d,per_beach,cala-millor-1,Cala Millor Son Servera,,123.0,0.2579,0.4272,0.3298,False
+cross_year_20260522_184606,3d,per_beach,cala-millor-2,Cala Millor Son Servera,,31.3,0.2569,0.3808,0.2937,False
+cross_year_20260522_184606,3d,per_beach,palmanova-matias-beach,Playa de Palmanova,,95.0,0.3381,0.5089,0.4147,False
+cross_year_20260522_184606,10d,OVERALL,ALL,,,,0.359,0.4405,0.4042,False
+cross_year_20260522_184606,10d,per_beach,playa-de-tora_2,Playa de Torà,,45.0,0.4217,0.446,0.473,False
+cross_year_20260522_184606,10d,per_beach,playa-de-palmira_1,Playa de Palmira,,140.0,0.3356,0.4142,0.3982,False
+cross_year_20260522_184606,10d,per_beach,camp-de-mar_1,Camp de Mar,,285.0,0.3954,0.5787,0.3954,False
+cross_year_20260522_184606,10d,per_beach,camp-de-mar_3,Camp de Mar,,10.0,0.694,,1.0995,False
+cross_year_20260522_184606,10d,per_beach,cala-portals-vells,Cala Portals Vells,,43.0,0.3671,0.4794,0.4238,False
+cross_year_20260522_184606,10d,per_beach,port-dandratx,Brismar,,40.0,0.333,0.3311,0.3346,False
+cross_year_20260522_184606,10d,per_beach,platja-de-peguera_1,Playa de Palmira,,315.0,0.3565,0.5092,0.4358,False
+cross_year_20260522_184606,10d,per_beach,playa-de-tora_1,Playa de Torà,,231.0,0.3948,0.4167,0.3948,False
+cross_year_20260522_184606,10d,per_beach,playa-de-palmira,Playa de Palmira,,149.0,0.3204,0.502,0.4064,False
+cross_year_20260522_184606,10d,per_beach,playa-de-magaluf,Playa de Magaluf,,109.0,0.4321,0.4586,0.4321,False
+cross_year_20260522_184606,10d,per_beach,port-dandratx_2,Brismar,,282.8,0.4209,0.6459,0.3784,False
+cross_year_20260522_184606,10d,per_beach,playa-de-ses-penyes-roges,Playa de ses Penyes Roges,,137.0,0.3877,0.4371,0.4209,False
+cross_year_20260522_184606,10d,per_beach,playa-de-santa-ponca,Playa de Santa Ponça,,57.0,0.3121,0.3167,0.3415,False
+cross_year_20260522_184606,10d,per_beach,port-dandratx-port_1,Brismar,,31.0,0.3339,0.2694,0.3021,False
+cross_year_20260522_184606,10d,per_beach,cala-fornells_2,Cala Fornells,,43.0,0.3855,0.5296,0.4008,False
+cross_year_20260522_184606,10d,per_beach,port-dandratx-la-mola_1,Brismar,,106.0,0.4048,0.4217,0.416,False
+cross_year_20260522_184606,10d,per_beach,cala-llamp,Cala Llamp,,17.7,0.3244,,,False
+cross_year_20260522_184606,10d,per_beach,camp-de-mar_2,Camp de Mar,,20.0,0.3464,,0.4439,False
+cross_year_20260522_184606,10d,per_beach,andratx,Brismar,,0.0,0.0005,0.0001,0.0001,False
+cross_year_20260522_184606,10d,per_beach,cala-fornells_1,Cala Fornells,,70.0,0.239,0.2782,0.2778,False
+cross_year_20260522_184606,10d,per_beach,cala-fornells,Cala Fornells,,25.0,0.3807,0.3865,0.4198,False
+cross_year_20260522_184606,10d,per_beach,playa-de-tora,Playa de Torà,,119.0,0.3769,0.4392,0.4334,False
+cross_year_20260522_184606,10d,per_beach,santa-ponca-serra-de-tramuntana_1,Playa de Santa Ponça,,224.0,0.227,0.5251,0.2667,False
+cross_year_20260522_184606,10d,per_beach,golf-camp-de-mar,Camp de Mar,,135.0,0.1591,0.1998,0.2053,False
+cross_year_20260522_184606,10d,per_beach,platja-marina,Marina,,10.0,0.3674,0.5399,0.5045,False
+cross_year_20260522_184606,10d,per_beach,cala-agulla,Cala Agulla,,8.0,0.3525,,0.4984,False
+cross_year_20260522_184606,10d,per_beach,can-pastilla-bonaona,Palma,,193.0,0.302,0.4052,0.3239,False
+cross_year_20260522_184606,10d,per_beach,cala-vedella_1,Cala Vedella,,5.0,0.2957,0.5462,0.4838,False
+cross_year_20260522_184606,10d,per_beach,cala-vedella,Cala Vedella,,142.0,0.2632,0.5028,0.4393,False
+cross_year_20260522_184606,10d,per_beach,es-pujols,Es Pujols,,29.0,0.2858,0.4503,0.3563,False
+cross_year_20260522_184606,10d,per_beach,punta-de-sa-galera,Punta de Sa Galera,,16.0,0.2984,0.5102,0.4402,False
+cross_year_20260522_184606,10d,per_beach,can-pastilla_mallorca-pipeline,Palma,,51.0,0.2952,0.5201,0.3886,False
+cross_year_20260522_184606,10d,per_beach,marina,Marina,,10.0,0.3958,0.2451,0.3227,False
+cross_year_20260522_184606,10d,per_beach,muro-sector-i,Muro-Sector I,,185.0,0.2029,0.3361,0.2387,False
+cross_year_20260522_184606,10d,per_beach,son-serra-de-marina,Son Serra de Marina,,52.0,0.353,0.471,0.4566,False
+cross_year_20260522_184606,10d,per_beach,soller-santa-catalina-nord,Port,,1.0,0.9567,0.9753,0.9772,False
+cross_year_20260522_184606,10d,per_beach,port,Port,,7.0,0.4488,0.5371,0.5519,False
+cross_year_20260522_184606,10d,per_beach,cala-gat,Cala Gat,,4.0,0.5587,,,False
+cross_year_20260522_184606,10d,per_beach,tora-multimediatres,Playa de Torà,,57.0,0.6219,,,False
+cross_year_20260522_184606,10d,per_beach,pacific-bay-tora-multimediatres,Playa de Torà,,68.0,0.4256,,0.4586,False
+cross_year_20260522_184606,10d,per_beach,port-pollenca-sail-surf,Port Pollença,,16.0,0.4022,0.4659,0.4437,False
+cross_year_20260522_184606,10d,per_beach,port-pollenca,Port Pollença,,57.0,0.3404,0.494,0.3459,False
+cross_year_20260522_184606,10d,per_beach,cala-millor-1,Cala Millor Son Servera,,123.0,0.3197,0.4849,0.3829,False
+cross_year_20260522_184606,10d,per_beach,cala-millor-2,Cala Millor Son Servera,,31.3,0.2936,0.3833,0.3135,False
+cross_year_20260522_184606,10d,per_beach,palmanova-matias-beach,Playa de Palmanova,,95.0,0.3754,0.5313,0.4263,False
+cross_year_20260522_184606,15d,OVERALL,ALL,,,,0.3484,0.4446,0.3933,False
+cross_year_20260522_184606,15d,per_beach,playa-de-tora_2,Playa de Torà,,45.0,0.4006,0.452,0.4392,False
+cross_year_20260522_184606,15d,per_beach,playa-de-palmira_1,Playa de Palmira,,140.0,0.343,0.4143,0.4015,False
+cross_year_20260522_184606,15d,per_beach,camp-de-mar_1,Camp de Mar,,285.0,0.3854,,0.3854,False
+cross_year_20260522_184606,15d,per_beach,camp-de-mar_3,Camp de Mar,,10.0,0.8755,,1.0975,False
+cross_year_20260522_184606,15d,per_beach,cala-portals-vells,Cala Portals Vells,,43.0,0.3638,0.4692,0.4113,False
+cross_year_20260522_184606,15d,per_beach,port-dandratx,Brismar,,40.0,0.34,0.3458,0.3454,False
+cross_year_20260522_184606,15d,per_beach,platja-de-peguera_1,Playa de Palmira,,315.0,0.359,0.5165,0.4277,False
+cross_year_20260522_184606,15d,per_beach,playa-de-tora_1,Playa de Torà,,231.0,0.3828,0.4108,0.3828,False
+cross_year_20260522_184606,15d,per_beach,playa-de-palmira,Playa de Palmira,,149.0,0.3271,0.5013,0.4026,False
+cross_year_20260522_184606,15d,per_beach,playa-de-magaluf,Playa de Magaluf,,109.0,0.4225,0.4484,0.4225,False
+cross_year_20260522_184606,15d,per_beach,port-dandratx_2,Brismar,,282.8,0.4241,,0.4048,False
+cross_year_20260522_184606,15d,per_beach,playa-de-ses-penyes-roges,Playa de ses Penyes Roges,,137.0,0.3832,0.4283,0.4152,False
+cross_year_20260522_184606,15d,per_beach,playa-de-santa-ponca,Playa de Santa Ponça,,57.0,0.2958,0.2823,0.3067,False
+cross_year_20260522_184606,15d,per_beach,port-dandratx-port_1,Brismar,,31.0,0.3361,0.3166,0.3098,False
+cross_year_20260522_184606,15d,per_beach,cala-fornells_2,Cala Fornells,,43.0,0.3952,0.554,0.4049,False
+cross_year_20260522_184606,15d,per_beach,port-dandratx-la-mola_1,Brismar,,106.0,0.3768,0.3696,0.3775,False
+cross_year_20260522_184606,15d,per_beach,cala-llamp,Cala Llamp,,17.7,0.3917,,,False
+cross_year_20260522_184606,15d,per_beach,camp-de-mar_2,Camp de Mar,,20.0,0.3557,,0.383,False
+cross_year_20260522_184606,15d,per_beach,andratx,Brismar,,0.0,0.0011,0.0005,0.001,False
+cross_year_20260522_184606,15d,per_beach,cala-fornells_1,Cala Fornells,,70.0,0.2388,0.2878,0.2739,False
+cross_year_20260522_184606,15d,per_beach,cala-fornells,Cala Fornells,,25.0,0.3617,0.416,0.3955,False
+cross_year_20260522_184606,15d,per_beach,playa-de-tora,Playa de Torà,,119.0,0.3754,0.4628,0.4356,False
+cross_year_20260522_184606,15d,per_beach,santa-ponca-serra-de-tramuntana_1,Playa de Santa Ponça,,224.0,0.2435,0.5216,0.2745,False
+cross_year_20260522_184606,15d,per_beach,golf-camp-de-mar,Camp de Mar,,135.0,0.1908,0.2915,0.2364,False
+cross_year_20260522_184606,15d,per_beach,platja-marina,Marina,,10.0,0.3619,0.551,0.4989,False
+cross_year_20260522_184606,15d,per_beach,cala-agulla,Cala Agulla,,8.0,0.3593,,0.4512,False
+cross_year_20260522_184606,15d,per_beach,can-pastilla-bonaona,Palma,,193.0,0.321,0.4172,0.3356,False
+cross_year_20260522_184606,15d,per_beach,cala-vedella_1,Cala Vedella,,5.0,0.2732,0.4944,0.4349,False
+cross_year_20260522_184606,15d,per_beach,cala-vedella,Cala Vedella,,142.0,0.2553,0.5059,0.4224,False
+cross_year_20260522_184606,15d,per_beach,es-pujols,Es Pujols,,29.0,0.3142,0.5132,0.3821,False
+cross_year_20260522_184606,15d,per_beach,punta-de-sa-galera,Punta de Sa Galera,,16.0,0.3061,0.5208,0.4676,False
+cross_year_20260522_184606,15d,per_beach,can-pastilla_mallorca-pipeline,Palma,,51.0,0.2848,0.5114,0.3844,False
+cross_year_20260522_184606,15d,per_beach,marina,Marina,,10.0,0.3933,0.2779,0.3318,False
+cross_year_20260522_184606,15d,per_beach,muro-sector-i,Muro-Sector I,,185.0,0.2294,0.3921,0.2569,False
+cross_year_20260522_184606,15d,per_beach,son-serra-de-marina,Son Serra de Marina,,52.0,0.3514,0.4407,0.4393,False
+cross_year_20260522_184606,15d,per_beach,soller-santa-catalina-nord,Port,,1.0,0.7477,0.828,0.7727,False
+cross_year_20260522_184606,15d,per_beach,port,Port,,7.0,0.406,0.5913,0.5288,False
+cross_year_20260522_184606,15d,per_beach,cala-gat,Cala Gat,,4.0,0.5596,,,False
+cross_year_20260522_184606,15d,per_beach,tora-multimediatres,Playa de Torà,,57.0,0.6665,,,False
+cross_year_20260522_184606,15d,per_beach,pacific-bay-tora-multimediatres,Playa de Torà,,68.0,0.4186,,0.4308,False
+cross_year_20260522_184606,15d,per_beach,port-pollenca-sail-surf,Port Pollença,,16.0,0.4316,0.494,0.4871,False
+cross_year_20260522_184606,15d,per_beach,port-pollenca,Port Pollença,,57.0,0.3403,0.5033,0.3672,False
+cross_year_20260522_184606,15d,per_beach,cala-millor-1,Cala Millor Son Servera,,123.0,0.3313,0.4941,0.3662,False
+cross_year_20260522_184606,15d,per_beach,cala-millor-2,Cala Millor Son Servera,,31.3,0.3475,0.4259,0.3489,False
+cross_year_20260522_184606,15d,per_beach,palmanova-matias-beach,Playa de Palmanova,,95.0,0.3845,0.5217,0.4273,False
+cross_year_20260524_110811,3d,OVERALL,ALL,,,,0.2648,0.3257,0.2991,False
+cross_year_20260524_110811,3d,per_beach,playa-de-tora_2,Playa de Torà,,45.0,0.3268,0.3276,0.3463,False
+cross_year_20260524_110811,3d,per_beach,playa-de-palmira_1,Playa de Palmira,,140.0,0.2397,0.3069,0.2802,False
+cross_year_20260524_110811,3d,per_beach,camp-de-mar_1,Camp de Mar,,285.0,0.3247,0.3637,0.3247,False
+cross_year_20260524_110811,3d,per_beach,camp-de-mar_3,Camp de Mar,,10.0,0.3018,,0.3259,False
+cross_year_20260524_110811,3d,per_beach,cala-portals-vells,Cala Portals Vells,,43.0,0.2742,0.3309,0.3103,False
+cross_year_20260524_110811,3d,per_beach,port-dandratx,Brismar,,40.0,0.2588,0.2704,0.2655,False
+cross_year_20260524_110811,3d,per_beach,platja-de-peguera_1,Playa de Palmira,,315.0,0.253,0.3007,0.2974,False
+cross_year_20260524_110811,3d,per_beach,playa-de-tora_1,Playa de Torà,,231.0,0.3871,0.3891,0.3871,False
+cross_year_20260524_110811,3d,per_beach,playa-de-palmira,Playa de Palmira,,149.0,0.2604,0.4162,0.3242,False
+cross_year_20260524_110811,3d,per_beach,playa-de-magaluf,Playa de Magaluf,,109.0,0.297,0.3212,0.297,False
+cross_year_20260524_110811,3d,per_beach,port-dandratx_2,Brismar,,282.8,0.4036,0.2174,0.42,False
+cross_year_20260524_110811,3d,per_beach,playa-de-ses-penyes-roges,Playa de ses Penyes Roges,,137.0,0.3035,0.2983,0.3274,False
+cross_year_20260524_110811,3d,per_beach,playa-de-santa-ponca,Playa de Santa Ponça,,57.0,0.2803,0.2759,0.2983,False
+cross_year_20260524_110811,3d,per_beach,port-dandratx-port_1,Brismar,,31.0,0.296,0.23,0.2767,False
+cross_year_20260524_110811,3d,per_beach,cala-fornells_2,Cala Fornells,,43.0,0.3422,0.4643,0.3521,False
+cross_year_20260524_110811,3d,per_beach,port-dandratx-la-mola_1,Brismar,,106.0,0.2652,0.2342,0.2513,False
+cross_year_20260524_110811,3d,per_beach,cala-llamp,Cala Llamp,,17.7,0.4578,,0.3316,False
+cross_year_20260524_110811,3d,per_beach,camp-de-mar_2,Camp de Mar,,20.0,0.2758,,0.3939,False
+cross_year_20260524_110811,3d,per_beach,andratx,Brismar,,0.0,0.1543,0.184,0.1712,False
+cross_year_20260524_110811,3d,per_beach,cala-fornells_1,Cala Fornells,,70.0,0.2065,0.2647,0.2414,False
+cross_year_20260524_110811,3d,per_beach,cala-fornells,Cala Fornells,,25.0,0.3053,0.3303,0.3482,False
+cross_year_20260524_110811,3d,per_beach,playa-de-tora,Playa de Torà,,119.0,0.2274,0.2872,0.2591,False
+cross_year_20260524_110811,3d,per_beach,santa-ponca-serra-de-tramuntana_1,Playa de Santa Ponça,,224.0,0.1858,0.3881,0.2134,False
+cross_year_20260524_110811,3d,per_beach,golf-camp-de-mar,Camp de Mar,,135.0,0.1284,0.1515,0.1636,False
+cross_year_20260524_110811,3d,per_beach,platja-marina,Marina,,10.0,0.2976,0.4199,0.3988,False
+cross_year_20260524_110811,3d,per_beach,cala-agulla,Cala Agulla,,8.0,0.3103,,0.4035,False
+cross_year_20260524_110811,3d,per_beach,can-pastilla-bonaona,Palma,,193.0,0.2548,0.3442,0.2745,False
+cross_year_20260524_110811,3d,per_beach,cala-vedella_1,Cala Vedella,,5.0,0.2672,0.4384,0.4095,False
+cross_year_20260524_110811,3d,per_beach,cala-vedella,Cala Vedella,,142.0,0.1833,0.3229,0.2961,False
+cross_year_20260524_110811,3d,per_beach,es-pujols,Es Pujols,,29.0,0.2385,0.3517,0.293,False
+cross_year_20260524_110811,3d,per_beach,punta-de-sa-galera,Punta de Sa Galera,,16.0,0.236,0.3869,0.3404,False
+cross_year_20260524_110811,3d,per_beach,can-pastilla_mallorca-pipeline,Palma,,51.0,0.2655,0.4428,0.3443,False
+cross_year_20260524_110811,3d,per_beach,marina,Marina,,10.0,0.342,0.2321,0.2829,False
+cross_year_20260524_110811,3d,per_beach,muro-sector-i,Muro-Sector I,,185.0,0.1895,0.3175,0.2208,False
+cross_year_20260524_110811,3d,per_beach,son-serra-de-marina,Son Serra de Marina,,52.0,0.2519,0.3243,0.3096,False
+cross_year_20260524_110811,3d,per_beach,soller-santa-catalina-nord,Port,,1.0,0.3071,0.2586,0.2739,False
+cross_year_20260524_110811,3d,per_beach,port,Port,,7.0,0.2868,0.4259,0.3848,False
+cross_year_20260524_110811,3d,per_beach,cala-gat,Cala Gat,,4.0,0.2929,,,False
+cross_year_20260524_110811,3d,per_beach,tora-multimediatres,Playa de Torà,,57.0,0.5768,,,False
+cross_year_20260524_110811,3d,per_beach,pacific-bay-tora-multimediatres,Playa de Torà,,68.0,0.262,,0.2615,False
+cross_year_20260524_110811,3d,per_beach,port-pollenca-sail-surf,Port Pollença,,16.0,0.331,0.381,0.3659,False
+cross_year_20260524_110811,3d,per_beach,port-pollenca,Port Pollença,,57.0,0.1867,0.2662,0.204,False
+cross_year_20260524_110811,3d,per_beach,cala-millor-1,Cala Millor Son Servera,,123.0,0.2534,0.4317,0.3239,False
+cross_year_20260524_110811,3d,per_beach,cala-millor-2,Cala Millor Son Servera,,31.3,0.2279,0.3474,0.2626,False
+cross_year_20260524_110811,3d,per_beach,palmanova-matias-beach,Playa de Palmanova,,95.0,0.2576,0.3666,0.3122,False
+cross_year_20260524_110811,10d,OVERALL,ALL,,,,0.2746,0.3582,0.3158,False
+cross_year_20260524_110811,10d,per_beach,playa-de-tora_2,Playa de Torà,,45.0,0.2814,0.2331,0.292,False
+cross_year_20260524_110811,10d,per_beach,playa-de-palmira_1,Playa de Palmira,,140.0,0.2753,0.3968,0.3332,False
+cross_year_20260524_110811,10d,per_beach,camp-de-mar_1,Camp de Mar,,285.0,0.3945,0.5675,0.3945,False
+cross_year_20260524_110811,10d,per_beach,camp-de-mar_3,Camp de Mar,,10.0,0.5013,,0.7182,False
+cross_year_20260524_110811,10d,per_beach,cala-portals-vells,Cala Portals Vells,,43.0,0.2729,0.321,0.3092,False
+cross_year_20260524_110811,10d,per_beach,port-dandratx,Brismar,,40.0,0.2645,0.2815,0.2696,False
+cross_year_20260524_110811,10d,per_beach,platja-de-peguera_1,Playa de Palmira,,315.0,0.393,0.6012,0.4955,False
+cross_year_20260524_110811,10d,per_beach,playa-de-tora_1,Playa de Torà,,231.0,0.3983,0.4475,0.3983,False
+cross_year_20260524_110811,10d,per_beach,playa-de-palmira,Playa de Palmira,,149.0,0.2659,0.4494,0.3401,False
+cross_year_20260524_110811,10d,per_beach,playa-de-magaluf,Playa de Magaluf,,109.0,0.2912,0.3172,0.2912,False
+cross_year_20260524_110811,10d,per_beach,port-dandratx_2,Brismar,,282.8,0.5146,0.4948,0.5086,False
+cross_year_20260524_110811,10d,per_beach,playa-de-ses-penyes-roges,Playa de ses Penyes Roges,,137.0,0.3176,0.385,0.3509,False
+cross_year_20260524_110811,10d,per_beach,playa-de-santa-ponca,Playa de Santa Ponça,,57.0,0.2851,0.3313,0.3156,False
+cross_year_20260524_110811,10d,per_beach,port-dandratx-port_1,Brismar,,31.0,0.2962,0.2514,0.2832,False
+cross_year_20260524_110811,10d,per_beach,cala-fornells_2,Cala Fornells,,43.0,0.3333,0.453,0.3411,False
+cross_year_20260524_110811,10d,per_beach,port-dandratx-la-mola_1,Brismar,,106.0,0.2581,0.2322,0.2389,False
+cross_year_20260524_110811,10d,per_beach,cala-llamp,Cala Llamp,,17.7,0.2923,,,False
+cross_year_20260524_110811,10d,per_beach,camp-de-mar_2,Camp de Mar,,20.0,0.3022,,0.4166,False
+cross_year_20260524_110811,10d,per_beach,andratx,Brismar,,0.0,0.1773,0.1645,0.1803,False
+cross_year_20260524_110811,10d,per_beach,cala-fornells_1,Cala Fornells,,70.0,0.1927,0.2324,0.2293,False
+cross_year_20260524_110811,10d,per_beach,cala-fornells,Cala Fornells,,25.0,0.3183,0.3436,0.3736,False
+cross_year_20260524_110811,10d,per_beach,playa-de-tora,Playa de Torà,,119.0,0.2568,0.3354,0.3005,False
+cross_year_20260524_110811,10d,per_beach,santa-ponca-serra-de-tramuntana_1,Playa de Santa Ponça,,224.0,0.2507,0.6288,0.2955,False
+cross_year_20260524_110811,10d,per_beach,golf-camp-de-mar,Camp de Mar,,135.0,0.1657,0.2261,0.2102,False
+cross_year_20260524_110811,10d,per_beach,platja-marina,Marina,,10.0,0.2573,0.4003,0.3672,False
+cross_year_20260524_110811,10d,per_beach,cala-agulla,Cala Agulla,,8.0,0.3041,,0.3761,False
+cross_year_20260524_110811,10d,per_beach,can-pastilla-bonaona,Palma,,193.0,0.3173,0.4839,0.347,False
+cross_year_20260524_110811,10d,per_beach,cala-vedella_1,Cala Vedella,,5.0,0.2319,0.3472,0.3377,False
+cross_year_20260524_110811,10d,per_beach,cala-vedella,Cala Vedella,,142.0,0.233,0.5018,0.3918,False
+cross_year_20260524_110811,10d,per_beach,es-pujols,Es Pujols,,29.0,0.233,0.3695,0.2917,False
+cross_year_20260524_110811,10d,per_beach,punta-de-sa-galera,Punta de Sa Galera,,16.0,0.2342,0.3945,0.3387,False
+cross_year_20260524_110811,10d,per_beach,can-pastilla_mallorca-pipeline,Palma,,51.0,0.2603,0.477,0.3482,False
+cross_year_20260524_110811,10d,per_beach,marina,Marina,,10.0,0.3048,0.2079,0.259,False
+cross_year_20260524_110811,10d,per_beach,muro-sector-i,Muro-Sector I,,185.0,0.2149,0.4175,0.2543,False
+cross_year_20260524_110811,10d,per_beach,son-serra-de-marina,Son Serra de Marina,,52.0,0.2763,0.3716,0.3498,False
+cross_year_20260524_110811,10d,per_beach,soller-santa-catalina-nord,Port,,1.0,0.3447,0.286,0.3166,False
+cross_year_20260524_110811,10d,per_beach,port,Port,,7.0,0.2363,0.3317,0.3139,False
+cross_year_20260524_110811,10d,per_beach,cala-gat,Cala Gat,,4.0,0.38,,,False
+cross_year_20260524_110811,10d,per_beach,tora-multimediatres,Playa de Torà,,57.0,0.528,,,False
+cross_year_20260524_110811,10d,per_beach,pacific-bay-tora-multimediatres,Playa de Torà,,68.0,0.2779,,0.2369,False
+cross_year_20260524_110811,10d,per_beach,port-pollenca-sail-surf,Port Pollença,,16.0,0.3179,0.3795,0.3582,False
+cross_year_20260524_110811,10d,per_beach,port-pollenca,Port Pollença,,57.0,0.2065,0.2225,0.1791,False
+cross_year_20260524_110811,10d,per_beach,cala-millor-1,Cala Millor Son Servera,,123.0,0.2783,0.4235,0.3332,False
+cross_year_20260524_110811,10d,per_beach,cala-millor-2,Cala Millor Son Servera,,31.3,0.2435,0.3238,0.2607,False
+cross_year_20260524_110811,10d,per_beach,palmanova-matias-beach,Playa de Palmanova,,95.0,0.2782,0.3584,0.3126,False
+tft_20260628_110439,3d,OVERALL,ALL,,,,0.1614,0.1913,0.1779,True
+tft_20260628_110439,3d,per_beach,playa-de-tora_2,Playa de Torà,,45.0,0.1954,0.1707,0.1906,True
+tft_20260628_110439,3d,per_beach,playa-de-palmira_1,Playa de Palmira,,140.0,0.123,0.1474,0.1379,True
+tft_20260628_110439,3d,per_beach,camp-de-mar_1,Camp de Mar,,285.0,0.1101,0.1147,0.1101,True
+tft_20260628_110439,3d,per_beach,camp-de-mar_3,Camp de Mar,,10.0,0.2662,,0.3095,True
+tft_20260628_110439,3d,per_beach,cala-portals-vells,Cala Portals Vells,,43.0,0.1762,0.2041,0.1976,True
+tft_20260628_110439,3d,per_beach,port-dandratx,Brismar,,40.0,0.1971,0.2079,0.2006,True
+tft_20260628_110439,3d,per_beach,platja-de-peguera_1,Playa de Palmira,,315.0,0.1123,0.1195,0.1247,True
+tft_20260628_110439,3d,per_beach,playa-de-tora_1,Playa de Torà,,231.0,0.1522,0.1452,0.1522,True
+tft_20260628_110439,3d,per_beach,playa-de-palmira,Playa de Palmira,,149.0,0.1171,0.1618,0.1389,True
+tft_20260628_110439,3d,per_beach,playa-de-magaluf,Playa de Magaluf,,109.0,0.1695,0.169,0.1695,True
+tft_20260628_110439,3d,per_beach,port-dandratx_2,Brismar,,282.8,0.2015,0.1524,0.1701,True
+tft_20260628_110439,3d,per_beach,playa-de-ses-penyes-roges,Playa de ses Penyes Roges,,137.0,0.1631,0.1568,0.1627,True
+tft_20260628_110439,3d,per_beach,playa-de-santa-ponca,Playa de Santa Ponça,,57.0,0.192,0.1711,0.1948,True
+tft_20260628_110439,3d,per_beach,port-dandratx-port_1,Brismar,,31.0,0.2265,0.181,0.2072,True
+tft_20260628_110439,3d,per_beach,cala-fornells_2,Cala Fornells,,43.0,0.2162,0.2615,0.209,True
+tft_20260628_110439,3d,per_beach,port-dandratx-la-mola_1,Brismar,,106.0,0.1606,0.1512,0.1524,True
+tft_20260628_110439,3d,per_beach,cala-llamp,Cala Llamp,,17.7,0.4133,,0.2983,True
+tft_20260628_110439,3d,per_beach,camp-de-mar_2,Camp de Mar,,20.0,0.2221,,0.3088,True
+tft_20260628_110439,3d,per_beach,andratx,Brismar,,0.0,0.0769,0.0698,0.0746,True
+tft_20260628_110439,3d,per_beach,cala-fornells_1,Cala Fornells,,70.0,0.1205,0.1481,0.1342,True
+tft_20260628_110439,3d,per_beach,cala-fornells,Cala Fornells,,25.0,0.2128,0.232,0.234,True
+tft_20260628_110439,3d,per_beach,playa-de-tora,Playa de Torà,,119.0,0.1409,0.1706,0.1564,True
+tft_20260628_110439,3d,per_beach,santa-ponca-serra-de-tramuntana_1,Playa de Santa Ponça,,224.0,0.0942,0.1819,0.1059,True
+tft_20260628_110439,3d,per_beach,golf-camp-de-mar,Camp de Mar,,135.0,0.0875,0.105,0.1112,True
+tft_20260628_110439,3d,per_beach,platja-marina,Marina,,10.0,0.1554,0.2174,0.2004,True
+tft_20260628_110439,3d,per_beach,cala-agulla,Cala Agulla,,8.0,0.2395,,0.2909,True
+tft_20260628_110439,3d,per_beach,can-pastilla-bonaona,Palma,,193.0,0.1376,0.1684,0.145,True
+tft_20260628_110439,3d,per_beach,cala-vedella_1,Cala Vedella,,5.0,0.184,0.2847,0.2757,True
+tft_20260628_110439,3d,per_beach,cala-vedella,Cala Vedella,,142.0,0.0934,0.159,0.1466,True
+tft_20260628_110439,3d,per_beach,es-pujols,Es Pujols,,29.0,0.1586,0.2281,0.1945,True
+tft_20260628_110439,3d,per_beach,punta-de-sa-galera,Punta de Sa Galera,,16.0,0.1428,0.2205,0.2005,True
+tft_20260628_110439,3d,per_beach,can-pastilla_mallorca-pipeline,Palma,,51.0,0.198,0.3185,0.252,True
+tft_20260628_110439,3d,per_beach,marina,Marina,,10.0,0.2044,0.1821,0.1908,True
+tft_20260628_110439,3d,per_beach,muro-sector-i,Muro-Sector I,,185.0,0.1247,0.1881,0.1439,True
+tft_20260628_110439,3d,per_beach,son-serra-de-marina,Son Serra de Marina,,52.0,0.1911,0.2546,0.2276,True
+tft_20260628_110439,3d,per_beach,soller-santa-catalina-nord,Port,,1.0,0.1356,0.1236,0.129,True
+tft_20260628_110439,3d,per_beach,port,Port,,7.0,0.2098,0.2969,0.2827,True
+tft_20260628_110439,3d,per_beach,cala-gat,Cala Gat,,4.0,0.2029,,,True
+tft_20260628_110439,3d,per_beach,tora-multimediatres,Playa de Torà,,57.0,0.2884,,,True
+tft_20260628_110439,3d,per_beach,pacific-bay-tora-multimediatres,Playa de Torà,,68.0,0.1884,,0.1717,True
+tft_20260628_110439,3d,per_beach,port-pollenca-sail-surf,Port Pollença,,16.0,0.2075,0.2472,0.2316,True
+tft_20260628_110439,3d,per_beach,port-pollenca,Port Pollença,,57.0,0.1709,0.2182,0.1799,True
+tft_20260628_110439,3d,per_beach,cala-millor-1,Cala Millor Son Servera,,123.0,0.1512,0.2518,0.1918,True
+tft_20260628_110439,3d,per_beach,cala-millor-2,Cala Millor Son Servera,,31.3,0.1805,0.2764,0.2078,True
+tft_20260628_110439,3d,per_beach,palmanova-matias-beach,Playa de Palmanova,,95.0,0.1257,0.151,0.1481,True
+tft_20260628_110439,10d,OVERALL,ALL,,,,0.1869,0.2279,0.2091,True
+tft_20260628_110439,10d,per_beach,playa-de-tora_2,Playa de Torà,,45.0,0.2308,0.2285,0.2417,True
+tft_20260628_110439,10d,per_beach,playa-de-palmira_1,Playa de Palmira,,140.0,0.1473,0.1861,0.1731,True
+tft_20260628_110439,10d,per_beach,camp-de-mar_1,Camp de Mar,,285.0,0.1264,0.1508,0.1264,True
+tft_20260628_110439,10d,per_beach,camp-de-mar_3,Camp de Mar,,10.0,0.395,,0.5715,True
+tft_20260628_110439,10d,per_beach,cala-portals-vells,Cala Portals Vells,,43.0,0.1859,0.2338,0.2123,True
+tft_20260628_110439,10d,per_beach,port-dandratx,Brismar,,40.0,0.2136,0.2293,0.217,True
+tft_20260628_110439,10d,per_beach,platja-de-peguera_1,Playa de Palmira,,315.0,0.1534,0.205,0.1806,True
+tft_20260628_110439,10d,per_beach,playa-de-tora_1,Playa de Torà,,231.0,0.1712,0.1707,0.1712,True
+tft_20260628_110439,10d,per_beach,playa-de-palmira,Playa de Palmira,,149.0,0.1253,0.1808,0.1528,True
+tft_20260628_110439,10d,per_beach,playa-de-magaluf,Playa de Magaluf,,109.0,0.186,0.186,0.186,True
+tft_20260628_110439,10d,per_beach,port-dandratx_2,Brismar,,282.8,0.223,0.3181,0.2069,True
+tft_20260628_110439,10d,per_beach,playa-de-ses-penyes-roges,Playa de ses Penyes Roges,,137.0,0.1876,0.1827,0.1909,True
+tft_20260628_110439,10d,per_beach,playa-de-santa-ponca,Playa de Santa Ponça,,57.0,0.2557,0.346,0.2866,True
+tft_20260628_110439,10d,per_beach,port-dandratx-port_1,Brismar,,31.0,0.2443,0.2109,0.227,True
+tft_20260628_110439,10d,per_beach,cala-fornells_2,Cala Fornells,,43.0,0.2256,0.2746,0.217,True
+tft_20260628_110439,10d,per_beach,port-dandratx-la-mola_1,Brismar,,106.0,0.1838,0.1803,0.1743,True
+tft_20260628_110439,10d,per_beach,cala-llamp,Cala Llamp,,17.7,0.3111,,,True
+tft_20260628_110439,10d,per_beach,camp-de-mar_2,Camp de Mar,,20.0,0.2229,,0.3065,True
+tft_20260628_110439,10d,per_beach,andratx,Brismar,,0.0,0.0823,0.0914,0.0872,True
+tft_20260628_110439,10d,per_beach,cala-fornells_1,Cala Fornells,,70.0,0.1394,0.165,0.1589,True
+tft_20260628_110439,10d,per_beach,cala-fornells,Cala Fornells,,25.0,0.2325,0.2424,0.2587,True
+tft_20260628_110439,10d,per_beach,playa-de-tora,Playa de Torà,,119.0,0.1714,0.2144,0.1981,True
+tft_20260628_110439,10d,per_beach,santa-ponca-serra-de-tramuntana_1,Playa de Santa Ponça,,224.0,0.1163,0.2303,0.1343,True
+tft_20260628_110439,10d,per_beach,golf-camp-de-mar,Camp de Mar,,135.0,0.1129,0.1524,0.1464,True
+tft_20260628_110439,10d,per_beach,platja-marina,Marina,,10.0,0.161,0.2186,0.2097,True
+tft_20260628_110439,10d,per_beach,cala-agulla,Cala Agulla,,8.0,0.2418,,0.2985,True
+tft_20260628_110439,10d,per_beach,can-pastilla-bonaona,Palma,,193.0,0.1584,0.1955,0.1668,True
+tft_20260628_110439,10d,per_beach,cala-vedella_1,Cala Vedella,,5.0,0.1966,0.304,0.2983,True
+tft_20260628_110439,10d,per_beach,cala-vedella,Cala Vedella,,142.0,0.1181,0.2067,0.1896,True
+tft_20260628_110439,10d,per_beach,es-pujols,Es Pujols,,29.0,0.1729,0.2529,0.2117,True
+tft_20260628_110439,10d,per_beach,punta-de-sa-galera,Punta de Sa Galera,,16.0,0.1552,0.2176,0.2057,True
+tft_20260628_110439,10d,per_beach,can-pastilla_mallorca-pipeline,Palma,,51.0,0.2288,0.4233,0.3051,True
+tft_20260628_110439,10d,per_beach,marina,Marina,,10.0,0.217,0.1864,0.2039,True
+tft_20260628_110439,10d,per_beach,muro-sector-i,Muro-Sector I,,185.0,0.1206,0.157,0.1406,True
+tft_20260628_110439,10d,per_beach,son-serra-de-marina,Son Serra de Marina,,52.0,0.2368,0.3151,0.2903,True
+tft_20260628_110439,10d,per_beach,soller-santa-catalina-nord,Port,,1.0,0.2013,0.1708,0.1848,True
+tft_20260628_110439,10d,per_beach,port,Port,,7.0,0.2642,0.4016,0.3734,True
+tft_20260628_110439,10d,per_beach,cala-gat,Cala Gat,,4.0,0.3702,,,True
+tft_20260628_110439,10d,per_beach,tora-multimediatres,Playa de Torà,,57.0,0.5469,,,True
+tft_20260628_110439,10d,per_beach,pacific-bay-tora-multimediatres,Playa de Torà,,68.0,0.2507,,0.2108,True
+tft_20260628_110439,10d,per_beach,port-pollenca-sail-surf,Port Pollença,,16.0,0.2217,0.2711,0.2426,True
+tft_20260628_110439,10d,per_beach,port-pollenca,Port Pollença,,57.0,0.2289,0.2574,0.2081,True
+tft_20260628_110439,10d,per_beach,cala-millor-1,Cala Millor Son Servera,,123.0,0.2246,0.3423,0.2683,True
+tft_20260628_110439,10d,per_beach,cala-millor-2,Cala Millor Son Servera,,31.3,0.2258,0.2988,0.2406,True
+tft_20260628_110439,10d,per_beach,palmanova-matias-beach,Playa de Palmanova,,95.0,0.175,0.1728,0.1878,True
+tft_20260628_110439,15d,OVERALL,ALL,,,,0.2083,0.2533,0.2301,True
+tft_20260628_110439,15d,per_beach,playa-de-tora_2,Playa de Torà,,45.0,0.1939,0.1928,0.1995,True
+tft_20260628_110439,15d,per_beach,playa-de-palmira_1,Playa de Palmira,,140.0,0.1542,0.1652,0.1747,True
+tft_20260628_110439,15d,per_beach,camp-de-mar_1,Camp de Mar,,285.0,0.1703,,0.1703,True
+tft_20260628_110439,15d,per_beach,camp-de-mar_3,Camp de Mar,,10.0,0.5021,,0.531,True
+tft_20260628_110439,15d,per_beach,cala-portals-vells,Cala Portals Vells,,43.0,0.1934,0.2346,0.2132,True
+tft_20260628_110439,15d,per_beach,port-dandratx,Brismar,,40.0,0.2643,0.291,0.2652,True
+tft_20260628_110439,15d,per_beach,platja-de-peguera_1,Playa de Palmira,,315.0,0.1775,0.2305,0.205,True
+tft_20260628_110439,15d,per_beach,playa-de-tora_1,Playa de Torà,,231.0,0.1856,0.1831,0.1856,True
+tft_20260628_110439,15d,per_beach,playa-de-palmira,Playa de Palmira,,149.0,0.1475,0.1856,0.1728,True
+tft_20260628_110439,15d,per_beach,playa-de-magaluf,Playa de Magaluf,,109.0,0.1822,0.1813,0.1822,True
+tft_20260628_110439,15d,per_beach,port-dandratx_2,Brismar,,282.8,0.2326,,0.2171,True
+tft_20260628_110439,15d,per_beach,playa-de-ses-penyes-roges,Playa de ses Penyes Roges,,137.0,0.2066,0.2018,0.211,True
+tft_20260628_110439,15d,per_beach,playa-de-santa-ponca,Playa de Santa Ponça,,57.0,0.2823,0.3824,0.2939,True
+tft_20260628_110439,15d,per_beach,port-dandratx-port_1,Brismar,,31.0,0.2897,0.2574,0.2786,True
+tft_20260628_110439,15d,per_beach,cala-fornells_2,Cala Fornells,,43.0,0.3154,0.4117,0.3081,True
+tft_20260628_110439,15d,per_beach,port-dandratx-la-mola_1,Brismar,,106.0,0.2173,0.1872,0.1908,True
+tft_20260628_110439,15d,per_beach,cala-llamp,Cala Llamp,,17.7,0.3443,,,True
+tft_20260628_110439,15d,per_beach,camp-de-mar_2,Camp de Mar,,20.0,0.2383,,0.2515,True
+tft_20260628_110439,15d,per_beach,andratx,Brismar,,0.0,0.1114,0.1303,0.1183,True
+tft_20260628_110439,15d,per_beach,cala-fornells_1,Cala Fornells,,70.0,0.1558,0.1575,0.1742,True
+tft_20260628_110439,15d,per_beach,cala-fornells,Cala Fornells,,25.0,0.2647,0.2606,0.2917,True
+tft_20260628_110439,15d,per_beach,playa-de-tora,Playa de Torà,,119.0,0.2163,0.3145,0.2498,True
+tft_20260628_110439,15d,per_beach,santa-ponca-serra-de-tramuntana_1,Playa de Santa Ponça,,224.0,0.1338,0.2468,0.1486,True
+tft_20260628_110439,15d,per_beach,golf-camp-de-mar,Camp de Mar,,135.0,0.1532,0.2118,0.1902,True
+tft_20260628_110439,15d,per_beach,platja-marina,Marina,,10.0,0.1638,0.2227,0.2019,True
+tft_20260628_110439,15d,per_beach,cala-agulla,Cala Agulla,,8.0,0.2849,,0.3244,True
+tft_20260628_110439,15d,per_beach,can-pastilla-bonaona,Palma,,193.0,0.1653,0.1929,0.1713,True
+tft_20260628_110439,15d,per_beach,cala-vedella_1,Cala Vedella,,5.0,0.2027,0.3123,0.3063,True
+tft_20260628_110439,15d,per_beach,cala-vedella,Cala Vedella,,142.0,0.1175,0.2047,0.1881,True
+tft_20260628_110439,15d,per_beach,es-pujols,Es Pujols,,29.0,0.1994,0.3118,0.2408,True
+tft_20260628_110439,15d,per_beach,punta-de-sa-galera,Punta de Sa Galera,,16.0,0.1581,0.2132,0.2214,True
+tft_20260628_110439,15d,per_beach,can-pastilla_mallorca-pipeline,Palma,,51.0,0.2285,0.3975,0.3046,True
+tft_20260628_110439,15d,per_beach,marina,Marina,,10.0,0.2539,0.2201,0.2193,True
+tft_20260628_110439,15d,per_beach,muro-sector-i,Muro-Sector I,,185.0,0.1444,0.197,0.1602,True
+tft_20260628_110439,15d,per_beach,son-serra-de-marina,Son Serra de Marina,,52.0,0.2429,0.3275,0.2885,True
+tft_20260628_110439,15d,per_beach,soller-santa-catalina-nord,Port,,1.0,0.2455,0.205,0.241,True
+tft_20260628_110439,15d,per_beach,port,Port,,7.0,0.2897,0.4759,0.3991,True
+tft_20260628_110439,15d,per_beach,cala-gat,Cala Gat,,4.0,0.4853,,,True
+tft_20260628_110439,15d,per_beach,tora-multimediatres,Playa de Torà,,57.0,0.6139,,,True
+tft_20260628_110439,15d,per_beach,pacific-bay-tora-multimediatres,Playa de Torà,,68.0,0.2206,,0.2108,True
+tft_20260628_110439,15d,per_beach,port-pollenca-sail-surf,Port Pollença,,16.0,0.2426,0.298,0.2703,True
+tft_20260628_110439,15d,per_beach,port-pollenca,Port Pollença,,57.0,0.2066,0.2727,0.2122,True
+tft_20260628_110439,15d,per_beach,cala-millor-1,Cala Millor Son Servera,,123.0,0.2462,0.3503,0.2704,True
+tft_20260628_110439,15d,per_beach,cala-millor-2,Cala Millor Son Servera,,31.3,0.2316,0.2955,0.2325,True
+tft_20260628_110439,15d,per_beach,palmanova-matias-beach,Playa de Palmanova,,95.0,0.1827,0.1643,0.2005,True
+xgb_cross_year_20260522_184606,3d,OVERALL,ALL,,,,1.0296,1.3275,1.1875,False
+xgb_cross_year_20260522_184606,3d,per_beach,playa-de-tora_2,Playa de Torà,,45.0,0.2896,0.2873,0.3047,False
+xgb_cross_year_20260522_184606,3d,per_beach,playa-de-palmira_1,Playa de Palmira,,140.0,0.2477,0.3395,0.2936,False
+xgb_cross_year_20260522_184606,3d,per_beach,camp-de-mar_1,Camp de Mar,,285.0,0.3228,0.4165,0.3228,False
+xgb_cross_year_20260522_184606,3d,per_beach,camp-de-mar_3,Camp de Mar,,10.0,0.713,,0.9201,False
+xgb_cross_year_20260522_184606,3d,per_beach,cala-portals-vells,Cala Portals Vells,,43.0,0.3101,0.3717,0.3497,False
+xgb_cross_year_20260522_184606,3d,per_beach,port-dandratx,Brismar,,40.0,0.3275,0.3551,0.3326,False
+xgb_cross_year_20260522_184606,3d,per_beach,platja-de-peguera_1,Playa de Palmira,,315.0,0.2786,0.3848,0.3365,False
+xgb_cross_year_20260522_184606,3d,per_beach,playa-de-tora_1,Playa de Torà,,231.0,0.35,0.3729,0.35,False
+xgb_cross_year_20260522_184606,3d,per_beach,playa-de-palmira,Playa de Palmira,,149.0,0.2528,0.4058,0.3142,False
+xgb_cross_year_20260522_184606,3d,per_beach,playa-de-magaluf,Playa de Magaluf,,109.0,0.3095,0.3319,0.3095,False
+xgb_cross_year_20260522_184606,3d,per_beach,port-dandratx_2,Brismar,,282.8,0.3126,0.2606,0.2637,False
+xgb_cross_year_20260522_184606,3d,per_beach,playa-de-ses-penyes-roges,Playa de ses Penyes Roges,,137.0,0.2836,0.3289,0.3092,False
+xgb_cross_year_20260522_184606,3d,per_beach,playa-de-santa-ponca,Playa de Santa Ponça,,57.0,0.2963,0.3117,0.3074,False
+xgb_cross_year_20260522_184606,3d,per_beach,port-dandratx-port_1,Brismar,,31.0,0.315,0.2906,0.308,False
+xgb_cross_year_20260522_184606,3d,per_beach,cala-fornells_2,Cala Fornells,,43.0,0.4428,0.5782,0.4707,False
+xgb_cross_year_20260522_184606,3d,per_beach,port-dandratx-la-mola_1,Brismar,,106.0,0.2477,0.243,0.2387,False
+xgb_cross_year_20260522_184606,3d,per_beach,cala-llamp,Cala Llamp,,17.7,0.6287,,0.2136,False
+xgb_cross_year_20260522_184606,3d,per_beach,camp-de-mar_2,Camp de Mar,,20.0,0.3378,,0.3763,False
+xgb_cross_year_20260522_184606,3d,per_beach,andratx,Brismar,,0.0,10.998,13.5147,12.531,False
+xgb_cross_year_20260522_184606,3d,per_beach,cala-fornells_1,Cala Fornells,,70.0,0.2003,0.2635,0.2308,False
+xgb_cross_year_20260522_184606,3d,per_beach,cala-fornells,Cala Fornells,,25.0,0.376,0.3846,0.4139,False
+xgb_cross_year_20260522_184606,3d,per_beach,playa-de-tora,Playa de Torà,,119.0,0.2396,0.3116,0.2774,False
+xgb_cross_year_20260522_184606,3d,per_beach,santa-ponca-serra-de-tramuntana_1,Playa de Santa Ponça,,224.0,0.1881,0.4128,0.2173,False
+xgb_cross_year_20260522_184606,3d,per_beach,golf-camp-de-mar,Camp de Mar,,135.0,0.1612,0.1971,0.1988,False
+xgb_cross_year_20260522_184606,3d,per_beach,platja-marina,Marina,,10.0,0.6202,0.9094,0.8576,False
+xgb_cross_year_20260522_184606,3d,per_beach,cala-agulla,Cala Agulla,,8.0,0.8225,,0.9915,False
+xgb_cross_year_20260522_184606,3d,per_beach,can-pastilla-bonaona,Palma,,193.0,0.2297,0.3096,0.246,False
+xgb_cross_year_20260522_184606,3d,per_beach,cala-vedella_1,Cala Vedella,,5.0,1.4855,1.9135,1.8373,False
+xgb_cross_year_20260522_184606,3d,per_beach,cala-vedella,Cala Vedella,,142.0,0.1833,0.3192,0.2895,False
+xgb_cross_year_20260522_184606,3d,per_beach,es-pujols,Es Pujols,,29.0,0.3162,0.429,0.3616,False
+xgb_cross_year_20260522_184606,3d,per_beach,punta-de-sa-galera,Punta de Sa Galera,,16.0,0.3869,0.4476,0.4651,False
+xgb_cross_year_20260522_184606,3d,per_beach,can-pastilla_mallorca-pipeline,Palma,,51.0,0.2823,0.4565,0.3627,False
+xgb_cross_year_20260522_184606,3d,per_beach,marina,Marina,,10.0,0.7292,1.0243,0.9338,False
+xgb_cross_year_20260522_184606,3d,per_beach,muro-sector-i,Muro-Sector I,,185.0,0.1811,0.2869,0.21,False
+xgb_cross_year_20260522_184606,3d,per_beach,son-serra-de-marina,Son Serra de Marina,,52.0,0.2541,0.3458,0.3174,False
+xgb_cross_year_20260522_184606,3d,per_beach,soller-santa-catalina-nord,Port,,1.0,8.5784,11.9023,11.1101,False
+xgb_cross_year_20260522_184606,3d,per_beach,port,Port,,7.0,0.9068,1.3779,1.2605,False
+xgb_cross_year_20260522_184606,3d,per_beach,cala-gat,Cala Gat,,4.0,0.9257,,,False
+xgb_cross_year_20260522_184606,3d,per_beach,tora-multimediatres,Playa de Torà,,57.0,0.3107,,,False
+xgb_cross_year_20260522_184606,3d,per_beach,pacific-bay-tora-multimediatres,Playa de Torà,,68.0,0.2738,,0.2706,False
+xgb_cross_year_20260522_184606,3d,per_beach,port-pollenca-sail-surf,Port Pollença,,16.0,0.4279,0.4668,0.4667,False
+xgb_cross_year_20260522_184606,3d,per_beach,port-pollenca,Port Pollença,,57.0,0.1978,0.2691,0.2074,False
+xgb_cross_year_20260522_184606,3d,per_beach,cala-millor-1,Cala Millor Son Servera,,123.0,0.2792,0.4315,0.3529,False
+xgb_cross_year_20260522_184606,3d,per_beach,cala-millor-2,Cala Millor Son Servera,,31.3,0.3778,0.4099,0.4208,False
+xgb_cross_year_20260522_184606,3d,per_beach,palmanova-matias-beach,Playa de Palmanova,,95.0,0.2695,0.4027,0.3244,False
+xgb_cross_year_20260522_184606,10d,OVERALL,ALL,,,,1.205,1.6713,1.4159,False
+xgb_cross_year_20260522_184606,10d,per_beach,playa-de-tora_2,Playa de Torà,,45.0,0.2888,0.289,0.3121,False
+xgb_cross_year_20260522_184606,10d,per_beach,playa-de-palmira_1,Playa de Palmira,,140.0,0.3173,0.4372,0.3813,False
+xgb_cross_year_20260522_184606,10d,per_beach,camp-de-mar_1,Camp de Mar,,285.0,0.391,0.4948,0.391,False
+xgb_cross_year_20260522_184606,10d,per_beach,camp-de-mar_3,Camp de Mar,,10.0,0.6372,,0.8179,False
+xgb_cross_year_20260522_184606,10d,per_beach,cala-portals-vells,Cala Portals Vells,,43.0,0.3125,0.3749,0.3515,False
+xgb_cross_year_20260522_184606,10d,per_beach,port-dandratx,Brismar,,40.0,0.3298,0.3617,0.3382,False
+xgb_cross_year_20260522_184606,10d,per_beach,platja-de-peguera_1,Playa de Palmira,,315.0,0.3323,0.4593,0.4022,False
+xgb_cross_year_20260522_184606,10d,per_beach,playa-de-tora_1,Playa de Torà,,231.0,0.4209,0.4522,0.4209,False
+xgb_cross_year_20260522_184606,10d,per_beach,playa-de-palmira,Playa de Palmira,,149.0,0.3134,0.5184,0.399,False
+xgb_cross_year_20260522_184606,10d,per_beach,playa-de-magaluf,Playa de Magaluf,,109.0,0.3763,0.4175,0.3763,False
+xgb_cross_year_20260522_184606,10d,per_beach,port-dandratx_2,Brismar,,282.8,0.3619,0.7445,0.3205,False
+xgb_cross_year_20260522_184606,10d,per_beach,playa-de-ses-penyes-roges,Playa de ses Penyes Roges,,137.0,0.3357,0.3989,0.3712,False
+xgb_cross_year_20260522_184606,10d,per_beach,playa-de-santa-ponca,Playa de Santa Ponça,,57.0,0.3604,0.3737,0.365,False
+xgb_cross_year_20260522_184606,10d,per_beach,port-dandratx-port_1,Brismar,,31.0,0.3234,0.3118,0.3109,False
+xgb_cross_year_20260522_184606,10d,per_beach,cala-fornells_2,Cala Fornells,,43.0,0.426,0.5428,0.4464,False
+xgb_cross_year_20260522_184606,10d,per_beach,port-dandratx-la-mola_1,Brismar,,106.0,0.3195,0.3156,0.3163,False
+xgb_cross_year_20260522_184606,10d,per_beach,cala-llamp,Cala Llamp,,17.7,0.8285,,,False
+xgb_cross_year_20260522_184606,10d,per_beach,camp-de-mar_2,Camp de Mar,,20.0,0.316,,0.3421,False
+xgb_cross_year_20260522_184606,10d,per_beach,andratx,Brismar,,0.0,13.4065,17.0761,15.2306,False
+xgb_cross_year_20260522_184606,10d,per_beach,cala-fornells_1,Cala Fornells,,70.0,0.2242,0.293,0.2639,False
+xgb_cross_year_20260522_184606,10d,per_beach,cala-fornells,Cala Fornells,,25.0,0.3913,0.4327,0.417,False
+xgb_cross_year_20260522_184606,10d,per_beach,playa-de-tora,Playa de Torà,,119.0,0.3066,0.3934,0.3627,False
+xgb_cross_year_20260522_184606,10d,per_beach,santa-ponca-serra-de-tramuntana_1,Playa de Santa Ponça,,224.0,0.2314,0.5674,0.2742,False
+xgb_cross_year_20260522_184606,10d,per_beach,golf-camp-de-mar,Camp de Mar,,135.0,0.2006,0.2621,0.2398,False
+xgb_cross_year_20260522_184606,10d,per_beach,platja-marina,Marina,,10.0,0.7198,1.0173,0.973,False
+xgb_cross_year_20260522_184606,10d,per_beach,cala-agulla,Cala Agulla,,8.0,0.794,,1.0156,False
+xgb_cross_year_20260522_184606,10d,per_beach,can-pastilla-bonaona,Palma,,193.0,0.2985,0.4143,0.318,False
+xgb_cross_year_20260522_184606,10d,per_beach,cala-vedella_1,Cala Vedella,,5.0,1.9006,2.7992,2.5361,False
+xgb_cross_year_20260522_184606,10d,per_beach,cala-vedella,Cala Vedella,,142.0,0.2318,0.429,0.3809,False
+xgb_cross_year_20260522_184606,10d,per_beach,es-pujols,Es Pujols,,29.0,0.3466,0.4574,0.3784,False
+xgb_cross_year_20260522_184606,10d,per_beach,punta-de-sa-galera,Punta de Sa Galera,,16.0,0.4198,0.5307,0.5282,False
+xgb_cross_year_20260522_184606,10d,per_beach,can-pastilla_mallorca-pipeline,Palma,,51.0,0.2731,0.4526,0.3547,False
+xgb_cross_year_20260522_184606,10d,per_beach,marina,Marina,,10.0,0.904,1.3588,1.1652,False
+xgb_cross_year_20260522_184606,10d,per_beach,muro-sector-i,Muro-Sector I,,185.0,0.1916,0.2906,0.2234,False
+xgb_cross_year_20260522_184606,10d,per_beach,son-serra-de-marina,Son Serra de Marina,,52.0,0.2883,0.3848,0.3563,False
+xgb_cross_year_20260522_184606,10d,per_beach,soller-santa-catalina-nord,Port,,1.0,9.5921,15.2422,13.1457,False
+xgb_cross_year_20260522_184606,10d,per_beach,port,Port,,7.0,1.0672,1.6974,1.47,False
+xgb_cross_year_20260522_184606,10d,per_beach,cala-gat,Cala Gat,,4.0,0.83,,,False
+xgb_cross_year_20260522_184606,10d,per_beach,tora-multimediatres,Playa de Torà,,57.0,0.3668,,,False
+xgb_cross_year_20260522_184606,10d,per_beach,pacific-bay-tora-multimediatres,Playa de Torà,,68.0,0.3672,,0.3571,False
+xgb_cross_year_20260522_184606,10d,per_beach,port-pollenca-sail-surf,Port Pollença,,16.0,0.4391,0.5026,0.4897,False
+xgb_cross_year_20260522_184606,10d,per_beach,port-pollenca,Port Pollença,,57.0,0.2363,0.3235,0.2429,False
+xgb_cross_year_20260522_184606,10d,per_beach,cala-millor-1,Cala Millor Son Servera,,123.0,0.3617,0.5137,0.4312,False
+xgb_cross_year_20260522_184606,10d,per_beach,cala-millor-2,Cala Millor Son Servera,,31.3,0.4444,0.4388,0.4695,False
+xgb_cross_year_20260522_184606,10d,per_beach,palmanova-matias-beach,Playa de Palmanova,,95.0,0.3174,0.4491,0.3638,False
+xgb_cross_year_20260522_184606,15d,OVERALL,ALL,,,,1.3699,1.7758,1.5955,False
+xgb_cross_year_20260522_184606,15d,per_beach,playa-de-tora_2,Playa de Torà,,45.0,0.317,0.3448,0.342,False
+xgb_cross_year_20260522_184606,15d,per_beach,playa-de-palmira_1,Playa de Palmira,,140.0,0.3281,0.4513,0.3906,False
+xgb_cross_year_20260522_184606,15d,per_beach,camp-de-mar_1,Camp de Mar,,285.0,0.3893,,0.3893,False
+xgb_cross_year_20260522_184606,15d,per_beach,camp-de-mar_3,Camp de Mar,,10.0,0.8397,,1.0414,False
+xgb_cross_year_20260522_184606,15d,per_beach,cala-portals-vells,Cala Portals Vells,,43.0,0.2998,0.3804,0.3342,False
+xgb_cross_year_20260522_184606,15d,per_beach,port-dandratx,Brismar,,40.0,0.3265,0.369,0.3292,False
+xgb_cross_year_20260522_184606,15d,per_beach,platja-de-peguera_1,Playa de Palmira,,315.0,0.3434,0.4809,0.4111,False
+xgb_cross_year_20260522_184606,15d,per_beach,playa-de-tora_1,Playa de Torà,,231.0,0.4155,0.4465,0.4155,False
+xgb_cross_year_20260522_184606,15d,per_beach,playa-de-palmira,Playa de Palmira,,149.0,0.3061,0.499,0.3787,False
+xgb_cross_year_20260522_184606,15d,per_beach,playa-de-magaluf,Playa de Magaluf,,109.0,0.3495,0.3649,0.3495,False
+xgb_cross_year_20260522_184606,15d,per_beach,port-dandratx_2,Brismar,,282.8,0.4063,,0.379,False
+xgb_cross_year_20260522_184606,15d,per_beach,playa-de-ses-penyes-roges,Playa de ses Penyes Roges,,137.0,0.3403,0.38,0.3676,False
+xgb_cross_year_20260522_184606,15d,per_beach,playa-de-santa-ponca,Playa de Santa Ponça,,57.0,0.3085,0.3308,0.3297,False
+xgb_cross_year_20260522_184606,15d,per_beach,port-dandratx-port_1,Brismar,,31.0,0.3275,0.295,0.3182,False
+xgb_cross_year_20260522_184606,15d,per_beach,cala-fornells_2,Cala Fornells,,43.0,0.4202,0.5306,0.4418,False
+xgb_cross_year_20260522_184606,15d,per_beach,port-dandratx-la-mola_1,Brismar,,106.0,0.2971,0.2818,0.2921,False
+xgb_cross_year_20260522_184606,15d,per_beach,cala-llamp,Cala Llamp,,17.7,0.4987,,,False
+xgb_cross_year_20260522_184606,15d,per_beach,camp-de-mar_2,Camp de Mar,,20.0,0.3509,,0.388,False
+xgb_cross_year_20260522_184606,15d,per_beach,andratx,Brismar,,0.0,15.5679,18.8082,17.694,False
+xgb_cross_year_20260522_184606,15d,per_beach,cala-fornells_1,Cala Fornells,,70.0,0.2218,0.2581,0.2513,False
+xgb_cross_year_20260522_184606,15d,per_beach,cala-fornells,Cala Fornells,,25.0,0.3784,0.3902,0.4029,False
+xgb_cross_year_20260522_184606,15d,per_beach,playa-de-tora,Playa de Torà,,119.0,0.3225,0.4381,0.3821,False
+xgb_cross_year_20260522_184606,15d,per_beach,santa-ponca-serra-de-tramuntana_1,Playa de Santa Ponça,,224.0,0.258,0.5713,0.2917,False
+xgb_cross_year_20260522_184606,15d,per_beach,golf-camp-de-mar,Camp de Mar,,135.0,0.2167,0.2878,0.2616,False
+xgb_cross_year_20260522_184606,15d,per_beach,platja-marina,Marina,,10.0,0.763,1.0,1.0219,False
+xgb_cross_year_20260522_184606,15d,per_beach,cala-agulla,Cala Agulla,,8.0,0.9032,,1.0619,False
+xgb_cross_year_20260522_184606,15d,per_beach,can-pastilla-bonaona,Palma,,193.0,0.3222,0.4278,0.3353,False
+xgb_cross_year_20260522_184606,15d,per_beach,cala-vedella_1,Cala Vedella,,5.0,2.2365,3.1475,3.0369,False
+xgb_cross_year_20260522_184606,15d,per_beach,cala-vedella,Cala Vedella,,142.0,0.2255,0.4344,0.3635,False
+xgb_cross_year_20260522_184606,15d,per_beach,es-pujols,Es Pujols,,29.0,0.35,0.4137,0.3711,False
+xgb_cross_year_20260522_184606,15d,per_beach,punta-de-sa-galera,Punta de Sa Galera,,16.0,0.4386,0.5033,0.5475,False
+xgb_cross_year_20260522_184606,15d,per_beach,can-pastilla_mallorca-pipeline,Palma,,51.0,0.2688,0.4594,0.3566,False
+xgb_cross_year_20260522_184606,15d,per_beach,marina,Marina,,10.0,0.9545,1.4335,1.2622,False
+xgb_cross_year_20260522_184606,15d,per_beach,muro-sector-i,Muro-Sector I,,185.0,0.2144,0.3454,0.2419,False
+xgb_cross_year_20260522_184606,15d,per_beach,son-serra-de-marina,Son Serra de Marina,,52.0,0.2871,0.3844,0.3529,False
+xgb_cross_year_20260522_184606,15d,per_beach,soller-santa-catalina-nord,Port,,1.0,10.8305,15.9385,14.7984,False
+xgb_cross_year_20260522_184606,15d,per_beach,port,Port,,7.0,1.1896,1.7283,1.6327,False
+xgb_cross_year_20260522_184606,15d,per_beach,cala-gat,Cala Gat,,4.0,0.8641,,,False
+xgb_cross_year_20260522_184606,15d,per_beach,tora-multimediatres,Playa de Torà,,57.0,0.6305,,,False
+xgb_cross_year_20260522_184606,15d,per_beach,pacific-bay-tora-multimediatres,Playa de Torà,,68.0,0.3852,,0.3826,False
+xgb_cross_year_20260522_184606,15d,per_beach,port-pollenca-sail-surf,Port Pollença,,16.0,0.4318,0.4718,0.4615,False
+xgb_cross_year_20260522_184606,15d,per_beach,port-pollenca,Port Pollença,,57.0,0.2608,0.3513,0.2727,False
+xgb_cross_year_20260522_184606,15d,per_beach,cala-millor-1,Cala Millor Son Servera,,123.0,0.3635,0.5022,0.3991,False
+xgb_cross_year_20260522_184606,15d,per_beach,cala-millor-2,Cala Millor Son Servera,,31.3,0.4534,0.4056,0.4539,False
+xgb_cross_year_20260522_184606,15d,per_beach,palmanova-matias-beach,Playa de Palmanova,,95.0,0.3047,0.3805,0.3402,False
+xgb_cross_year_20260524_110811,3d,OVERALL,ALL,,,,1.0296,1.3275,1.1875,False
+xgb_cross_year_20260524_110811,3d,per_beach,playa-de-tora_2,Playa de Torà,,45.0,0.2896,0.2873,0.3047,False
+xgb_cross_year_20260524_110811,3d,per_beach,playa-de-palmira_1,Playa de Palmira,,140.0,0.2477,0.3395,0.2936,False
+xgb_cross_year_20260524_110811,3d,per_beach,camp-de-mar_1,Camp de Mar,,285.0,0.3228,0.4165,0.3228,False
+xgb_cross_year_20260524_110811,3d,per_beach,camp-de-mar_3,Camp de Mar,,10.0,0.713,,0.9201,False
+xgb_cross_year_20260524_110811,3d,per_beach,cala-portals-vells,Cala Portals Vells,,43.0,0.3101,0.3717,0.3497,False
+xgb_cross_year_20260524_110811,3d,per_beach,port-dandratx,Brismar,,40.0,0.3275,0.3551,0.3326,False
+xgb_cross_year_20260524_110811,3d,per_beach,platja-de-peguera_1,Playa de Palmira,,315.0,0.2786,0.3848,0.3365,False
+xgb_cross_year_20260524_110811,3d,per_beach,playa-de-tora_1,Playa de Torà,,231.0,0.35,0.3729,0.35,False
+xgb_cross_year_20260524_110811,3d,per_beach,playa-de-palmira,Playa de Palmira,,149.0,0.2528,0.4058,0.3142,False
+xgb_cross_year_20260524_110811,3d,per_beach,playa-de-magaluf,Playa de Magaluf,,109.0,0.3095,0.3319,0.3095,False
+xgb_cross_year_20260524_110811,3d,per_beach,port-dandratx_2,Brismar,,282.8,0.3126,0.2606,0.2637,False
+xgb_cross_year_20260524_110811,3d,per_beach,playa-de-ses-penyes-roges,Playa de ses Penyes Roges,,137.0,0.2836,0.3289,0.3092,False
+xgb_cross_year_20260524_110811,3d,per_beach,playa-de-santa-ponca,Playa de Santa Ponça,,57.0,0.2963,0.3117,0.3074,False
+xgb_cross_year_20260524_110811,3d,per_beach,port-dandratx-port_1,Brismar,,31.0,0.315,0.2906,0.308,False
+xgb_cross_year_20260524_110811,3d,per_beach,cala-fornells_2,Cala Fornells,,43.0,0.4428,0.5782,0.4707,False
+xgb_cross_year_20260524_110811,3d,per_beach,port-dandratx-la-mola_1,Brismar,,106.0,0.2477,0.243,0.2387,False
+xgb_cross_year_20260524_110811,3d,per_beach,cala-llamp,Cala Llamp,,17.7,0.6287,,0.2136,False
+xgb_cross_year_20260524_110811,3d,per_beach,camp-de-mar_2,Camp de Mar,,20.0,0.3378,,0.3763,False
+xgb_cross_year_20260524_110811,3d,per_beach,andratx,Brismar,,0.0,10.998,13.5147,12.531,False
+xgb_cross_year_20260524_110811,3d,per_beach,cala-fornells_1,Cala Fornells,,70.0,0.2003,0.2635,0.2308,False
+xgb_cross_year_20260524_110811,3d,per_beach,cala-fornells,Cala Fornells,,25.0,0.376,0.3846,0.4139,False
+xgb_cross_year_20260524_110811,3d,per_beach,playa-de-tora,Playa de Torà,,119.0,0.2396,0.3116,0.2774,False
+xgb_cross_year_20260524_110811,3d,per_beach,santa-ponca-serra-de-tramuntana_1,Playa de Santa Ponça,,224.0,0.1881,0.4128,0.2173,False
+xgb_cross_year_20260524_110811,3d,per_beach,golf-camp-de-mar,Camp de Mar,,135.0,0.1612,0.1971,0.1988,False
+xgb_cross_year_20260524_110811,3d,per_beach,platja-marina,Marina,,10.0,0.6202,0.9094,0.8576,False
+xgb_cross_year_20260524_110811,3d,per_beach,cala-agulla,Cala Agulla,,8.0,0.8225,,0.9915,False
+xgb_cross_year_20260524_110811,3d,per_beach,can-pastilla-bonaona,Palma,,193.0,0.2297,0.3096,0.246,False
+xgb_cross_year_20260524_110811,3d,per_beach,cala-vedella_1,Cala Vedella,,5.0,1.4855,1.9135,1.8373,False
+xgb_cross_year_20260524_110811,3d,per_beach,cala-vedella,Cala Vedella,,142.0,0.1833,0.3192,0.2895,False
+xgb_cross_year_20260524_110811,3d,per_beach,es-pujols,Es Pujols,,29.0,0.3162,0.429,0.3616,False
+xgb_cross_year_20260524_110811,3d,per_beach,punta-de-sa-galera,Punta de Sa Galera,,16.0,0.3869,0.4476,0.4651,False
+xgb_cross_year_20260524_110811,3d,per_beach,can-pastilla_mallorca-pipeline,Palma,,51.0,0.2823,0.4565,0.3627,False
+xgb_cross_year_20260524_110811,3d,per_beach,marina,Marina,,10.0,0.7292,1.0243,0.9338,False
+xgb_cross_year_20260524_110811,3d,per_beach,muro-sector-i,Muro-Sector I,,185.0,0.1811,0.2869,0.21,False
+xgb_cross_year_20260524_110811,3d,per_beach,son-serra-de-marina,Son Serra de Marina,,52.0,0.2541,0.3458,0.3174,False
+xgb_cross_year_20260524_110811,3d,per_beach,soller-santa-catalina-nord,Port,,1.0,8.5784,11.9023,11.1101,False
+xgb_cross_year_20260524_110811,3d,per_beach,port,Port,,7.0,0.9068,1.3779,1.2605,False
+xgb_cross_year_20260524_110811,3d,per_beach,cala-gat,Cala Gat,,4.0,0.9257,,,False
+xgb_cross_year_20260524_110811,3d,per_beach,tora-multimediatres,Playa de Torà,,57.0,0.3107,,,False
+xgb_cross_year_20260524_110811,3d,per_beach,pacific-bay-tora-multimediatres,Playa de Torà,,68.0,0.2738,,0.2706,False
+xgb_cross_year_20260524_110811,3d,per_beach,port-pollenca-sail-surf,Port Pollença,,16.0,0.4279,0.4668,0.4667,False
+xgb_cross_year_20260524_110811,3d,per_beach,port-pollenca,Port Pollença,,57.0,0.1978,0.2691,0.2074,False
+xgb_cross_year_20260524_110811,3d,per_beach,cala-millor-1,Cala Millor Son Servera,,123.0,0.2792,0.4315,0.3529,False
+xgb_cross_year_20260524_110811,3d,per_beach,cala-millor-2,Cala Millor Son Servera,,31.3,0.3778,0.4099,0.4208,False
+xgb_cross_year_20260524_110811,3d,per_beach,palmanova-matias-beach,Playa de Palmanova,,95.0,0.2695,0.4027,0.3244,False
+xgb_cross_year_20260524_110811,10d,OVERALL,ALL,,,,1.205,1.6713,1.4159,False
+xgb_cross_year_20260524_110811,10d,per_beach,playa-de-tora_2,Playa de Torà,,45.0,0.2888,0.289,0.3121,False
+xgb_cross_year_20260524_110811,10d,per_beach,playa-de-palmira_1,Playa de Palmira,,140.0,0.3173,0.4372,0.3813,False
+xgb_cross_year_20260524_110811,10d,per_beach,camp-de-mar_1,Camp de Mar,,285.0,0.391,0.4948,0.391,False
+xgb_cross_year_20260524_110811,10d,per_beach,camp-de-mar_3,Camp de Mar,,10.0,0.6372,,0.8179,False
+xgb_cross_year_20260524_110811,10d,per_beach,cala-portals-vells,Cala Portals Vells,,43.0,0.3125,0.3749,0.3515,False
+xgb_cross_year_20260524_110811,10d,per_beach,port-dandratx,Brismar,,40.0,0.3298,0.3617,0.3382,False
+xgb_cross_year_20260524_110811,10d,per_beach,platja-de-peguera_1,Playa de Palmira,,315.0,0.3323,0.4593,0.4022,False
+xgb_cross_year_20260524_110811,10d,per_beach,playa-de-tora_1,Playa de Torà,,231.0,0.4209,0.4522,0.4209,False
+xgb_cross_year_20260524_110811,10d,per_beach,playa-de-palmira,Playa de Palmira,,149.0,0.3134,0.5184,0.399,False
+xgb_cross_year_20260524_110811,10d,per_beach,playa-de-magaluf,Playa de Magaluf,,109.0,0.3763,0.4175,0.3763,False
+xgb_cross_year_20260524_110811,10d,per_beach,port-dandratx_2,Brismar,,282.8,0.3619,0.7445,0.3205,False
+xgb_cross_year_20260524_110811,10d,per_beach,playa-de-ses-penyes-roges,Playa de ses Penyes Roges,,137.0,0.3357,0.3989,0.3712,False
+xgb_cross_year_20260524_110811,10d,per_beach,playa-de-santa-ponca,Playa de Santa Ponça,,57.0,0.3604,0.3737,0.365,False
+xgb_cross_year_20260524_110811,10d,per_beach,port-dandratx-port_1,Brismar,,31.0,0.3234,0.3118,0.3109,False
+xgb_cross_year_20260524_110811,10d,per_beach,cala-fornells_2,Cala Fornells,,43.0,0.426,0.5428,0.4464,False
+xgb_cross_year_20260524_110811,10d,per_beach,port-dandratx-la-mola_1,Brismar,,106.0,0.3195,0.3156,0.3163,False
+xgb_cross_year_20260524_110811,10d,per_beach,cala-llamp,Cala Llamp,,17.7,0.8285,,,False
+xgb_cross_year_20260524_110811,10d,per_beach,camp-de-mar_2,Camp de Mar,,20.0,0.316,,0.3421,False
+xgb_cross_year_20260524_110811,10d,per_beach,andratx,Brismar,,0.0,13.4065,17.0761,15.2306,False
+xgb_cross_year_20260524_110811,10d,per_beach,cala-fornells_1,Cala Fornells,,70.0,0.2242,0.293,0.2639,False
+xgb_cross_year_20260524_110811,10d,per_beach,cala-fornells,Cala Fornells,,25.0,0.3913,0.4327,0.417,False
+xgb_cross_year_20260524_110811,10d,per_beach,playa-de-tora,Playa de Torà,,119.0,0.3066,0.3934,0.3627,False
+xgb_cross_year_20260524_110811,10d,per_beach,santa-ponca-serra-de-tramuntana_1,Playa de Santa Ponça,,224.0,0.2314,0.5674,0.2742,False
+xgb_cross_year_20260524_110811,10d,per_beach,golf-camp-de-mar,Camp de Mar,,135.0,0.2006,0.2621,0.2398,False
+xgb_cross_year_20260524_110811,10d,per_beach,platja-marina,Marina,,10.0,0.7198,1.0173,0.973,False
+xgb_cross_year_20260524_110811,10d,per_beach,cala-agulla,Cala Agulla,,8.0,0.794,,1.0156,False
+xgb_cross_year_20260524_110811,10d,per_beach,can-pastilla-bonaona,Palma,,193.0,0.2985,0.4143,0.318,False
+xgb_cross_year_20260524_110811,10d,per_beach,cala-vedella_1,Cala Vedella,,5.0,1.9006,2.7992,2.5361,False
+xgb_cross_year_20260524_110811,10d,per_beach,cala-vedella,Cala Vedella,,142.0,0.2318,0.429,0.3809,False
+xgb_cross_year_20260524_110811,10d,per_beach,es-pujols,Es Pujols,,29.0,0.3466,0.4574,0.3784,False
+xgb_cross_year_20260524_110811,10d,per_beach,punta-de-sa-galera,Punta de Sa Galera,,16.0,0.4198,0.5307,0.5282,False
+xgb_cross_year_20260524_110811,10d,per_beach,can-pastilla_mallorca-pipeline,Palma,,51.0,0.2731,0.4526,0.3547,False
+xgb_cross_year_20260524_110811,10d,per_beach,marina,Marina,,10.0,0.904,1.3588,1.1652,False
+xgb_cross_year_20260524_110811,10d,per_beach,muro-sector-i,Muro-Sector I,,185.0,0.1916,0.2906,0.2234,False
+xgb_cross_year_20260524_110811,10d,per_beach,son-serra-de-marina,Son Serra de Marina,,52.0,0.2883,0.3848,0.3563,False
+xgb_cross_year_20260524_110811,10d,per_beach,soller-santa-catalina-nord,Port,,1.0,9.5921,15.2422,13.1457,False
+xgb_cross_year_20260524_110811,10d,per_beach,port,Port,,7.0,1.0672,1.6974,1.47,False
+xgb_cross_year_20260524_110811,10d,per_beach,cala-gat,Cala Gat,,4.0,0.83,,,False
+xgb_cross_year_20260524_110811,10d,per_beach,tora-multimediatres,Playa de Torà,,57.0,0.3668,,,False
+xgb_cross_year_20260524_110811,10d,per_beach,pacific-bay-tora-multimediatres,Playa de Torà,,68.0,0.3672,,0.3571,False
+xgb_cross_year_20260524_110811,10d,per_beach,port-pollenca-sail-surf,Port Pollença,,16.0,0.4391,0.5026,0.4897,False
+xgb_cross_year_20260524_110811,10d,per_beach,port-pollenca,Port Pollença,,57.0,0.2363,0.3235,0.2429,False
+xgb_cross_year_20260524_110811,10d,per_beach,cala-millor-1,Cala Millor Son Servera,,123.0,0.3617,0.5137,0.4312,False
+xgb_cross_year_20260524_110811,10d,per_beach,cala-millor-2,Cala Millor Son Servera,,31.3,0.4444,0.4388,0.4695,False
+xgb_cross_year_20260524_110811,10d,per_beach,palmanova-matias-beach,Playa de Palmanova,,95.0,0.3174,0.4491,0.3638,False
